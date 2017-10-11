@@ -1,0 +1,2 @@
+git+ssh://git@git.pierrebeaujean.net/pierre/qcip_tools.git@dev#egg=qcip_tools>=0.3,<0.4
+setuptools == 36.4.0
