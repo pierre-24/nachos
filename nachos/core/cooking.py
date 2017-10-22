@@ -1,7 +1,11 @@
-import os
 import collections
+import copy
+import math
+import os
 
-from qcip_tools import numerical_differentiation, derivatives
+import numpy
+from qcip_tools import numerical_differentiation, derivatives, quantities, derivatives_e
+from qcip_tools.chemistry_files import gaussian
 
 
 def compute_numerical_derivative_of_tensor(
@@ -159,6 +163,26 @@ class Cooker:
             raise BadCooking('{} is not a directory'.format(directory))
 
         self.directory = directory
+        self.fields_needed = fields_needed_by_recipe(self.recipe)
+
+        self.compute_F = False
+        self.compute_polar = False
+        self.compute_polar_with_freq = False
+        self.compute_G = False
+        self.compute_GG = False
+
+        for basis in self.recipe['bases']:
+            if not self.compute_G and basis == 'G':
+                self.compute_G = True
+            if not self.compute_GG and basis == 'GG':
+                self.compute_GG = True
+            if not self.compute_F and basis == 'F':
+                self.compute_F = True
+            if not self.compute_polar and 'FF' in basis:
+                self.compute_polar = True
+            if not self.compute_polar_with_freq and 'D' in basis:
+                self.compute_polar = True
+                self.compute_polar_with_freq = True
 
     def cook(self):
         """Create the different input files in the directory"""
@@ -169,25 +193,163 @@ class Cooker:
         """Create inputs for gaussian
         """
 
-        pass
+        base_m = False
+        counter = 0
+
+        compute_polar_and_G = self.compute_polar and (self.compute_G or self.compute_GG)
+
+        # try to open custom basis set if any
+        gen_basis_set = []
+        if self.recipe['basis_set'] == 'gen':
+            path = self.recipe['flavor_extra']['gen_basis']
+            if not os.path.exists(path):
+                raise BadCooking('gen basis file {} cannot be opened'.format(path))
+
+            gbs = gaussian.BasisSet()
+            try:
+                with open(path) as f:
+                    gbs.read(f)
+            except gaussian.BasisSetFormatError as e:
+                raise BadCooking('error while opening custom basis set ({}): {}'.format(path, str(e)))
+
+            try:
+                gen_basis_set = gbs.to_string(for_molecule=self.recipe.geometry).splitlines()[1:]
+            except Exception as e:
+                raise BadCooking('error while using custom basis set ({}) : {}'.format(path, e))
+
+        for fields in self.fields_needed:
+            counter += 1
+
+            fi = gaussian.Input()
+            real_fields = Cooker.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
+
+            if self.recipe['type'] == 'geometric':
+                fi.molecule = Cooker.deform_geometry(self.recipe.geometry, real_fields)
+            else:
+                fi.molecule = self.recipe.geometry
+
+            if not base_m and fields == [0] * len(fields):
+                fi.title = 'base'
+                base_m = True
+            else:
+                fi.title = 'field: ' + \
+                    ', '.join(Cooker.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
+
+            fi.options['nprocshared'] = self.recipe['flavor_extra']['procs']
+            fi.options['mem'] = self.recipe['flavor_extra']['memory']
+            fi.options['chk'] = 'xxx'
+
+            input_card = [
+                '#P {} {} nosym{}'.format(
+                    self.recipe['method'] if self.recipe['method'] != 'DFT' else self.recipe['flavor_extra']['XC'],
+                    self.recipe['basis_set'],
+                    ' field=read' if self.recipe['type'] == 'electric' else ''),
+                'scf=(Conver={c},NoVarAcc,MaxCyc={m},vshift={v}) IOP(9/6={m},9/9={cc})'.format_map(
+                    {
+                        'c': self.recipe['flavor_extra']['convergence'],
+                        'cc': self.recipe['flavor_extra']['cc_convergence'],
+                        'm': self.recipe['flavor_extra']['max_cycles'],
+                        'v': self.recipe['flavor_extra']['vshift']
+                    })
+            ]
+
+            if self.recipe['flavor_extra']['extra_keywords']:
+                input_card.extend(self.recipe['flavor_extra']['extra_keywords'])
+
+            if self.compute_polar_with_freq:
+                fi.other_blocks.append([
+                    '{}'.format(derivatives_e.convert_frequency_from_string(a)) for a in self.recipe['frequencies']])
+
+            if self.recipe['basis_set'] == 'gen':
+                fi.other_blocks.append(gen_basis_set)
+
+            if self.recipe['type'] == 'electric':
+                fi.other_blocks.append(['\t'.join(['{: .10f}'.format(a) for a in real_fields])])
+
+            if self.recipe['flavor_extra']['extra_sections']:
+                fi.other_blocks.extend(self.recipe['flavor_extra']['extra_sections'])
+
+            fi.input_card = input_card
+
+            if self.compute_polar:
+                extra_line = 'polar{} cphf=(conver={}{})'.format(
+                    '=dcshg' if 'FDD' in self.recipe['bases'] else '',
+                    self.recipe['flavor_extra']['cphf_convergence'],
+                    ',rdfreq' if self.compute_polar_with_freq else ''
+                )
+                fi.input_card.append(extra_line)
+                with open('{}/{}_{:04d}{}.com'.format(
+                        self.directory, self.recipe['name'], counter, 'a' if compute_polar_and_G else ''), 'w') as f:
+                    fi.write(f)
+                fi.input_card.pop(-1)
+
+            if self.compute_G or self.compute_GG:
+                if self.compute_GG:
+                    extra_line = 'freq'
+                else:
+                    extra_line = 'force'
+
+                fi.input_card.append(extra_line)
+                with open('{}/{}_{:04d}{}.com'.format(
+                        self.directory, self.recipe['name'], counter, 'b' if compute_polar_and_G else ''), 'w') as f:
+                    fi.write(f)
 
     def cook_dalton_inputs(self):
         """Create inputs for dalton
         """
 
-        pass
+        for fields in self.fields_needed:
+            real_fields = Cooker.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
+            print(fields, real_fields)
 
     @staticmethod
-    def deform_geometry(geometry, fields):
+    def deform_geometry(geometry, fields, geometry_in_angstrom=True):
         """Create an input for gaussian
 
         :param fields: Differentiation field
         :type fields: list
         :param geometry: geometry do deform
         :type geometry: qcip_tools.molecule.Molecule
+        :param geometry_in_angstrom: indicate wheter the geometry is given in Angstrom or not
+            (because the field is obviously given in atomic units)
+        :type geometry_in_angstrom: bool
         :rtype: qcip_tools.molecule.Molecule
         """
-        pass
+
+        deformed = copy.deepcopy(geometry)
+
+        for index, atom in enumerate(deformed):
+            atom.position += numpy.array(
+                [fields[index * 3 + i] * (quantities.AuToAngstrom if geometry_in_angstrom else 1.) for i in range(3)]
+            )
+
+        return deformed
+
+    @staticmethod
+    def real_fields(fields, min_field, ratio):
+        """Return the "real value" of the field applied
+
+        :param fields: input field (in term of ak)
+        :type fields: list
+        :param min_field: minimal field
+        :type min_field: float
+        :param ratio: ratio
+        :type ratio: float
+        :rtype: list
+        """
+
+        return [min_field * numerical_differentiation.ak_shifted(ratio, _) for _ in fields]
+
+    @staticmethod
+    def nonzero_fields(fields, geometry, t):
+        return [
+            '{}({:+g}{})'.format(
+                '{}{}'.format(
+                    geometry[int(math.floor(i / 3))].symbol, int(math.floor(i / 3) + 1))
+                if t == 'geometric' else 'F',
+                e,
+                derivatives.COORDINATES[i % 3]
+            ) for i, e in enumerate(fields) if e != 0]
 
 
 class Baker:

@@ -9,12 +9,14 @@ CONFIG = {
             'memory': '1Gb',
             'procs': 1,
             'convergence': 11,
-            'cc_convergence': 0,
+            'cc_convergence': 11,
+            'cphf_convergence': 10,
             'max_cycles': 600,
             'extra_keywords': '',
             'extra_sections': [],
             'gen_basis': '',
             'vshift': 1000,
+            'XC': ''
         }
     },
     'dalton': {
