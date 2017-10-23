@@ -183,6 +183,7 @@ class Cooker:
 
         base_m = False
         counter = 0
+        files_created = 0
 
         # try to open custom basis set if any
         gen_basis_set = []
@@ -292,6 +293,7 @@ class Cooker:
                 with open('{}/{}_{:04d}{}.com'.format(
                         self.directory, self.recipe['name'], counter, 'a' if compute_polar_and_G else ''), 'w') as f:
                     fi.write(f)
+                    files_created += 1
                 fi.input_card.pop(-1)
                 fi.other_blocks.pop(0)
 
@@ -304,6 +306,9 @@ class Cooker:
                 with open('{}/{}_{:04d}{}.com'.format(
                         self.directory, self.recipe['name'], counter, 'b' if compute_polar_and_G else ''), 'w') as f:
                     fi.write(f)
+                    files_created += 1
+
+        return files_created
 
     def cook_dalton_inputs(self):
         """Create inputs for dalton

@@ -1,6 +1,8 @@
 import numpy
 import os
 import random
+import subprocess
+import glob
 
 from qcip_tools import derivatives, quantities, derivatives_e
 from qcip_tools.chemistry_files import gaussian
@@ -14,7 +16,11 @@ class FilesTestCase(NachosTestCase):
     def setUp(self):
         self.geometry = self.copy_to_temporary_directory('water.xyz')
         self.basis_set = self.copy_to_temporary_directory('sto-3g.gbs')
+        self.custom_recipe = self.copy_to_temporary_directory('nachos_recipe.yml')
         self.working_directory = self.setup_temporary_directory()
+
+    def tearDown(self):
+        pass
 
     def test_fields_needed(self):
         opt_dict = dict(
@@ -358,4 +364,42 @@ class FilesTestCase(NachosTestCase):
 
     def test_nachos_cooker(self):
         """Test the cooker program"""
-        pass
+
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.com')]), 0)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.yml')]), 0)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.xyz')]), 0)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.gbs')]), 0)
+
+        # process without copy
+        process = self.run_python_script(
+            'nachos/nachos_cooker.py',
+            ['-r', self.custom_recipe, '-d', self.working_directory],
+            out_pipe=subprocess.PIPE,
+            err_pipe=subprocess.PIPE)
+
+        stdout_t, stderr_t = process.communicate()
+
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertNotEqual(len(stdout_t), 0)
+
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.com')]), 542)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.yml')]), 0)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.xyz')]), 0)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.gbs')]), 0)
+
+        # process with copy
+        process = self.run_python_script(
+            'nachos/nachos_cooker.py',
+            ['-r', self.custom_recipe, '-d', self.working_directory, '-c'],
+            out_pipe=subprocess.PIPE,
+            err_pipe=subprocess.PIPE)
+
+        stdout_t, stderr_t = process.communicate()
+
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertNotEqual(len(stdout_t), 0)
+
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.com')]), 542)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.yml')]), 1)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.xyz')]), 1)
+        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.gbs')]), 1)
