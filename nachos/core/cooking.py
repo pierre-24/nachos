@@ -123,26 +123,33 @@ def fields_needed_by_recipe(recipe):
 
     :param recipe: recipe
     :type recipe: nachos.core.files.Recipe
+    :rtype: list
     """
+
+    diffs = recipe.maximum_derivatives()
+
+    fields_needed = [
+        [0] * (3 if recipe['type'] == 'F' else recipe.dof)  # with zero field
+    ]
+
+    fields_needed_with_level = [
+        (fields_needed[0], 1)
+    ]
 
     def collect_fields(fields, *args, **kwargs):
         f = list(int(a) for a in fields)
         if f not in fields_needed:
             fields_needed.append(f)
+            fields_needed_with_level.append((f, kwargs['level']))
         return .0
-
-    diffs = recipe.derivatives()
-
-    fields_needed = [
-        [0] * diffs[0].dimension()  # with zero field
-    ]
 
     e = derivatives.Derivative('')
 
     for d in diffs:
-        compute_numerical_derivative_of_tensor(recipe, e, d, collect_fields, dry_run=True)
+        compute_numerical_derivative_of_tensor(
+            recipe, e, d, collect_fields, dry_run=True, level=d.order())
 
-    return fields_needed
+    return fields_needed_with_level
 
 
 class BadCooking(Exception):
@@ -165,25 +172,6 @@ class Cooker:
         self.directory = directory
         self.fields_needed = fields_needed_by_recipe(self.recipe)
 
-        self.compute_F = False
-        self.compute_polar = False
-        self.compute_polar_with_freq = False
-        self.compute_G = False
-        self.compute_GG = False
-
-        for basis in self.recipe['bases']:
-            if not self.compute_G and basis == 'G':
-                self.compute_G = True
-            if not self.compute_GG and basis == 'GG':
-                self.compute_GG = True
-            if not self.compute_F and basis == 'F':
-                self.compute_F = True
-            if not self.compute_polar and 'FF' in basis:
-                self.compute_polar = True
-            if not self.compute_polar_with_freq and 'D' in basis:
-                self.compute_polar = True
-                self.compute_polar_with_freq = True
-
     def cook(self):
         """Create the different input files in the directory"""
 
@@ -195,8 +183,6 @@ class Cooker:
 
         base_m = False
         counter = 0
-
-        compute_polar_and_G = self.compute_polar and (self.compute_G or self.compute_GG)
 
         # try to open custom basis set if any
         gen_basis_set = []
@@ -217,13 +203,34 @@ class Cooker:
             except Exception as e:
                 raise BadCooking('error while using custom basis set ({}) : {}'.format(path, e))
 
-        for fields in self.fields_needed:
+        for fields, level in self.fields_needed:
             counter += 1
+
+            compute_polar = False
+            compute_polar_with_freq = False
+            compute_G = False
+            compute_GG = False
+
+            bases = self.recipe.bases(level_min=level)
+
+            for b, l in bases:
+                basis = b.representation()
+                if not compute_G and basis == 'G':
+                    compute_G = True
+                if not compute_GG and basis == 'GG':
+                    compute_GG = True
+                if not compute_polar and 'FF' in basis:
+                    compute_polar = True
+                if not compute_polar_with_freq and 'D' in basis:
+                    compute_polar = True
+                    compute_polar_with_freq = True
+
+            compute_polar_and_G = compute_polar and (compute_G or compute_GG)
 
             fi = gaussian.Input()
             real_fields = Cooker.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
 
-            if self.recipe['type'] == 'geometric':
+            if self.recipe['type'] == 'G':
                 fi.molecule = Cooker.deform_geometry(self.recipe.geometry, real_fields)
             else:
                 fi.molecule = self.recipe.geometry
@@ -232,18 +239,19 @@ class Cooker:
                 fi.title = 'base'
                 base_m = True
             else:
-                fi.title = 'field: ' + \
-                    ', '.join(Cooker.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
+                fi.title = 'field({})='.format(level) + \
+                    ','.join(Cooker.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
 
             fi.options['nprocshared'] = self.recipe['flavor_extra']['procs']
             fi.options['mem'] = self.recipe['flavor_extra']['memory']
             fi.options['chk'] = 'xxx'
 
+            # input card
             input_card = [
                 '#P {} {} nosym{}'.format(
                     self.recipe['method'] if self.recipe['method'] != 'DFT' else self.recipe['flavor_extra']['XC'],
                     self.recipe['basis_set'],
-                    ' field=read' if self.recipe['type'] == 'electric' else ''),
+                    ' field=read' if self.recipe['type'] == 'F' else ''),
                 'scf=(Conver={c},NoVarAcc,MaxCyc={m},vshift={v}) IOP(9/6={m},9/9={cc})'.format_map(
                     {
                         'c': self.recipe['flavor_extra']['convergence'],
@@ -256,40 +264,43 @@ class Cooker:
             if self.recipe['flavor_extra']['extra_keywords']:
                 input_card.extend(self.recipe['flavor_extra']['extra_keywords'])
 
-            if self.compute_polar_with_freq:
-                fi.other_blocks.append([
-                    '{}'.format(derivatives_e.convert_frequency_from_string(a)) for a in self.recipe['frequencies']])
+            fi.input_card = input_card
 
+            # other blocks
             if self.recipe['basis_set'] == 'gen':
                 fi.other_blocks.append(gen_basis_set)
 
-            if self.recipe['type'] == 'electric':
+            if self.recipe['type'] == 'F':
                 fi.other_blocks.append(['\t'.join(['{: .10f}'.format(a) for a in real_fields])])
 
             if self.recipe['flavor_extra']['extra_sections']:
                 fi.other_blocks.extend(self.recipe['flavor_extra']['extra_sections'])
 
-            fi.input_card = input_card
-
-            if self.compute_polar:
+            # write files
+            if compute_polar:
                 extra_line = 'polar{} cphf=(conver={}{})'.format(
-                    '=dcshg' if 'FDD' in self.recipe['bases'] else '',
+                    '=dcshg' if 'FDD' in bases else '',
                     self.recipe['flavor_extra']['cphf_convergence'],
-                    ',rdfreq' if self.compute_polar_with_freq else ''
+                    ',rdfreq' if compute_polar_with_freq else ''
                 )
                 fi.input_card.append(extra_line)
+
+                if compute_polar_with_freq:
+                    fi.other_blocks.insert(0, [
+                        '{}'.format(derivatives_e.convert_frequency_from_string(a)) for a in
+                        self.recipe['frequencies']])
                 with open('{}/{}_{:04d}{}.com'.format(
                         self.directory, self.recipe['name'], counter, 'a' if compute_polar_and_G else ''), 'w') as f:
                     fi.write(f)
                 fi.input_card.pop(-1)
+                fi.other_blocks.pop(0)
 
-            if self.compute_G or self.compute_GG:
-                if self.compute_GG:
-                    extra_line = 'freq'
-                else:
-                    extra_line = 'force'
+            if compute_polar_and_G or not compute_polar:
+                if compute_GG:
+                    fi.input_card.append('freq')
+                elif compute_G:
+                    fi.input_card.append('force')
 
-                fi.input_card.append(extra_line)
                 with open('{}/{}_{:04d}{}.com'.format(
                         self.directory, self.recipe['name'], counter, 'b' if compute_polar_and_G else ''), 'w') as f:
                     fi.write(f)
@@ -346,7 +357,7 @@ class Cooker:
             '{}({:+g}{})'.format(
                 '{}{}'.format(
                     geometry[int(math.floor(i / 3))].symbol, int(math.floor(i / 3) + 1))
-                if t == 'geometric' else 'F',
+                if t == 'G' else 'F',
                 e,
                 derivatives.COORDINATES[i % 3]
             ) for i, e in enumerate(fields) if e != 0]

@@ -2,7 +2,7 @@ import sys
 
 CONFIG = {
     'gaussian': {
-        'types': ['geometric', 'electric'],
+        'types': ['G', 'F'],
         'methods': ['HF', 'MP2', 'MP3', 'MP4D', 'MP4DQ', 'MP4SDQ', 'MP4', 'CCSD', 'CCSD(T)', 'DFT'],
         'bases': ['energy', 'G', 'GG', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD'],
         'default_for_extra_fields': {
@@ -20,7 +20,7 @@ CONFIG = {
         }
     },
     'dalton': {
-        'types': ['geometric'],
+        'types': ['G'],
         'methods': ['CCS', 'CC2', 'CCSD', 'CC3'],
         'bases': ['energy', 'G', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD', 'FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD'],
         'default_for_extra_fields': {

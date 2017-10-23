@@ -12,12 +12,20 @@ class FilesTestCase(NachosTestCase):
     def test_recipe(self):
         """Test the behavior of a recipe"""
 
+        differentiation = {
+            3: ['energy'],
+            2: ['F'],
+            1: ['FF']
+        }
+
         opt_dict = dict(
             flavor='gaussian',
-            type='electric',
+            type='F',
             method='HF',
             basis_set='STO-3G',
-            geometry=self.geometry)
+            geometry=self.geometry,
+            differentiation=differentiation
+        )
 
         flavor_extra = {
             'memory': '3Gb',
@@ -31,6 +39,13 @@ class FilesTestCase(NachosTestCase):
 
         for key in flavor_extra:
             self.assertEqual(r.recipe['flavor_extra'][key], flavor_extra[key])
+
+        bases = r.bases()
+        for basis, level in bases:
+            representation = basis.representation()
+            if representation == '':
+                representation = 'energy'
+            self.assertIn(representation, differentiation[level])
 
         # test write
         recipe_file = os.path.join(self.temporary_directory, 'nachos_recipe.yaml')
@@ -63,9 +78,21 @@ class FilesTestCase(NachosTestCase):
             rx = files.Recipe(accuracy_level=10000, **opt_dict)
             rx.check_data()
 
-        with self.assertRaises(files.BadRecipe):
+        with self.assertRaises(files.BadRecipe):  # differentiation level should be an int
             opt_dict_p = opt_dict.copy()
-            opt_dict_p['bases'] = ['energy', 'F', 'FD']
+            opt_dict_p['differentiation'] = {'1': ['energy', 'F']}
+            rx = files.Recipe(**opt_dict_p)
+            rx.check_data()
+
+        with self.assertRaises(files.BadRecipe):  # differentiation level should be larger than 1
+            opt_dict_p = opt_dict.copy()
+            opt_dict_p['differentiation'] = {0: ['energy', 'F']}
+            rx = files.Recipe(**opt_dict_p)
+            rx.check_data()
+
+        with self.assertRaises(files.BadRecipe):  # no frequency
+            opt_dict_p = opt_dict.copy()
+            opt_dict_p['differentiation'] = {1: ['energy', 'F', 'FD']}
             rx = files.Recipe(**opt_dict_p)
             rx.check_data()
 

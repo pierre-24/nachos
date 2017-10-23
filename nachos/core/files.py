@@ -18,8 +18,7 @@ RECIPE_MANDATORY_FIELDS = [
     'min_field',
     'ratio',
     'k_max',
-    'bases',
-    'max_differentiation',
+    'differentiation',
     'accuracy_level',  # -1 = T-REX compatibility, 0 = default, 1 = more accurate for order 3
     'flavor_extra'
 ]
@@ -33,8 +32,7 @@ DEFAULT_RECIPE = {
     'min_field': 0.0004,
     'ratio': 2,
     'k_max': 5,
-    'bases': ['energy'],
-    'max_differentiation': 3,
+    'differentiation': {2: ['energy']},
     'accuracy_level': 1,
     'flavor_extra': {},
 }
@@ -52,9 +50,11 @@ class Recipe:
         self.geometry = None
 
         self.recipe = {}
+        self.max_differentiation = 1
+        self.dof = 0
         self.recipe.update(**DEFAULT_RECIPE)
         self.recipe.update(**kwargs)
-        self.__update(kwargs)
+        self._update(kwargs)
 
     def check_data(self):
         """check if data are coherent
@@ -89,12 +89,20 @@ class Recipe:
         if self['method'] not in CONFIG[self['flavor']]['methods']:
             raise BadRecipe('Calculation with method {} not available'.format(self['method']))
 
-        for basis in self['bases']:
-            if basis not in config_for_flavor['bases']:
-                raise BadRecipe('Differentiation of {} not available'.format(basis))
+        for level in self['differentiation']:
+            if type(level) is not int:
+                raise BadRecipe('level of differentiation should be an int')
+            if level < 1:
+                raise BadRecipe('level of differentiation should be > 1')
+            if type(self['differentiation'][level]) is not list:
+                raise BadRecipe('bases should be given as a list!')
 
-            if 'D' in basis and 'frequencies' not in self.recipe:
-                raise BadRecipe('Field dependant basis requested ({}) but no "frequencies" field'.format(basis))
+            for basis in self['differentiation'][level]:
+                if basis not in config_for_flavor['bases']:
+                    raise BadRecipe('Differentiation of {} not available'.format(basis))
+
+                if 'D' in basis and 'frequencies' not in self.recipe:
+                    raise BadRecipe('Field dependant basis requested ({}) but no "frequencies" field'.format(basis))
 
         if 'flavor_extra' in self:
             extra = self['flavor_extra']
@@ -120,10 +128,10 @@ class Recipe:
 
         up = yaml.load(fp)
         self.recipe.update(up)
-        self.__update(up)
+        self._update(up)
         self.check_data()
 
-    def __update(self, kw):
+    def _update(self, kw):
         """Set up the default options depending on the flavor, then update their value with what is inside ``kw``."""
 
         # flavor
@@ -140,8 +148,17 @@ class Recipe:
                     g = helpers.open_chemistry_file(f)
                     if g.has_property('molecule'):
                         self.geometry = g.property('molecule')
+                        self.dof = 3 * len(self.geometry)
             except helpers.ProbablyNotAChemistryFile:
                 pass
+
+        # max diff
+        if 'differentiation' in kw:
+            self.max_differentiation = 0
+            for level in kw['differentiation']:
+                if type(level) is int:
+                    if level > self.max_differentiation:
+                        self.max_differentiation = level
 
     def write(self, fp):
         """Dump the Recipe into a YAML file
@@ -162,26 +179,35 @@ class Recipe:
     def __contains__(self, item):
         return item in self.recipe
 
-    def bases(self):
-        """Get basis in the form of Derivatives objects
+    def bases(self, level_min=-1):
+        """Get basis in the form of Derivatives objects, plus the level of differentiation
 
-        :rtype: list
+        :param level_min: minimum level required
+        :type level_min: int
+        :rtype: list of tuple
         """
 
-        dof = 3 * len(self.geometry)
-        return [derivatives.Derivative(basis if basis != 'energy' else '', spacial_dof=dof) for basis in self['bases']]
+        bases = []
 
-    def derivatives(self):
+        for level in self['differentiation']:
+                if level >= level_min:
+                    for basis in self['differentiation'][level]:
+                        bases.append(
+                            (derivatives.Derivative(basis if basis != 'energy' else '', spacial_dof=self.dof), level))
+
+        return bases
+
+    def maximum_derivatives(self):
         """Get the different derivatives performed by the recipe
 
         :rtype: list
         """
 
-        diff_repr = 'F' if self['type'] == 'electric' else 'G'
+        diff_repr = self['type']
         d = []
 
-        for i in range(1, self['max_differentiation'] + 1):
-            d.append(derivatives.Derivative(diff_repr * i, spacial_dof=3 * len(self.geometry)))
+        for i in range(1, self.max_differentiation + 1):
+            d.append(derivatives.Derivative(diff_repr * i, spacial_dof=self.dof))
 
         return d
 
