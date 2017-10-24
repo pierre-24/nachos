@@ -3,7 +3,18 @@ import sys
 CONFIG = {
     'gaussian': {
         'types': ['G', 'F'],
-        'methods': ['HF', 'MP2', 'MP3', 'MP4D', 'MP4DQ', 'MP4SDQ', 'MP4', 'CCSD', 'CCSD(T)', 'DFT'],
+        'methods': [
+            ('HF', {'G': 2, 'F': 3}),
+            ('DFT', {'G': 2, 'F': 3}),
+            ('MP2', {'G': 2, 'F': 2}),  # ... but only static polarizability
+            ('MP3', {'G': 1, 'F': 1}),
+            ('MP4D', {'G': 1, 'F': 1}),
+            ('MP4DQ', {'G': 1, 'F': 1}),
+            ('MP4SDQ', {'G': 1, 'F': 1}),
+            ('MP4', {'G': 1, 'F': 1}),
+            ('CCSD', {'G': 1, 'F': 1}),
+            ('CCSD(T)', {'G': 1, 'F': 1}),
+        ],
         'bases': ['energy', 'G', 'GG', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD'],
         'default_for_extra_fields': {
             'memory': '1Gb',
@@ -21,7 +32,12 @@ CONFIG = {
     },
     'dalton': {
         'types': ['G'],
-        'methods': ['CCS', 'CC2', 'CCSD', 'CC3'],
+        'methods': [
+            ('CCS', {'G': 1, 'F': 4}),
+            ('CC2', {'G': 1, 'F': 4}),
+            ('CCSD', {'G': 1, 'F': 4}),
+            ('CC3', {'G': 1, 'F': 4}),
+        ],
         'bases': ['energy', 'G', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD', 'FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD'],
         'default_for_extra_fields': {
             'max_iteration': 2500,

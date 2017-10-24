@@ -96,6 +96,13 @@ class FilesTestCase(NachosTestCase):
             rx = files.Recipe(**opt_dict_p)
             rx.check_data()
 
-        with self.assertRaises(files.BadRecipe):
+        with self.assertRaises(files.BadRecipe):  # unknown option for flavor
             rx = files.Recipe(flavor_extra={'x': 'y'}, **opt_dict)
+            rx.check_data()
+
+        with self.assertRaises(files.BadRecipe):  # polarizability is not available for MP3
+            opt_dict_p = opt_dict.copy()
+            opt_dict_p['method'] = 'MP3'
+            opt_dict_p['differentiation'] = {1: ['energy', 'F', 'FF']}
+            rx = files.Recipe(**opt_dict_p)
             rx.check_data()

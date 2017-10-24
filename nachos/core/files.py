@@ -86,8 +86,11 @@ class Recipe:
 
         if self['type'] not in CONFIG[self['flavor']]['types']:
             raise BadRecipe('{}al derivatives not available for flavor "{}"'.format(self['type'], self['flavor']))
-        if self['method'] not in CONFIG[self['flavor']]['methods']:
+        if self['method'] not in [a[0] for a in CONFIG[self['flavor']]['methods']]:
             raise BadRecipe('Calculation with method {} not available'.format(self['method']))
+
+        max_differentiation_for_method = next(
+            a for a in CONFIG[self['flavor']]['methods'] if a[0] == self['method'])[1]
 
         for level in self['differentiation']:
             if type(level) is not int:
@@ -103,6 +106,15 @@ class Recipe:
 
                 if 'D' in basis and 'frequencies' not in self.recipe:
                     raise BadRecipe('Field dependant basis requested ({}) but no "frequencies" field'.format(basis))
+
+                num_G = basis.count('G')
+                num_F = basis.count('F') + basis.count('D')
+
+                if num_G > max_differentiation_for_method['G']:
+                    raise BadRecipe('"{}" for method {} is not possible'.format(basis, self['method']))
+
+                if num_F > max_differentiation_for_method['F']:
+                    raise BadRecipe('"{}" for method {} is not possible'.format(basis, self['method']))
 
         if 'flavor_extra' in self:
             extra = self['flavor_extra']
