@@ -8,7 +8,7 @@ import shutil
 
 from nachos.core import files, exit_failure, cooking
 
-__version__ = '0.1'
+__version__ = '0.2'
 __author__ = 'Pierre Beaujean'
 __maintainer__ = 'Pierre Beaujean'
 __email__ = 'pierre.beaujean@unamur.be'
@@ -50,16 +50,16 @@ def main():
     chdir = os.path.dirname(args.recipe.name)
     os.chdir(chdir)
 
-    # read recipe and cook!
+    # read recipe and prepare!
     try:
         recipe.read(args.recipe)
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
-    cook = cooking.Preparer(recipe, directory)
+    preparer = cooking.Preparer(recipe, directory)
 
     try:
-        n = cook.prepare()
+        n = preparer.prepare()
     except cooking.BadPreparation as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 
