@@ -56,11 +56,11 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
-    cook = cooking.Cooker(recipe, directory)
+    cook = cooking.Preparer(recipe, directory)
 
     try:
-        n = cook.cook()
-    except cooking.BadCooking as e:
+        n = cook.prepare()
+    except cooking.BadPreparation as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 
     if args.copy_files:

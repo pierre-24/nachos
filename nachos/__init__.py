@@ -12,7 +12,7 @@ __status__ = 'Development'
 
 # List of the scripts that are installed, without the .py extension. The name is used to give the command name.
 provide_scripts = [
-    'nachos_cooker',
+    'nachos_prepare',
 ]
 
 

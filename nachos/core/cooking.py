@@ -152,12 +152,12 @@ def fields_needed_by_recipe(recipe):
     return fields_needed_with_level
 
 
-class BadCooking(Exception):
+class BadPreparation(Exception):
     pass
 
 
-class Cooker:
-    """Cooking class to generate the input files
+class Preparer:
+    """Prepare the input files
 
     :param recipe: a recipe
     :type recipe: nachos.core.files.Recipe
@@ -167,17 +167,17 @@ class Cooker:
         self.recipe = recipe
 
         if not os.path.isdir(directory):
-            raise BadCooking('{} is not a directory'.format(directory))
+            raise BadPreparation('{} is not a directory'.format(directory))
 
         self.directory = directory
         self.fields_needed = fields_needed_by_recipe(self.recipe)
 
-    def cook(self):
+    def prepare(self):
         """Create the different input files in the directory"""
 
-        return getattr(self, 'cook_{}_inputs'.format(self.recipe['flavor']))()
+        return getattr(self, 'prepare_{}_inputs'.format(self.recipe['flavor']))()
 
-    def cook_gaussian_inputs(self):
+    def prepare_gaussian_inputs(self):
         """Create inputs for gaussian
         """
 
@@ -190,19 +190,19 @@ class Cooker:
         if self.recipe['basis_set'] == 'gen':
             path = self.recipe['flavor_extra']['gen_basis']
             if not os.path.exists(path):
-                raise BadCooking('gen basis file {} cannot be opened'.format(path))
+                raise BadPreparation('gen basis file {} cannot be opened'.format(path))
 
             gbs = gaussian.BasisSet()
             try:
                 with open(path) as f:
                     gbs.read(f)
             except gaussian.BasisSetFormatError as e:
-                raise BadCooking('error while opening custom basis set ({}): {}'.format(path, str(e)))
+                raise BadPreparation('error while opening custom basis set ({}): {}'.format(path, str(e)))
 
             try:
                 gen_basis_set = gbs.to_string(for_molecule=self.recipe.geometry).splitlines()[1:]
             except Exception as e:
-                raise BadCooking('error while using custom basis set ({}) : {}'.format(path, e))
+                raise BadPreparation('error while using custom basis set ({}) : {}'.format(path, e))
 
         for fields, level in self.fields_needed:
             counter += 1
@@ -229,10 +229,10 @@ class Cooker:
             compute_polar_and_G = compute_polar and (compute_G or compute_GG)
 
             fi = gaussian.Input()
-            real_fields = Cooker.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
+            real_fields = Preparer.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
 
             if self.recipe['type'] == 'G':
-                fi.molecule = Cooker.deform_geometry(self.recipe.geometry, real_fields)
+                fi.molecule = Preparer.deform_geometry(self.recipe.geometry, real_fields)
             else:
                 fi.molecule = self.recipe.geometry
 
@@ -241,7 +241,7 @@ class Cooker:
                 base_m = True
             else:
                 fi.title = 'field({})='.format(level) + \
-                    ','.join(Cooker.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
+                    ','.join(Preparer.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
 
             fi.options['nprocshared'] = self.recipe['flavor_extra']['procs']
             fi.options['mem'] = self.recipe['flavor_extra']['memory']
@@ -310,12 +310,12 @@ class Cooker:
 
         return files_created
 
-    def cook_dalton_inputs(self):
+    def prepare_dalton_inputs(self):
         """Create inputs for dalton
         """
 
         for fields in self.fields_needed:
-            real_fields = Cooker.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
+            real_fields = Preparer.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
             print(fields, real_fields)
 
     @staticmethod
@@ -368,8 +368,8 @@ class Cooker:
             ) for i, e in enumerate(fields) if e != 0]
 
 
-class Baker:
-    """Baking class to retrieve the information out of the calculation results
+class Cooker:
+    """Cooker class to retrieve the information out of the calculation results
 
     :param recipe: a recipe
     :type recipe: nachos.core.files.Recipe"""

@@ -11,7 +11,7 @@ from tests import NachosTestCase, factories
 from nachos.core import files, cooking
 
 
-class FilesTestCase(NachosTestCase):
+class PrepareTestCase(NachosTestCase):
 
     def setUp(self):
         self.geometry = self.copy_to_temporary_directory('water.xyz')
@@ -69,7 +69,7 @@ class FilesTestCase(NachosTestCase):
         def energy_exp(fields, h0, basis, inverse, component, frequency, recipe):
             """Taylor series of the energy"""
 
-            r_field = cooking.Cooker.real_fields(fields, h0, recipe['ratio'])
+            r_field = cooking.Preparer.real_fields(fields, h0, recipe['ratio'])
 
             x = energy
             x += numpy.tensordot(mu.components, r_field, axes=1)
@@ -82,7 +82,7 @@ class FilesTestCase(NachosTestCase):
         def dipole_exp(fields, h0, basis, inverse, component, frequency, recipe):
             """Taylor series of the dipole moment"""
 
-            r_field = cooking.Cooker.real_fields(fields, h0, recipe['ratio'])
+            r_field = cooking.Preparer.real_fields(fields, h0, recipe['ratio'])
 
             x = mu.components.copy()
             x += numpy.tensordot(alpha.components, r_field, axes=1)
@@ -160,15 +160,15 @@ class FilesTestCase(NachosTestCase):
         zero_fields = [0] * r.dof
 
         # nothing is deformed
-        deformed = cooking.Cooker.deform_geometry(r.geometry, zero_fields)
+        deformed = cooking.Preparer.deform_geometry(r.geometry, zero_fields)
         for i, a in enumerate(deformed):
             self.assertArrayAlmostEqual(a.position, r.geometry[i].position)
 
         # simple deformation:
         fields = zero_fields.copy()
         fields[0] = 1  # x of first atom
-        deformed = cooking.Cooker.deform_geometry(
-            r.geometry, cooking.Cooker.real_fields(fields, r['min_field'], r['ratio']))
+        deformed = cooking.Preparer.deform_geometry(
+            r.geometry, cooking.Preparer.real_fields(fields, r['min_field'], r['ratio']))
 
         self.assertNotEqual(r.geometry[0].position[0], deformed[0].position[0])
         self.assertEqual(r.geometry[0].position[1], deformed[0].position[1])  # only the first coordinate was modified
@@ -183,8 +183,8 @@ class FilesTestCase(NachosTestCase):
         fields = zero_fields.copy()
         fields[0] = 3
         fields[4] = -2  # y of second atom
-        deformed = cooking.Cooker.deform_geometry(
-            r.geometry, cooking.Cooker.real_fields(fields, r['min_field'], r['ratio']))
+        deformed = cooking.Preparer.deform_geometry(
+            r.geometry, cooking.Preparer.real_fields(fields, r['min_field'], r['ratio']))
 
         self.assertNotEqual(r.geometry[0].position[0], deformed[0].position[0])
         self.assertNotEqual(r.geometry[1].position[1], deformed[1].position[1])
@@ -232,8 +232,8 @@ class FilesTestCase(NachosTestCase):
 
         fields = cooking.fields_needed_by_recipe(r)
 
-        cook = cooking.Cooker(recipe=r, directory=self.working_directory)
-        cook.cook()
+        cook = cooking.Preparer(recipe=r, directory=self.working_directory)
+        cook.prepare()
 
         # test for base
         path = os.path.join(self.working_directory, name + '_0001.com')
@@ -265,7 +265,7 @@ class FilesTestCase(NachosTestCase):
                 self.assertEqual(fi.other_blocks[-2][0], 'O     0')
                 self.assertEqual(
                     [float(a) for a in fi.other_blocks[-1][0].split()],
-                    cooking.Cooker.real_fields(fields_n, min_field, 2.))
+                    cooking.Preparer.real_fields(fields_n, min_field, 2.))
 
     def test_cooker_for_G(self):
         """Test the cooker class"""
@@ -306,8 +306,8 @@ class FilesTestCase(NachosTestCase):
         with open(recipe_path, 'w') as f:
             r.write(f)
 
-        cook = cooking.Cooker(recipe=r, directory=self.working_directory)
-        cook.cook()
+        cook = cooking.Preparer(recipe=r, directory=self.working_directory)
+        cook.prepare()
 
         path = os.path.join(self.working_directory, name + '_0001a.com')
         self.assertTrue(os.path.exists(path))
@@ -356,8 +356,8 @@ class FilesTestCase(NachosTestCase):
 
                 self.assertEqual(fi.other_blocks[-1][0], 'O     0')
 
-                deformed = cooking.Cooker.deform_geometry(
-                    r.geometry, cooking.Cooker.real_fields(fields_n, min_field, 2))
+                deformed = cooking.Preparer.deform_geometry(
+                    r.geometry, cooking.Preparer.real_fields(fields_n, min_field, 2))
 
                 for i, a in enumerate(fi.molecule):
                     self.assertArrayAlmostEqual(deformed[i].position, a.position)
@@ -372,7 +372,7 @@ class FilesTestCase(NachosTestCase):
 
         # process without copy
         process = self.run_python_script(
-            'nachos/nachos_cooker.py',
+            'nachos/nachos_prepare.py',
             ['-r', self.custom_recipe, '-d', self.working_directory],
             out_pipe=subprocess.PIPE,
             err_pipe=subprocess.PIPE)
@@ -389,7 +389,7 @@ class FilesTestCase(NachosTestCase):
 
         # process with copy
         process = self.run_python_script(
-            'nachos/nachos_cooker.py',
+            'nachos/nachos_prepare.py',
             ['-r', self.custom_recipe, '-d', self.working_directory, '-c'],
             out_pipe=subprocess.PIPE,
             err_pipe=subprocess.PIPE)

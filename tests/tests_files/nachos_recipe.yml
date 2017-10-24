@@ -1,8 +1,8 @@
 # flavor
 flavor: gaussian
-geometry: water.xyz
-basis_set: gen
 method: HF
+basis_set: gen
+geometry: water.xyz
 flavor_extra:
   convergence: 11
   cphf_convergence: 10
