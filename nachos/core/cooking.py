@@ -1,11 +1,11 @@
 import collections
-import copy
 import math
 import os
-
+import copy
 import numpy
+
 from qcip_tools import numerical_differentiation, derivatives, quantities, derivatives_e
-from qcip_tools.chemistry_files import gaussian
+from qcip_tools.chemistry_files import gaussian, dalton
 
 
 def compute_numerical_derivative_of_tensor(
@@ -154,6 +154,26 @@ def fields_needed_by_recipe(recipe):
 
 class BadPreparation(Exception):
     pass
+
+
+CC_WAVE_FUNCTION = """
+**WAVE FUNCTIONS
+.CC
+*SCF INPUT
+.THRESH
+{conv}
+*CC INPUT
+.{method}
+.MAX IT
+{max_it}
+.MAXRED
+{max_it}
+.MXLRV
+{max_it}
+.THRENR
+{cc_conv}
+.THRLEQ
+{conv}"""
 
 
 class Preparer:
@@ -311,12 +331,124 @@ class Preparer:
         return files_created
 
     def prepare_dalton_inputs(self):
-        """Create inputs for dalton
+        """Create inputs for dalton. Note that it assume geometrical derivatives for the moment
         """
 
-        for fields in self.fields_needed:
+        if self.recipe['type'] != 'G':
+            raise BadPreparation('Dalton only works for G!')
+
+        base_m = False
+        counter = 0
+        dal_counter = 0
+        files_created = 0
+        inputs_matching = ''
+
+        dal_files = {}
+        frequencies = ' '.join(
+            '{:.8f}'.format(derivatives_e.convert_frequency_from_string(a)) for a in self.recipe['frequencies'])
+
+        freq_card = dalton.InputCard(parameters=[len(self.recipe['frequencies']), frequencies])
+
+        for fields, level in self.fields_needed:
+            counter += 1
+
+            bases = self.recipe.bases(level_min=level)
+            bases_repr = tuple([b[0].representation() for b in bases])
+
+            # dal file, if needed
+            if bases_repr not in dal_files:
+                dal_counter += 1
+                dal = dalton.Input()
+
+                # begining
+                dal.update('**DALTON INPUT\n.RUN WAVE FUNCTIONS')
+
+                # coupled cluster
+                if self.recipe['method'] != 'CC3':
+                    dal['DALTON']['.DIRECT'] = dalton.InputCard()
+
+                dal.update(CC_WAVE_FUNCTION.format_map({
+                    'method': self.recipe['method'],
+                    'max_it': self.recipe['flavor_extra']['max_iteration'],
+                    'conv': '{:.1e}'.format(self.recipe['flavor_extra']['threshold']).replace('e', 'D'),
+                    'cc_conv': '{:.1e}'.format(self.recipe['flavor_extra']['cc_threshold']).replace('e', 'D')}))
+
+                # dipole moment
+                if 'F' in bases_repr:
+                    dal.update('**INTEGRAL\n.DIPLEN\n')
+                    dal.update('**WAVE FUNCTION\n*CCFOP\n.DIPMOM')
+
+                    if self.recipe['method'] == 'CC3':
+                        dal['WAVE FUNC']['CCFOP']['.NONREL'] = dalton.InputCard()
+
+                # gradient
+                if 'G' in bases_repr:
+                    dal.update('**INTEGRAL\n.DEROVL\n.DERHAM\n')
+                    dal.update('**WAVE FUNCTION\n*DERIVATIVES')
+
+                # polarizability
+                if any([x in bases_repr for x in ['FF', 'FD']]):
+                    dal.update('**WAVE FUNC\n*CCLR\n.DIPOLE\n.STATIC')
+
+                    if 'FD' in bases_repr:
+                        dal['WAVE FUNC']['CCLR']['.FREQUE'] = copy.copy(freq_card)
+
+                # first hyperpolarizability
+                if any([x in bases_repr for x in ['FFF', 'FDF', 'FDD']]):
+                    dal.update('**WAVE FUNC\n*CCQR\n.DIPOLE\n.STATIC')
+
+                    if 'FDF' in bases_repr:
+                        dal['WAVE FUNC']['CCQR']['.EOPEFR'] = copy.copy(freq_card)
+
+                    if 'FDD' in bases_repr:
+                        dal['WAVE FUNC']['CCQR']['.SHGFRE'] = copy.copy(freq_card)
+
+                # second hyperpolarizability
+                if any([x in bases_repr for x in ['FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD']]):
+                    dal.update('**WAVE FUNC\n*CCCR\n.DIPOLE\n.STATIC')
+
+                    if 'FDFF' in bases_repr:
+                        dal['WAVE FUNC']['CCCR']['.DCKERR'] = copy.copy(freq_card)
+
+                    if 'FDDF' in bases_repr:
+                        dal['WAVE FUNC']['CCCR']['.ESHGFR'] = copy.copy(freq_card)
+
+                    if 'FDDd' in bases_repr:
+                        dal['WAVE FUNC']['CCCR']['.DFWMFR'] = copy.copy(freq_card)
+
+                    if 'FDDD' in bases_repr:
+                        dal['WAVE FUNC']['CCCR']['.THGFRE'] = copy.copy(freq_card)
+
+                dal_path = '{}_{:04d}.dal'.format(self.recipe['flavor_extra']['dal_name'], dal_counter)
+                with open('{}/{}'.format(self.directory, dal_path), 'w') as f:
+                    dal.write(f)
+
+                dal_files[bases_repr] = dal_path
+
+            # molecule file
+            fi = dalton.MoleculeInput()
             real_fields = Preparer.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
-            print(fields, real_fields)
+            fi.molecule = Preparer.deform_geometry(self.recipe.geometry, real_fields)
+
+            if not base_m and fields == [0] * len(fields):
+                fi.title = 'base'
+                base_m = True
+            else:
+                fi.title = 'field({})='.format(level) + \
+                           ','.join(Preparer.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
+
+            fi.basis_set = self.recipe['basis_set']
+
+            mol_path = '{}_{:04d}.mol'.format(self.recipe['name'], counter)
+            with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
+                fi.write(f)
+                inputs_matching += '{} {}\n'.format(dal_files[bases_repr], mol_path)
+                files_created += 1
+
+        with open('{}/inputs_matching.txt'.format(self.directory), 'w') as f:
+            f.write(inputs_matching)
+
+        return files_created
 
     @staticmethod
     def deform_geometry(geometry, fields, geometry_in_angstrom=True):

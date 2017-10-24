@@ -13,7 +13,7 @@ CONFIG = {
             ('MP4SDQ', {'G': 1, 'F': 1}),
             ('MP4', {'G': 1, 'F': 1}),
             ('CCSD', {'G': 1, 'F': 1}),
-            ('CCSD(T)', {'G': 1, 'F': 1}),
+            ('CCSD(T)', {'G': 0, 'F': 0}),
         ],
         'bases': ['energy', 'G', 'GG', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD'],
         'default_for_extra_fields': {
@@ -43,6 +43,7 @@ CONFIG = {
             'max_iteration': 2500,
             'threshold': 1e-6,
             'cc_threshold': 1e-11,
+            'dal_name': 'ND',
         }
     }
 }

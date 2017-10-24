@@ -5,7 +5,7 @@ import subprocess
 import glob
 
 from qcip_tools import derivatives, quantities, derivatives_e
-from qcip_tools.chemistry_files import gaussian
+from qcip_tools.chemistry_files import gaussian, dalton
 
 from tests import NachosTestCase, factories
 from nachos.core import files, cooking
@@ -20,6 +20,7 @@ class PrepareTestCase(NachosTestCase):
         self.working_directory = self.setup_temporary_directory()
 
     def tearDown(self):
+        super().tearDown()
         pass
 
     def test_fields_needed(self):
@@ -197,8 +198,8 @@ class PrepareTestCase(NachosTestCase):
             r.geometry[1].position[1] - r['min_field'] * r['ratio'] * quantities.AuToAngstrom,
             deformed[1].position[1])
 
-    def test_cooker_for_F(self):
-        """Test the cooker class"""
+    def test_preparer_for_F(self):
+        """Test the preparer class"""
 
         name = 'water_test'
         min_field = .0004
@@ -267,8 +268,8 @@ class PrepareTestCase(NachosTestCase):
                     [float(a) for a in fi.other_blocks[-1][0].split()],
                     cooking.Preparer.real_fields(fields_n, min_field, 2.))
 
-    def test_cooker_for_G(self):
-        """Test the cooker class"""
+    def test_preparer_for_G(self):
+        """Test the preparer class"""
 
         name = 'water_test'
         min_field = .01
@@ -302,7 +303,7 @@ class PrepareTestCase(NachosTestCase):
 
         fields = cooking.fields_needed_by_recipe(r)
 
-        recipe_path = os.path.join(self.working_directory, 'nachos_recipe.yaml')
+        recipe_path = os.path.join(self.working_directory, 'nachos_recipe.yml')
         with open(recipe_path, 'w') as f:
             r.write(f)
 
@@ -362,8 +363,74 @@ class PrepareTestCase(NachosTestCase):
                 for i, a in enumerate(fi.molecule):
                     self.assertArrayAlmostEqual(deformed[i].position, a.position)
 
-    def test_nachos_cooker(self):
-        """Test the cooker program"""
+    def test_preparer_for_G_dalton(self):
+        """Test the preparer class, for dalton"""
+
+        name = 'water_test'
+        min_field = .01
+
+        differentiation = {
+            2: ['energy'],
+            1: ['G', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD', 'FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD']
+        }
+
+        opt_dict = dict(
+            flavor='dalton',
+            type='G',
+            method='CCS',
+            basis_set='STO-3G',
+            geometry=self.geometry,
+            differentiation=differentiation,
+            frequencies=['1064nm'],
+            name=name,
+            min_field=min_field,
+            k_max=3
+        )
+
+        r = files.Recipe(**opt_dict)
+        r.check_data()
+
+        fields = cooking.fields_needed_by_recipe(r)
+
+        recipe_path = os.path.join(self.working_directory, 'nachos_recipe.yml')
+        with open(recipe_path, 'w') as f:
+            r.write(f)
+
+        cook = cooking.Preparer(recipe=r, directory=self.working_directory)
+        cook.prepare()
+
+        path = os.path.join(self.working_directory, name + '_0001.mol')
+        self.assertTrue(os.path.exists(path))
+
+        # test base files
+        with open(path) as f:
+            fi = dalton.MoleculeInput()
+            fi.read(f)
+
+            self.assertEqual(fi.basis_set, 'STO-3G')
+
+            for i, a in enumerate(fi.molecule):
+                self.assertArrayAlmostEqual(r.geometry[i].position, a.position)  # geometry not modified, it is base
+
+        for _ in range(5):  # 5 random tests that files contains what they should!
+            n = random.randrange(1, len(fields) + 1)
+            fields_n, level = fields[n - 1]
+            path = os.path.join(self.working_directory, name + '_{:04d}.mol').format(n)
+            self.assertTrue(os.path.exists(path), msg=path)
+            with open(path) as f:
+                fi = dalton.MoleculeInput()
+                fi.read(f)
+
+                self.assertEqual(fi.basis_set, 'STO-3G')
+
+                deformed = cooking.Preparer.deform_geometry(
+                    r.geometry, cooking.Preparer.real_fields(fields_n, min_field, 2))
+
+                for i, a in enumerate(fi.molecule):
+                    self.assertArrayAlmostEqual(deformed[i].position, a.position)
+
+    def test_nachos_preparer(self):
+        """Test the preparer program"""
 
         self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.com')]), 0)
         self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.yml')]), 0)
