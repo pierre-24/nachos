@@ -6,7 +6,7 @@ import os
 import argparse
 import shutil
 
-from nachos.core import files, exit_failure, cooking
+from nachos.core import files, preparing, exit_failure
 
 __version__ = '0.2'
 __author__ = 'Pierre Beaujean'
@@ -56,11 +56,11 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
-    preparer = cooking.Preparer(recipe, directory)
+    preparer = preparing.Preparer(recipe, directory)
 
     try:
         n = preparer.prepare()
-    except cooking.BadPreparation as e:
+    except preparing.BadPreparation as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 
     if args.copy_files:

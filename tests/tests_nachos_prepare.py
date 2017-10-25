@@ -8,7 +8,7 @@ from qcip_tools import derivatives, quantities, derivatives_e
 from qcip_tools.chemistry_files import gaussian, dalton
 
 from tests import NachosTestCase, factories
-from nachos.core import files, cooking
+from nachos.core import files, preparing, compute_numerical_derivative_of_tensor
 
 
 class PrepareTestCase(NachosTestCase):
@@ -39,27 +39,27 @@ class PrepareTestCase(NachosTestCase):
         )
 
         r = files.Recipe(**opt_dict)
-        self.assertEqual(len(cooking.fields_needed_by_recipe(r)), 137)
-        self.assertEqual(cooking.fields_needed_by_recipe(r)[0], ([0, 0, 0], 1))  # zero field is the first one
+        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 137)
+        self.assertEqual(preparing.fields_needed_by_recipe(r)[0], ([0, 0, 0], 1))  # zero field is the first one
 
         r['k_max'] = 3
-        self.assertEqual(len(cooking.fields_needed_by_recipe(r)), 85)
+        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 85)
 
         r['accuracy_level'] = 0
-        self.assertEqual(len(cooking.fields_needed_by_recipe(r)), 61)
+        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 61)
 
         r['differentiation'] = {1: ['energy']}
         r._update(r.recipe)
-        self.assertEqual(len(cooking.fields_needed_by_recipe(r)), 19)
+        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 19)
 
         r['type'] = 'G'
         r['differentiation'] = {2: ['energy']}
-        self.assertEqual(len(cooking.fields_needed_by_recipe(r)), 3 * len(r.geometry) * 2 * r['k_max'] + 1)
-        self.assertEqual(cooking.fields_needed_by_recipe(r)[0], ([0] * 3 * len(r.geometry), 1))  # zero field
+        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 3 * len(r.geometry) * 2 * r['k_max'] + 1)
+        self.assertEqual(preparing.fields_needed_by_recipe(r)[0], ([0] * 3 * len(r.geometry), 1))  # zero field
 
         r['k_max'] = 5
         r._update(r.recipe)
-        self.assertEqual(len(cooking.fields_needed_by_recipe(r)), (3 * len(r.geometry)) ** 2 * 2 * r['k_max'] + 1)
+        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), (3 * len(r.geometry)) ** 2 * 2 * r['k_max'] + 1)
 
     def test_numerical_differentiation(self):
         energy = 150.
@@ -70,7 +70,7 @@ class PrepareTestCase(NachosTestCase):
         def energy_exp(fields, h0, basis, inverse, component, frequency, recipe):
             """Taylor series of the energy"""
 
-            r_field = cooking.Preparer.real_fields(fields, h0, recipe['ratio'])
+            r_field = preparing.Preparer.real_fields(fields, h0, recipe['ratio'])
 
             x = energy
             x += numpy.tensordot(mu.components, r_field, axes=1)
@@ -83,7 +83,7 @@ class PrepareTestCase(NachosTestCase):
         def dipole_exp(fields, h0, basis, inverse, component, frequency, recipe):
             """Taylor series of the dipole moment"""
 
-            r_field = cooking.Preparer.real_fields(fields, h0, recipe['ratio'])
+            r_field = preparing.Preparer.real_fields(fields, h0, recipe['ratio'])
 
             x = mu.components.copy()
             x += numpy.tensordot(alpha.components, r_field, axes=1)
@@ -109,7 +109,7 @@ class PrepareTestCase(NachosTestCase):
         r.check_data()
 
         # compute polarizability
-        t, triangles = cooking.compute_numerical_derivative_of_tensor(
+        t, triangles = compute_numerical_derivative_of_tensor(
             r,
             derivatives.Derivative(from_representation='F', spacial_dof=r.dof),
             derivatives.Derivative('F', spacial_dof=r.dof),
@@ -117,7 +117,7 @@ class PrepareTestCase(NachosTestCase):
 
         self.assertArrayAlmostEqual(alpha.components, t.components, places=3)
 
-        t, triangles = cooking.compute_numerical_derivative_of_tensor(
+        t, triangles = compute_numerical_derivative_of_tensor(
             r,
             derivatives.Derivative(from_representation='', spacial_dof=r.dof),
             derivatives.Derivative('FF', spacial_dof=r.dof),
@@ -126,7 +126,7 @@ class PrepareTestCase(NachosTestCase):
         self.assertArrayAlmostEqual(alpha.components, t.components, places=3)
 
         # compute first polarizability
-        t, triangles = cooking.compute_numerical_derivative_of_tensor(
+        t, triangles = compute_numerical_derivative_of_tensor(
             r,
             derivatives.Derivative(from_representation='F', spacial_dof=r.dof),
             derivatives.Derivative('FF', spacial_dof=r.dof),
@@ -134,7 +134,7 @@ class PrepareTestCase(NachosTestCase):
 
         self.assertArrayAlmostEqual(beta.components, t.components, delta=.001)
 
-        t, triangles = cooking.compute_numerical_derivative_of_tensor(
+        t, triangles = compute_numerical_derivative_of_tensor(
             r,
             derivatives.Derivative(from_representation='', spacial_dof=r.dof),
             derivatives.Derivative('FFF', spacial_dof=r.dof),
@@ -161,15 +161,15 @@ class PrepareTestCase(NachosTestCase):
         zero_fields = [0] * r.dof
 
         # nothing is deformed
-        deformed = cooking.Preparer.deform_geometry(r.geometry, zero_fields)
+        deformed = preparing.Preparer.deform_geometry(r.geometry, zero_fields)
         for i, a in enumerate(deformed):
             self.assertArrayAlmostEqual(a.position, r.geometry[i].position)
 
         # simple deformation:
         fields = zero_fields.copy()
         fields[0] = 1  # x of first atom
-        deformed = cooking.Preparer.deform_geometry(
-            r.geometry, cooking.Preparer.real_fields(fields, r['min_field'], r['ratio']))
+        deformed = preparing.Preparer.deform_geometry(
+            r.geometry, preparing.Preparer.real_fields(fields, r['min_field'], r['ratio']))
 
         self.assertNotEqual(r.geometry[0].position[0], deformed[0].position[0])
         self.assertEqual(r.geometry[0].position[1], deformed[0].position[1])  # only the first coordinate was modified
@@ -184,8 +184,8 @@ class PrepareTestCase(NachosTestCase):
         fields = zero_fields.copy()
         fields[0] = 3
         fields[4] = -2  # y of second atom
-        deformed = cooking.Preparer.deform_geometry(
-            r.geometry, cooking.Preparer.real_fields(fields, r['min_field'], r['ratio']))
+        deformed = preparing.Preparer.deform_geometry(
+            r.geometry, preparing.Preparer.real_fields(fields, r['min_field'], r['ratio']))
 
         self.assertNotEqual(r.geometry[0].position[0], deformed[0].position[0])
         self.assertNotEqual(r.geometry[1].position[1], deformed[1].position[1])
@@ -231,9 +231,9 @@ class PrepareTestCase(NachosTestCase):
         r = files.Recipe(flavor_extra=flavor_extra, **opt_dict)
         r.check_data()
 
-        fields = cooking.fields_needed_by_recipe(r)
+        fields = preparing.fields_needed_by_recipe(r)
 
-        cook = cooking.Preparer(recipe=r, directory=self.working_directory)
+        cook = preparing.Preparer(recipe=r, directory=self.working_directory)
         cook.prepare()
 
         # test for base
@@ -266,7 +266,7 @@ class PrepareTestCase(NachosTestCase):
                 self.assertEqual(fi.other_blocks[-2][0], 'O     0')
                 self.assertEqual(
                     [float(a) for a in fi.other_blocks[-1][0].split()],
-                    cooking.Preparer.real_fields(fields_n, min_field, 2.))
+                    preparing.Preparer.real_fields(fields_n, min_field, 2.))
 
     def test_preparer_for_G(self):
         """Test the preparer class"""
@@ -301,13 +301,13 @@ class PrepareTestCase(NachosTestCase):
         r = files.Recipe(flavor_extra=flavor_extra, **opt_dict)
         r.check_data()
 
-        fields = cooking.fields_needed_by_recipe(r)
+        fields = preparing.fields_needed_by_recipe(r)
 
         recipe_path = os.path.join(self.working_directory, 'nachos_recipe.yml')
         with open(recipe_path, 'w') as f:
             r.write(f)
 
-        cook = cooking.Preparer(recipe=r, directory=self.working_directory)
+        cook = preparing.Preparer(recipe=r, directory=self.working_directory)
         cook.prepare()
 
         path = os.path.join(self.working_directory, name + '_0001a.com')
@@ -357,8 +357,8 @@ class PrepareTestCase(NachosTestCase):
 
                 self.assertEqual(fi.other_blocks[-1][0], 'O     0')
 
-                deformed = cooking.Preparer.deform_geometry(
-                    r.geometry, cooking.Preparer.real_fields(fields_n, min_field, 2))
+                deformed = preparing.Preparer.deform_geometry(
+                    r.geometry, preparing.Preparer.real_fields(fields_n, min_field, 2))
 
                 for i, a in enumerate(fi.molecule):
                     self.assertArrayAlmostEqual(deformed[i].position, a.position)
@@ -390,13 +390,13 @@ class PrepareTestCase(NachosTestCase):
         r = files.Recipe(**opt_dict)
         r.check_data()
 
-        fields = cooking.fields_needed_by_recipe(r)
+        fields = preparing.fields_needed_by_recipe(r)
 
         recipe_path = os.path.join(self.working_directory, 'nachos_recipe.yml')
         with open(recipe_path, 'w') as f:
             r.write(f)
 
-        cook = cooking.Preparer(recipe=r, directory=self.working_directory)
+        cook = preparing.Preparer(recipe=r, directory=self.working_directory)
         cook.prepare()
 
         path = os.path.join(self.working_directory, name + '_0001.mol')
@@ -423,8 +423,8 @@ class PrepareTestCase(NachosTestCase):
 
                 self.assertEqual(fi.basis_set, 'STO-3G')
 
-                deformed = cooking.Preparer.deform_geometry(
-                    r.geometry, cooking.Preparer.real_fields(fields_n, min_field, 2))
+                deformed = preparing.Preparer.deform_geometry(
+                    r.geometry, preparing.Preparer.real_fields(fields_n, min_field, 2))
 
                 for i, a in enumerate(fi.molecule):
                     self.assertArrayAlmostEqual(deformed[i].position, a.position)
