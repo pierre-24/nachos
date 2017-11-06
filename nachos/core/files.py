@@ -45,11 +45,15 @@ class BadRecipe(Exception):
 class Recipe:
     """Class that handle the parameters to perform numerical differentiation"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, directory='.', **kwargs):
 
         self.geometry = None
 
+        if not os.path.isdir(directory):
+            raise BadRecipe('{} is not a directory'.format(directory))
+
         self.recipe = {}
+        self.directory = directory
         self.max_differentiation = 1
         self.dof = 0
         self.recipe.update(**DEFAULT_RECIPE)
@@ -73,8 +77,10 @@ class Recipe:
         if self['accuracy_level'] not in [-1, 0, 1]:
             raise BadRecipe('Accuracy level {} does not exists'.format(self['accuracy_level']))
 
-        if not os.path.exists(self['geometry']):
-            raise BadRecipe('file "{}" containing the geometry does not exists'.format(self['geometry']))
+        path = os.path.join(self.directory, self['geometry'])
+
+        if not os.path.exists(path):
+            raise BadRecipe('file "{}" containing the geometry does not exists'.format(path))
 
         if self.geometry is None:
             raise BadRecipe('geometry is not readable')
@@ -154,15 +160,17 @@ class Recipe:
                 self.recipe['flavor_extra'].update(kw['flavor_extra'])
 
         # geometry
-        if 'geometry' in kw and os.path.exists(kw['geometry']):
-            try:
-                with open(kw['geometry']) as f:
-                    g = helpers.open_chemistry_file(f)
-                    if g.has_property('molecule'):
-                        self.geometry = g.property('molecule')
-                        self.dof = 3 * len(self.geometry)
-            except helpers.ProbablyNotAChemistryFile:
-                pass
+        if 'geometry' in kw:
+            path = os.path.join(self.directory, kw['geometry'])
+            if os.path.exists(path):
+                try:
+                    with open(path) as f:
+                        g = helpers.open_chemistry_file(f)
+                        if g.has_property('molecule'):
+                            self.geometry = g.property('molecule')
+                            self.dof = 3 * len(self.geometry)
+                except helpers.ProbablyNotAChemistryFile:
+                    pass
 
         # max diff
         if 'differentiation' in kw:

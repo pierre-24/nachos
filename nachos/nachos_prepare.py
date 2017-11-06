@@ -42,13 +42,10 @@ def get_arguments_parser():
 # main
 def main():
     args = get_arguments_parser().parse_args()
-
-    recipe = files.Recipe()
-
-    # move chdir so that it correspond to the directory where the recipe is
     directory = os.path.abspath(args.directory)
-    chdir = os.path.dirname(args.recipe.name)
-    os.chdir(chdir)
+    recipe_directory = os.path.dirname(args.recipe.name)
+
+    recipe = files.Recipe(directory=recipe_directory)
 
     # read recipe and prepare!
     try:
@@ -64,17 +61,16 @@ def main():
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 
     if args.copy_files:
-        shutil.copy(recipe['geometry'], directory)
-        recipe['geometry'] = os.path.basename(recipe['geometry'])
+        shutil.copy(os.path.join(recipe_directory, recipe['geometry']), directory)
+        recipe['geometry'] = os.path.basename(os.path.join(recipe_directory, recipe['geometry']))
 
         if 'gen_basis' in recipe['flavor_extra']:
-            shutil.copy(recipe['flavor_extra']['gen_basis'], directory)
-            recipe['flavor_extra']['gen_basis'] = os.path.basename(recipe['flavor_extra']['gen_basis'])
+            shutil.copy(os.path.join(recipe_directory, recipe['flavor_extra']['gen_basis']), directory)
+            recipe['flavor_extra']['gen_basis'] = os.path.basename(
+                os.path.join(recipe_directory, recipe['flavor_extra']['gen_basis']))
 
-        os.chdir(directory)
-        with open('nachos_recipe.yml', 'w') as f:
+        with open(os.path.join(directory, 'nachos_recipe.yml'), 'w') as f:
             recipe.write(f)
-        os.chdir(chdir)
 
     print('cooked {} files'.format(n))
 

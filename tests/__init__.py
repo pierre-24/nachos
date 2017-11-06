@@ -4,6 +4,7 @@ import os
 import subprocess
 import tempfile
 import shutil
+import zipfile
 
 
 def array_almost_equals(a, b, places=7, delta=None, msg=''):
@@ -110,3 +111,15 @@ class NachosTestCase(unittest.TestCase):
             cmd.extend(args)
 
         return subprocess.Popen(cmd, stdin=in_pipe, stdout=out_pipe, stderr=err_pipe, cwd=cwd)
+
+    def unzip_it(self, path, directory=None):
+        zf = zipfile.ZipFile(path, 'r')
+
+        if not directory:
+            directory = self.temporary_directory
+
+        if not os.path.isdir(directory):
+            raise NotADirectoryError(directory)
+
+        zf.extractall(directory)
+        zf.close()

@@ -99,7 +99,7 @@ class Preparer:
         # try to open custom basis set if any
         gen_basis_set = []
         if self.recipe['basis_set'] == 'gen':
-            path = self.recipe['flavor_extra']['gen_basis']
+            path = os.path.join(self.recipe.directory, self.recipe['flavor_extra']['gen_basis'])
             if not os.path.exists(path):
                 raise BadPreparation('gen basis file {} cannot be opened'.format(path))
 
