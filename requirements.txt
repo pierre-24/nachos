@@ -1,3 +1,4 @@
 git+ssh://git@git.pierrebeaujean.net/pierre/qcip_tools.git@add_tensor_numdiff#egg=qcip_tools>=0.3,<0.4
 setuptools == 36.4.0
 pyyaml==3.12
+h5py==2.7.1

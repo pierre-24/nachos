@@ -1,8 +1,11 @@
 import yaml
 import os
+import h5py
+
+from nachos.core import preparing
 
 from qcip_tools import derivatives
-from qcip_tools.chemistry_files import helpers
+from qcip_tools.chemistry_files import helpers, chemistry_datafile
 
 from nachos.core import CONFIG
 
@@ -232,12 +235,129 @@ class Recipe:
         return d
 
 
+class FieldsNotNeeded(Exception):
+    pass
+
+
+class DerivativeAlreadyDefined(Exception):
+    def __init__(self, fields, derivative):
+        super().__init__('already defined {}::{}'.format(fields, derivative))
+
+
+class BadResult(Exception):
+    pass
+
+
 class ComputationalResults:
-    """A class to store all the results obtained from the baking process
+    """A class to store all the results obtained from the cooking process
 
     :param recipe: a recipe
     :type recipe: nachos.core.files.Recipe
     """
 
-    def __init__(self, recipe):
+    file_type = 'NACHOS_CR'
+    version = 1
+
+    def __init__(self, recipe, directory='.'):
+
+        if not os.path.isdir(directory):
+            raise BadRecipe('{} is not a directory'.format(directory))
+
         self.recipe = recipe
+        self.directory = directory
+
+        self.results = {}
+        self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
+        self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
+
+    def add_result(self, fields, derivative, value, allow_replace=False):
+        """Add result for a given derivative in given fields
+
+        :param fields: fields
+        :type fields: tuple|list
+        :param derivative: derivative
+        :type derivative: str
+        :param value: value of the derivative
+        :type value: dict|qcip_tools.derivatives.Tensor
+        :param allow_replace: allow the value to be replaced
+        :type allow_replace: bool
+        """
+
+        if fields not in self.fields_needed:
+            raise FieldsNotNeeded(fields)
+
+        t_fields = tuple(fields)
+
+        if t_fields not in self.results:
+            self.results[t_fields] = {}
+
+        if derivative not in self.results[t_fields] or allow_replace:
+            self.results[t_fields][derivative] = value
+        else:
+            raise DerivativeAlreadyDefined(fields, derivative)
+
+    def check(self):
+        """Check that, according to the recipe, everything is present
+
+        :rtype: tuple
+        """
+
+        missing_fields = []
+        missing_derivatives = []
+
+        for fields, level in self.fields_needed_by_recipe:
+            t_fields = tuple(fields)
+            derivatives_needed = self.recipe.bases(level)
+
+            if t_fields not in self.results:
+                missing_fields.append(t_fields)
+
+            for derivative, lvl in derivatives_needed:
+                if derivative.representation() not in self.results[t_fields]:
+                    missing_derivatives.append((fields, derivative))
+
+        return missing_fields, missing_derivatives
+
+    def write(self, path):
+        """Write in h5 file
+
+        :param path: path to the file, relative to directory
+        :type path: str
+        """
+
+        dof = 3 * len(self.recipe.geometry)
+
+        with h5py.File(os.path.join(self.directory, path), 'w') as f:
+            dset = f.create_dataset('version', (1,), dtype='i', data=self.version)
+            dset.attrs['type'] = self.file_type
+
+            fields_group = f.create_group('fields')
+
+            for fields in self.results:
+                subgroup = fields_group.create_group(','.join(str(a) for a in fields))
+                chemistry_datafile.ChemistryDataFile.write_derivatives_in_group(subgroup, self.results[fields], dof)
+
+    def read(self, path):
+        """Read in h5 file
+
+        :param path: path to the file, relative to directory
+        :type path: str
+        """
+
+        dof = 3 * len(self.recipe.geometry)
+
+        with h5py.File(os.path.join(self.directory, path), 'r') as f:
+            if 'version' not in f or f['version'][0] != self.version:
+                raise BadResult('version > 1 (={})'.format(f['version'][0]))
+
+            if 'type' not in f['version'].attrs or f['version'].attrs['type'] != self.file_type:
+                raise BadResult('type is incorrect')
+
+            fields_group = f['/fields']
+
+            for i in fields_group:
+                fields = [int(a) for a in i.split(',')]
+                if fields in self.fields_needed:
+                    t_fields = tuple(fields)
+                    self.results[t_fields] = chemistry_datafile.ChemistryDataFile.read_derivatives_from_group(
+                        fields_group[i], dof)

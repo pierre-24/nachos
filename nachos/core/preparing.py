@@ -81,7 +81,7 @@ class Preparer:
             raise BadPreparation('{} is not a directory'.format(directory))
 
         self.directory = directory
-        self.fields_needed = fields_needed_by_recipe(self.recipe)
+        self.fields_needed_by_recipe = fields_needed_by_recipe(self.recipe)
 
     def prepare(self):
         """Create the different input files in the directory"""
@@ -115,7 +115,7 @@ class Preparer:
             except Exception as e:
                 raise BadPreparation('error while using custom basis set ({}) : {}'.format(path, e))
 
-        for fields, level in self.fields_needed:
+        for fields, level in self.fields_needed_by_recipe:
             counter += 1
 
             compute_polar = False
@@ -240,7 +240,7 @@ class Preparer:
 
         freq_card = dalton.InputCard(parameters=[len(self.recipe['frequencies']), frequencies])
 
-        for fields, level in self.fields_needed:
+        for fields, level in self.fields_needed_by_recipe:
             counter += 1
 
             bases = self.recipe.bases(level_min=level)
@@ -332,7 +332,7 @@ class Preparer:
 
             mol_path = '{}_{:04d}.mol'.format(self.recipe['name'], counter)
             with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
-                fi.write(f)
+                fi.write(f, nosym=True)
                 inputs_matching += '{} {}\n'.format(dal_files[bases_repr], mol_path)
                 files_created += 1
 

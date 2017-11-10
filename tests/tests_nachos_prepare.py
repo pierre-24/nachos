@@ -455,9 +455,10 @@ class PrepareTestCase(NachosTestCase):
         self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.gbs')]), 0)
 
         # process with copy
+        other_dir = self.setup_temporary_directory()
         process = self.run_python_script(
             'nachos/nachos_prepare.py',
-            ['-r', self.custom_recipe, '-d', self.working_directory, '-c'],
+            ['-r', self.custom_recipe, '-d', other_dir, '-c'],
             out_pipe=subprocess.PIPE,
             err_pipe=subprocess.PIPE)
 
@@ -466,7 +467,7 @@ class PrepareTestCase(NachosTestCase):
         self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
         self.assertNotEqual(len(stdout_t), 0)
 
-        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.com')]), 542)
-        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.yml')]), 1)
-        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.xyz')]), 1)
-        self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.gbs')]), 1)
+        self.assertEqual(len([a for a in glob.glob(other_dir + '/*.com')]), 542)
+        self.assertEqual(len([a for a in glob.glob(other_dir + '/*.yml')]), 1)
+        self.assertEqual(len([a for a in glob.glob(other_dir + '/*.xyz')]), 1)
+        self.assertEqual(len([a for a in glob.glob(other_dir + '/*.gbs')]), 1)
