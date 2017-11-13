@@ -3,7 +3,7 @@ import glob
 import math
 import numpy
 
-from qcip_tools import quantities, derivatives, derivatives_g
+from qcip_tools import quantities, derivatives, derivatives_g, derivatives_e
 from qcip_tools.chemistry_files import helpers, gaussian, PropertyNotPresent, PropertyNotDefined, dalton
 
 from nachos.core import files, preparing
@@ -93,6 +93,9 @@ class Cooker:
         :return:
         """
 
+        def almost_the_same(a, b, threshold=1e-3):
+            return math.fabs(a - b) < threshold
+
         # catch field
         if self.recipe['type'] == 'F':
             try:
@@ -126,10 +129,23 @@ class Cooker:
             electrical_derivatives = f.property('electrical_derivatives')
             for d in electrical_derivatives:
                 if d in derivatives_in_level:
+                    e_deriv = {}
+                    for a, b in electrical_derivatives[d].items():
+                        freq = a
+                        if a != 'static':
+                            for freq_ir in self.recipe['frequencies']:
+                                if almost_the_same(
+                                        derivatives_e.convert_frequency_from_string(freq_ir),
+                                        derivatives_e.convert_frequency_from_string(freq)):
+                                    freq = freq_ir
+                                    break
+
+                        e_deriv[freq] = b.components
+
                     self.storage.add_result(
                         fields,
                         d,
-                        dict((a, b.components) for a, b in electrical_derivatives[d].items()),
+                        e_deriv,
                         allow_replace=d == 'F')
         except (PropertyNotPresent, PropertyNotDefined):
             pass
