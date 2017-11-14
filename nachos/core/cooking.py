@@ -65,12 +65,13 @@ class Cooker:
             raise BadCooking('{} is not a directory'.format(directory))
 
         self.directory = directory
-        self.storage = files.ComputationalResults(recipe, directory=self.directory)
         self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
     def cook(self):
         """Look into the directory for files in which the information can be"""
+
+        storage = files.ComputationalResults(self.recipe, directory=self.directory)
 
         look_for = ['*.fchk'] if self.recipe['flavor'] == 'gaussian' else ['*.tar.gz', '*.out']
 
@@ -79,17 +80,21 @@ class Cooker:
                 with open(i) as f:
                     try:
                         fx = helpers.open_chemistry_file(f)
-                        self.cook_from_file(fx, i)
+                        self.cook_from_file(fx, i, storage)
                     except helpers.ProbablyNotAChemistryFile:
                         continue
 
-    def cook_from_file(self, f, name):
+        return storage
+
+    def cook_from_file(self, f, name, storage):
         """
 
         :param f: file
         :type f: qcip_tools.chemistry_files.ChemistryFile
         :param name: path to the file
         :type name: str
+        :param storage: storage object
+        :type storage: nachos.core.files.ComputationalResults
         :return:
         """
 
@@ -121,7 +126,7 @@ class Cooker:
         if derivatives.Derivative() in derivatives_in_level and f.file_type != 'DALTON_LOG':
             try:
                 energies = f.property('computed_energies')
-                self.storage.add_result(fields, '', energies['total'], allow_replace=True)
+                storage.add_result(fields, '', energies['total'], allow_replace=True)
             except (PropertyNotPresent, PropertyNotDefined):
                 pass
 
@@ -142,7 +147,7 @@ class Cooker:
 
                         e_deriv[freq] = b.components
 
-                    self.storage.add_result(
+                    storage.add_result(
                         fields,
                         d,
                         e_deriv,
@@ -154,7 +159,7 @@ class Cooker:
             geometrical_derivatives = f.property('geometrical_derivatives')
             for d in geometrical_derivatives:
                 if d in derivatives_in_level:
-                    self.storage.add_result(fields, d, geometrical_derivatives[d].components)
+                    storage.add_result(fields, d, geometrical_derivatives[d].components)
         except (PropertyNotPresent, PropertyNotDefined):
             pass
 

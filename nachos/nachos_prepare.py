@@ -2,10 +2,11 @@
 Create the input files for the quantum chemistry programs out of a given recipe
 """
 
-import os
 import argparse
+import os
 import shutil
 
+from nachos import is_dir
 from nachos.core import files, preparing, exit_failure
 
 __version__ = '0.2'
@@ -13,15 +14,6 @@ __author__ = 'Pierre Beaujean'
 __maintainer__ = 'Pierre Beaujean'
 __email__ = 'pierre.beaujean@unamur.be'
 __status__ = 'Development'
-
-
-def is_dir(dirname):
-    """Checks if a path is an actual directory"""
-    if not os.path.isdir(dirname):
-        msg = '{0} is not a directory'.format(dirname)
-        raise argparse.ArgumentTypeError(msg)
-    else:
-        return dirname
 
 
 # program options

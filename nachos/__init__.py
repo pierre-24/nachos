@@ -1,7 +1,7 @@
 """
 NACHOS: numerical differentiation code
 """
-
+import argparse
 import os
 
 __version__ = '0.1'
@@ -13,6 +13,7 @@ __status__ = 'Development'
 # List of the scripts that are installed, without the .py extension. The name is used to give the command name.
 provide_scripts = [
     'nachos_prepare',
+    'nachos_cook'
 ]
 
 
@@ -31,3 +32,12 @@ def make_console_scripts(package_name='nachos'):
         console_scripts.append('{0} = {1}.{0}:main'.format(script, package_name))
 
     return console_scripts
+
+
+def is_dir(dirname):
+    """Checks if a path is an actual directory"""
+    if not os.path.isdir(dirname):
+        msg = '{0} is not a directory'.format(dirname)
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return dirname

@@ -312,9 +312,10 @@ class ComputationalResults:
             if t_fields not in self.results:
                 missing_fields.append(t_fields)
 
-            for derivative, lvl in derivatives_needed:
-                if derivative.representation() not in self.results[t_fields]:
-                    missing_derivatives.append((fields, derivative))
+            else:
+                for derivative, lvl in derivatives_needed:
+                    if derivative.representation() not in self.results[t_fields]:
+                        missing_derivatives.append((t_fields, derivative))
 
         return missing_fields, missing_derivatives
 

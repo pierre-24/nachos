@@ -233,8 +233,8 @@ class PrepareTestCase(NachosTestCase):
 
         fields = preparing.fields_needed_by_recipe(r)
 
-        cook = preparing.Preparer(recipe=r, directory=self.working_directory)
-        cook.prepare()
+        preparer = preparing.Preparer(recipe=r, directory=self.working_directory)
+        preparer.prepare()
 
         # test for base
         path = os.path.join(self.working_directory, name + '_0001.com')
@@ -307,8 +307,8 @@ class PrepareTestCase(NachosTestCase):
         with open(recipe_path, 'w') as f:
             r.write(f)
 
-        cook = preparing.Preparer(recipe=r, directory=self.working_directory)
-        cook.prepare()
+        preparer = preparing.Preparer(recipe=r, directory=self.working_directory)
+        preparer.prepare()
 
         path = os.path.join(self.working_directory, name + '_0001a.com')
         self.assertTrue(os.path.exists(path))
@@ -396,8 +396,8 @@ class PrepareTestCase(NachosTestCase):
         with open(recipe_path, 'w') as f:
             r.write(f)
 
-        cook = preparing.Preparer(recipe=r, directory=self.working_directory)
-        cook.prepare()
+        preparer = preparing.Preparer(recipe=r, directory=self.working_directory)
+        preparer.prepare()
 
         path = os.path.join(self.working_directory, name + '_0001.mol')
         self.assertTrue(os.path.exists(path))
@@ -429,7 +429,7 @@ class PrepareTestCase(NachosTestCase):
                 for i, a in enumerate(fi.molecule):
                     self.assertArrayAlmostEqual(deformed[i].position, a.position)
 
-    def test_nachos_preparer(self):
+    def test_nachos_prepare(self):
         """Test the preparer program"""
 
         self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.com')]), 0)

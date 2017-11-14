@@ -342,11 +342,11 @@ class Preparer:
         return files_created
 
     @staticmethod
-    def deform_geometry(geometry, fields, geometry_in_angstrom=True):
+    def deform_geometry(geometry, real_fields, geometry_in_angstrom=True):
         """Create an input for gaussian
 
-        :param fields: Differentiation field
-        :type fields: list
+        :param real_fields: Real differentiation field
+        :type real_fields: list
         :param geometry: geometry do deform
         :type geometry: qcip_tools.molecule.Molecule
         :param geometry_in_angstrom: indicate wheter the geometry is given in Angstrom or not
@@ -359,7 +359,8 @@ class Preparer:
 
         for index, atom in enumerate(deformed):
             atom.position += numpy.array(
-                [fields[index * 3 + i] * (quantities.AuToAngstrom if geometry_in_angstrom else 1.) for i in range(3)]
+                [real_fields[index * 3 + i] * (
+                    quantities.AuToAngstrom if geometry_in_angstrom else 1.) for i in range(3)]
             )
 
         return deformed
