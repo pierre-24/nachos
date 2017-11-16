@@ -6,8 +6,8 @@ import argparse
 import os
 import shutil
 
-from nachos import is_dir
-from nachos.core import files, preparing, exit_failure
+from nachos import is_dir, exit_failure
+from nachos.core import files, preparing
 
 __version__ = '0.2'
 __author__ = 'Pierre Beaujean'

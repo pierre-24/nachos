@@ -56,7 +56,10 @@ class Cooker:
     """Cooker class to retrieve the information out of the calculation results
 
     :param recipe: a recipe
-    :type recipe: nachos.core.files.Recipe"""
+    :type recipe: nachos.core.files.Recipe
+    :param directory: working directory
+    :type directory: str
+    """
 
     def __init__(self, recipe, directory='.'):
         self.recipe = recipe

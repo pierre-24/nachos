@@ -1,7 +1,7 @@
+import math
 import collections
-import sys
 
-from qcip_tools import derivatives, numerical_differentiation
+from qcip_tools import derivatives, numerical_differentiation, derivatives_e, derivatives_g
 
 CONFIG = {
     'gaussian': {
@@ -50,20 +50,6 @@ CONFIG = {
         }
     }
 }
-
-
-def exit_failure(msg, status=1):
-    """Write a message in stderr and exits
-
-    :param msg: the msg
-    :type msg: str
-    :param status: exit status (!=0)
-    :type status: int
-    """
-
-    sys.stderr.write(msg)
-    sys.stderr.write('\n')
-    return sys.exit(status)
 
 
 def compute_numerical_derivative_of_tensor(
@@ -138,11 +124,10 @@ def compute_numerical_derivative_of_tensor(
                 k_max -= 1
 
         inverse = False
-        if recipe['type'] == 'electric':
+        if recipe['type'] == 'F':
             # because E(-F) = E0 - µ.F + 1/2*a.F² + ..
             #         µ(-F) = µ0 - a.F + 1/2*b.F² + ...
-            # (and why not G and GG ?)
-            if b_repr == '':
+            if basis.order() == 0:
                 inverse = True if derivative_order % 2 == 0 else False
             else:
                 inverse = True if derivative_order % 2 == 1 else False
@@ -168,9 +153,80 @@ def compute_numerical_derivative_of_tensor(
                 for inv_derivative_coo in inv_derivative_coos:
                     for inv_basis_coo in basis.inverse_smart_iterator(basis_coo):
                         if b_repr != '':
-                            tensor.components[inv_basis_coo][inv_derivative_coo] = val[1]
+                            if 'F' in d_repr:
+                                tensor.components[inv_basis_coo][inv_derivative_coo] = val[1]
+                            else:
+                                tensor.components[inv_derivative_coo][inv_basis_coo] = val[1]
                         else:
                             tensor.components[inv_derivative_coo] = val[1]
 
     if not dry_run:
         return tensor, romberg_triangles
+
+
+def fancy_output_derivative(derivative, frequency=None):
+    """
+
+    :param derivative: derivative to output
+    :type derivative: qcip_tools.derivatives.Derivative
+    :param frequency: eventual frequency
+    :type frequency: str|float
+    :rtype: str
+    """
+
+    r = 'energy'
+
+    g_part = derivative.raw_representation(exclude=derivatives.ELECTRICAL_DERIVATIVES)
+    e_part = derivative.raw_representation(exclude=derivatives.GEOMETRICAL_DERIVATIVES)
+
+    if e_part != '':
+        if e_part in derivatives_e.NAMES:
+            r = derivatives_e.NAMES[e_part]
+        else:
+            r = derivatives.ORDERS[len(e_part)] + ' order electrical derivative (of the energy)'
+
+        if g_part != '':
+            r = derivatives.ORDERS[len(g_part)] + ' order geometrical derivative of ' + r
+
+        if frequency is not None and 'D' in e_part:
+            r = '{} (w={})'.format(r, frequency)
+
+    elif g_part != '':
+        if g_part in derivatives_g.NAMES:
+            r = derivatives_g.NAMES[g_part]
+        else:
+            r = derivatives.ORDERS[len(g_part)] + ' order geometrical derivative (of the energy)'
+
+    return r
+
+
+def fancy_output_component_of_derivative(derivative, component, geometry=None):
+    """Get the representation of the component of a given tensor
+
+    :param derivative: derivative
+    :type derivative: qcip_tools.derivatives.Derivative
+    :param component: component of the tensor
+    :type component: list|tuple
+    :param geometry: the geometry
+    :type geometry: qcip_tools.molecule.Molecule
+    :rtype: str
+    """
+    r = ''
+
+    if len(component) != derivative.order():
+        raise ValueError('length of component does not match tensor representation')
+
+    for index, d in enumerate(derivative.representation()):
+        if d in derivatives.ELECTRICAL_DERIVATIVES:
+            r += derivatives.COORDINATES[component[index]]
+        else:
+            if r != '':
+                r += ','
+            if geometry is None:
+                r += str(component[index])
+            else:
+                num = int(math.floor(index / 3))
+                coo = derivatives.COORDINATES[index % 3]
+                r += '{}{}{}'.format(geometry[num].symbol, num + 1, coo)
+
+    return r

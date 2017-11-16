@@ -1,6 +1,7 @@
 import yaml
 import os
 import h5py
+import numpy
 
 from nachos.core import preparing
 
@@ -329,9 +330,15 @@ class ComputationalResults:
         dof = 3 * len(self.recipe.geometry)
 
         with h5py.File(os.path.join(self.directory, path), 'w') as f:
+            # first protection: version and type
             dset = f.create_dataset('version', (1,), dtype='i', data=self.version)
             dset.attrs['type'] = self.file_type
 
+            # second protection; some of the information of the recipe
+            f.create_dataset(
+                'recipe', shape=(6,), dtype='f', data=ComputationalResults.get_recipe_check_data(self.recipe))
+
+            # then the results
             fields_group = f.create_group('fields')
 
             for fields in self.results:
@@ -354,6 +361,12 @@ class ComputationalResults:
             if 'type' not in f['version'].attrs or f['version'].attrs['type'] != self.file_type:
                 raise BadResult('type is incorrect')
 
+            if 'recipe' not in f:
+                raise BadResult('no information about the recipe in storage')
+
+            if not numpy.any(f['recipe'][:] - ComputationalResults.get_recipe_check_data(self.recipe)):
+                raise BadResult('it is probably a storage from a different recipe that you are using!')
+
             fields_group = f['/fields']
 
             for i in fields_group:
@@ -362,3 +375,38 @@ class ComputationalResults:
                     t_fields = tuple(fields)
                     self.results[t_fields] = chemistry_datafile.ChemistryDataFile.read_derivatives_from_group(
                         fields_group[i], dof)
+
+    def tensor_element_access(self, fields, min_field, basis, inverse, component, frequency, recipe):
+        t_fields = tuple(fields)
+        if t_fields not in self.results:
+            raise BadResult('fields {} is not available'.format(fields))
+
+        results = self.results[t_fields]
+        b_repr = basis.representation()
+        if b_repr not in results:
+            raise BadResult('derivative {} is not available for {}'.format(b_repr, fields))
+
+        results = results[b_repr]
+
+        if derivatives.is_electrical(basis):
+            if frequency not in results:
+                raise BadResult('frequency {} is not available for {} of {}'.format(frequency, b_repr, fields))
+
+            results = results[frequency]
+
+        if b_repr != '':
+            if len(component) != len(results.shape):
+                raise BadResult('shape does not match for {}'.format(b_repr))
+
+        return (-1. if inverse else 1.) * results[component]
+
+    @staticmethod
+    def get_recipe_check_data(recipe):
+        return [
+            recipe['min_field'],
+            recipe['ratio'],
+            recipe['k_max'],
+            0. if recipe['type'] == 'F' else 1.,
+            len(recipe.geometry),
+            sum((a + 1) * b.atomic_number for a, b in enumerate(recipe.geometry))
+        ]

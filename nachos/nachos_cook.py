@@ -5,7 +5,8 @@ Out of the results of calculation, create a h5 file to store them
 import os
 import argparse
 
-from nachos.core import files, exit_failure, cooking
+from nachos.core import files, cooking
+from nachos import exit_failure
 
 __version__ = '0.1'
 __author__ = 'Pierre Beaujean'
