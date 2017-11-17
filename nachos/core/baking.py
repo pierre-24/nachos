@@ -73,6 +73,11 @@ class Baker:
         f = chemistry_datafile.ChemistryDataFile.from_molecule(self.recipe.geometry, 'nachos ND result')
         dof = 3 * len(self.recipe.geometry)
 
+        if copy_zero_field_basis:
+            zero_field = tuple([0] * (dof if self.recipe['type'] == 'G' else 3))
+            for b in self.storage.results[zero_field]:
+                f.derivatives[b] = self.storage.results[zero_field][b]
+
         for initial_derivative, level in bases:
             for diff_order in range(1, level + 1):
                 diff_derivative = derivatives.Derivative(self.recipe['type'] * diff_order, spacial_dof=dof)

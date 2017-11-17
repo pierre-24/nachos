@@ -144,6 +144,21 @@ class BakeTestCase(NachosTestCase):
         self.assertArrayAlmostEqual(cf.derivatives['GFF']['static'].flatten(), dalphadq[:81])
         self.assertArrayAlmostEqual(cf.derivatives['GFD']['1064nm'].flatten(), dalphadq[81:])
 
+        # now, bake and steal results from zero field
+        cf_with_copy = baker.bake(only=[(derivatives.Derivative(), 0)], copy_zero_field_basis=True)
+
+        # gradient and hessian ...
+        self.assertIn('G', cf_with_copy.derivatives)
+        self.assertIn('GG', cf_with_copy.derivatives)
+
+        # ... but also:
+        self.assertIn('', cf_with_copy.derivatives)
+        self.assertIn('F', cf_with_copy.derivatives)
+        self.assertIn('FF', cf_with_copy.derivatives)
+        self.assertIn('FD', cf_with_copy.derivatives)
+
+        self.assertEqual(len(cf_with_copy.derivatives), 6)
+
     def test_bake_dalton_G(self):
         self.unzip_it(self.zip_G_dalton, self.working_directory)
         directory = os.path.join(self.working_directory, 'numdiff_G_dalton')
