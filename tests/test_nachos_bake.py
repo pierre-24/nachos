@@ -47,13 +47,13 @@ class BakeTestCase(NachosTestCase):
         self.assertEqual(len(cf_with_energy.derivatives), 3)
 
         self.assertArrayAlmostEqual(
-            electrical_derivatives['F']['static'].components, cf_with_energy.derivatives['F']['static'].components)
+            electrical_derivatives['F']['static'].components, cf_with_energy.derivatives['F']['static'])
 
         self.assertArrayAlmostEqual(
-            electrical_derivatives['FF']['static'].components, cf_with_energy.derivatives['FF']['static'].components)
+            electrical_derivatives['FF']['static'].components, cf_with_energy.derivatives['FF']['static'])
 
         self.assertArrayAlmostEqual(
-            electrical_derivatives['FFF']['static'].components, cf_with_energy.derivatives['FFF']['static'].components)
+            electrical_derivatives['FFF']['static'].components, cf_with_energy.derivatives['FFF']['static'])
 
         # with mu:
         cf_with_mu = baker.bake(only=[(derivatives.Derivative('F'), 2)])
@@ -63,11 +63,11 @@ class BakeTestCase(NachosTestCase):
         self.assertEqual(len(cf_with_mu.derivatives), 2)
 
         self.assertArrayAlmostEqual(
-            electrical_derivatives['FF']['static'].components, cf_with_mu.derivatives['FF']['static'].components)
+            electrical_derivatives['FF']['static'].components, cf_with_mu.derivatives['FF']['static'])
 
         self.assertArrayAlmostEqual(
             electrical_derivatives['FFF']['static'].components,
-            cf_with_mu.derivatives['FFF']['static'].components,
+            cf_with_mu.derivatives['FFF']['static'],
             delta=.01)
 
         # with alpha:
@@ -78,7 +78,7 @@ class BakeTestCase(NachosTestCase):
 
         self.assertArrayAlmostEqual(
             electrical_derivatives['FFF']['static'].components,
-            cf_with_alpha.derivatives['FFF']['static'].components)
+            cf_with_alpha.derivatives['FFF']['static'])
 
         # fire some errors:
         with self.assertRaises(baking.BadBaking):
@@ -118,10 +118,10 @@ class BakeTestCase(NachosTestCase):
         self.assertEqual(len(cf_with_energy.derivatives), 2)
 
         self.assertArrayAlmostEqual(
-            geometrical_derivatives['G'].components, cf_with_energy.derivatives['G'].components)
+            geometrical_derivatives['G'].components, cf_with_energy.derivatives['G'])
 
         self.assertArrayAlmostEqual(
-            geometrical_derivatives['GG'].components, cf_with_energy.derivatives['GG'].components)
+            geometrical_derivatives['GG'].components, cf_with_energy.derivatives['GG'])
 
         # try with all
         cf = baker.bake()
@@ -135,14 +135,14 @@ class BakeTestCase(NachosTestCase):
         self.assertEqual(len(cf.derivatives), 5)
 
         self.assertArrayAlmostEqual(
-            geometrical_derivatives['GG'].components, cf.derivatives['GG'].components)
+            geometrical_derivatives['GG'].components, cf.derivatives['GG'])
 
         self.assertArrayAlmostEqual(
-            cf.derivatives['GF']['static'].components.flatten(), fchk.get('Dipole Derivatives'))
+            cf.derivatives['GF']['static'].flatten(), fchk.get('Dipole Derivatives'))
 
         dalphadq = fchk.get('Derivative Alpha(-w,w)')
-        self.assertArrayAlmostEqual(cf.derivatives['GFF']['static'].components.flatten(), dalphadq[:81])
-        self.assertArrayAlmostEqual(cf.derivatives['GFD']['1064nm'].components.flatten(), dalphadq[81:])
+        self.assertArrayAlmostEqual(cf.derivatives['GFF']['static'].flatten(), dalphadq[:81])
+        self.assertArrayAlmostEqual(cf.derivatives['GFD']['1064nm'].flatten(), dalphadq[81:])
 
     def test_bake_dalton_G(self):
         self.unzip_it(self.zip_G_dalton, self.working_directory)

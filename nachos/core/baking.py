@@ -35,7 +35,7 @@ class Baker:
         if self.storage.check() != ([], []):
             raise BadBaking('The storage (h5 file) does not fulfill the recipe!')
 
-    def bake(self, only=None, out=sys.stdout, verbosity_level=0):
+    def bake(self, only=None, out=sys.stdout, verbosity_level=0, copy_zero_field_basis=False):
         """Perform the numerical differentiation
 
         :param only: list of derivatives to perform (None = all of them)
@@ -44,6 +44,8 @@ class Baker:
         :type out: file
         :param verbosity_level: how far should we print information
         :type verbosity_level: int
+        :param copy_zero_field_basis: copy the basis found in zero field
+        :type copy_zero_field_basis: bool
         :rtype: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
         """
 
@@ -86,7 +88,7 @@ class Baker:
                                 diff_derivative,
                                 self.storage.tensor_element_access,
                                 frequency=freq)
-                            results_per_frequency[freq] = r
+                            results_per_frequency[freq] = r.components
 
                             Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
                     else:
@@ -96,14 +98,14 @@ class Baker:
                             diff_derivative,
                             self.storage.tensor_element_access,
                             frequency='static')
-                        results_per_frequency['static'] = r
+                        results_per_frequency['static'] = r.components
                         Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
 
                     f.derivatives[final_derivative.representation()] = results_per_frequency
                 else:
                     r, trigs = compute_numerical_derivative_of_tensor(
                         self.recipe, initial_derivative, diff_derivative, self.storage.tensor_element_access)
-                    f.derivatives[final_derivative.representation()] = r
+                    f.derivatives[final_derivative.representation()] = r.components
 
                     Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
         return f
