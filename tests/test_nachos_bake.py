@@ -1,8 +1,9 @@
 import os
+import math
 
 from tests import NachosTestCase
 
-from qcip_tools import derivatives
+from qcip_tools import derivatives, derivatives_g
 from qcip_tools.chemistry_files import gaussian
 
 from nachos.core import files, baking
@@ -143,6 +144,22 @@ class BakeTestCase(NachosTestCase):
         dalphadq = fchk.get('Derivative Alpha(-w,w)')
         self.assertArrayAlmostEqual(cf.derivatives['GFF']['static'].flatten(), dalphadq[:81])
         self.assertArrayAlmostEqual(cf.derivatives['GFD']['1064nm'].flatten(), dalphadq[81:])
+
+        # try projection
+        mwh = derivatives_g.MassWeightedHessian(fchk.molecule, geometrical_derivatives['GG'])
+        baking.project_geometrical_derivatives(r, cf, mwh)
+
+        self.assertIn('N', cf.derivatives)
+        self.assertIn('NN', cf.derivatives)
+        self.assertIn('NF', cf.derivatives)
+        self.assertIn('NFF', cf.derivatives)
+        self.assertIn('NFD', cf.derivatives)
+
+        ph = cf.derivatives['NN']
+        for i in range(r.dof):
+            # so the square of the frequencies are in the diagonal:
+            self.assertAlmostEqual(
+                math.fabs(ph[i, i]), mwh.frequencies[i] ** 2, places=5)
 
         # now, bake and steal results from zero field
         cf_with_copy = baker.bake(only=[(derivatives.Derivative(), 0)], copy_zero_field_basis=True)

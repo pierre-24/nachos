@@ -134,14 +134,14 @@ class Baker:
 
         :param recipe: the corresponding recipe
         :type recipe: nachos.core.files.Recipe
-        :param out: output
-        :type out: file
         :param initial_derivative: starting point
         :type initial_derivative: qcip_tools.derivatives.Derivative
         :param final_result: what was computed
         :type final_result: qcip_tools.derivatives.Tensor
         :param romberg_triangles: the different Romberg triangles
         :type romberg_triangles: collections.OrderedDict
+        :param out: output
+        :type out: file
         :param verbosity_level: how far should we print information
         :type verbosity_level: int
         """
@@ -183,3 +183,72 @@ class Baker:
 
             out.write(final_result.to_string(molecule=recipe.geometry))
             out.write('\n')
+
+
+def project_geometrical_derivatives(recipe, datafile, mass_weighted_hessian, out=sys.stdout, verbosity_level=0):
+    """Project geometrical derivatives, if any
+
+    :param recipe: the recipe
+    :type recipe: nachos.core.files.Recipe
+    :param datafile: the data file with derivatives
+    :type datafile: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
+    :param mass_weighted_hessian: the mass weighted hessian
+    :type mass_weighted_hessian: qcip_tools.derivatives_g.MassWeightedHessian
+    :param out: output
+    :type out: file
+    :param verbosity_level: how far should we print information
+    :type verbosity_level: int
+    """
+
+    if mass_weighted_hessian.dof != recipe.dof:
+        raise ValueError('displacement shape does not match')
+
+    for basis, level in recipe.bases():
+        b_repr = basis.representation()
+
+        if derivatives.is_geometrical(b_repr) or recipe['type'] == 'G':
+            for l in range(0, level + 1):
+                if l == 0:
+                    derivative = basis
+                else:
+                    derivative = basis.differentiate(recipe['type'] * l)
+                d_repr = derivative.representation()
+                n_repr = d_repr.replace('G', 'N')
+                if d_repr in datafile.derivatives and n_repr not in datafile.derivatives:
+                    if derivatives.is_electrical(derivative):
+                        x = {}
+                        for freq in datafile.derivatives[d_repr]:
+                            r = __project_tensor(
+                                derivative, datafile.derivatives[d_repr][freq], mass_weighted_hessian, frequency=freq)
+                            __output_nm_derivatives(recipe, r, out, verbosity_level)
+                            x[freq] = r.components
+                    else:
+                        r = __project_tensor(derivative, datafile.derivatives[d_repr], mass_weighted_hessian)
+                        __output_nm_derivatives(recipe, r, out, verbosity_level)
+                        x = r.components
+
+                    datafile.derivatives[n_repr] = x
+
+
+def __project_tensor(derivative, data, mwh, frequency=None):
+    """Project tensor over displacements to get their normal derivative equivalent
+
+    :param derivative: the derivative
+    :type derivative: qcip_tools.derivatives.Derivative
+    :param data: the data
+    :type data: numpy.array|dict
+    :param mwh: mass weighted hessian
+    :type mwh: qcip_tools.derivatives_g.MassWeightedHessian
+    :rtype: numpy.array
+    """
+
+    t = derivatives.Tensor(representation=derivative, spacial_dof=mwh.dof, components=data, frequency=frequency)
+    return t.project_over_normal_modes(mwh)
+
+
+def __output_nm_derivatives(recipe, final_result, out, verbosity_level=0):
+    if verbosity_level >= 1:
+        out.write('\n** projected ')
+        out.write(fancy_output_derivative(final_result.representation, final_result.frequency))
+        out.write('\n')
+        out.write(final_result.to_string(molecule=recipe.geometry, threshold=1e-8))
