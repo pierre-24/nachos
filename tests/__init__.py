@@ -6,6 +6,8 @@ import tempfile
 import shutil
 import zipfile
 
+from qcip_tools import derivatives
+
 
 def array_almost_equals(a, b, places=7, delta=None, msg=''):
     """Check if two arrays containing float number are almost equals"""
@@ -29,8 +31,32 @@ class NachosTestCase(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.temporary_directory)
 
-    def assertArrayAlmostEqual(self, a, b, places=3, delta=None, msg=''):
+    def assertArraysAlmostEqual(self, a, b, places=3, delta=None, msg=''):
         return array_almost_equals(a, b, places=places, delta=delta, msg=msg)
+
+    def assertTensorsAlmostEqual(self, a, b, places=3, delta=None, msg='', skip_frequency_test=False):
+        """Check if two tensors are the same
+        """
+
+        self.assertEqual(
+            a.representation.representation(),
+            b.representation.representation(),
+            msg='representations does not matches ({} != {})'.format(
+                a.representation.representation(), b.representation.representation()))
+
+        if derivatives.is_geometrical(a.representation):
+            self.assertEqual(
+                a.spacial_dof,
+                b.spacial_dof,
+                msg='spacial dof does not matches ({} != {})'.format(a.spacial_dof, b.spacial_dof))
+
+        if derivatives.is_electrical(a.representation) and not skip_frequency_test:
+            self.assertEqual(
+                a.frequency,
+                b.frequency,
+                msg='frequencies does not matches ({} != {})'.format(a.frequency, b.frequency))
+
+        return self.assertArraysAlmostEqual(a.components, b.components, places, delta, msg)
 
     def copy_to_temporary_directory(self, path, new_name='', directory=None):
         """Copy the content of a file to the temporary directory

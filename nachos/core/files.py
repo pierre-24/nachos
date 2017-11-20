@@ -395,10 +395,10 @@ class ComputationalResults:
             results = results[frequency]
 
         if b_repr != '':
-            if len(component) != len(results.shape):
+            if len(component) != results.representation.order():
                 raise BadResult('shape does not match for {}'.format(b_repr))
 
-        return (-1. if inverse else 1.) * results[component]
+        return (-1. if inverse else 1.) * results.components[component]
 
     @staticmethod
     def get_recipe_check_data(recipe):

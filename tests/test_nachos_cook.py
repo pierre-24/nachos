@@ -43,10 +43,10 @@ class CookTestCase(NachosTestCase):
             real_fields = preparing.Preparer.real_fields(fields, min_field, ratio)
             deformed_geometry = preparing.Preparer.deform_geometry(geometry, real_fields)
 
-            self.assertArrayAlmostEqual(
+            self.assertArraysAlmostEqual(
                 real_fields, cooking.Cooker.real_fields_from_geometry(geometry, deformed_geometry))
 
-            self.assertArrayAlmostEqual(
+            self.assertArraysAlmostEqual(
                 fields, cooking.Cooker.real_fields_to_fields(real_fields, min_field, ratio))
 
     def test_cook_F_gaussian(self):
@@ -83,18 +83,20 @@ class CookTestCase(NachosTestCase):
                 fx.read(f)
                 results = s.results[t_fields]
 
-                self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''][0])
+                self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''].components[0])
 
                 if level <= 2:
                     electrical_derivatives = fx.property('electrical_derivatives')
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['F']['static'].components, results['F']['static'])
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['F']['static'], results['F']['static'])
 
                     if level <= 1:
-                        self.assertArrayAlmostEqual(
-                            electrical_derivatives['FF']['static'].components, results['FF']['static'])
-                        self.assertArrayAlmostEqual(
-                            electrical_derivatives['FD'][0.0428227067].components, results['FD']['1064nm'])
+                        self.assertTensorsAlmostEqual(
+                            electrical_derivatives['FF']['static'], results['FF']['static'])
+                        self.assertTensorsAlmostEqual(
+                            electrical_derivatives['FD'][0.0428227067],
+                            results['FD']['1064nm'],
+                            skip_frequency_test=True)
 
     def test_cook_G_gaussian(self):
         self.unzip_it(self.zip_G, self.working_directory)
@@ -133,16 +135,16 @@ class CookTestCase(NachosTestCase):
                     cooking.Cooker.real_fields_from_geometry(r.geometry, fx.molecule), r['min_field'], r['ratio']))
 
                 results = s.results[t_fields]
-                self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''][0])
+                self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''].components[0])
 
                 if level <= 1:
                     electrical_derivatives = fx.property('electrical_derivatives')
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['F']['static'].components, results['F']['static'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FF']['static'].components, results['FF']['static'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FD'][0.0428227067].components, results['FD']['1064nm'])
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['F']['static'], results['F']['static'])
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FF']['static'], results['FF']['static'])
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FD'][0.0428227067], results['FD']['1064nm'], skip_frequency_test=True)
 
             path = os.path.join(directory, r['name'] + '_{:04d}{}.fchk').format(n, 'b' if level < 2 else '')
             self.assertTrue(os.path.exists(path), msg=path)
@@ -152,8 +154,8 @@ class CookTestCase(NachosTestCase):
 
                 if level <= 1:
                     geometrical_derivatives = fx.property('geometrical_derivatives')
-                    self.assertArrayAlmostEqual(
-                        geometrical_derivatives['G'].components,
+                    self.assertTensorsAlmostEqual(
+                        geometrical_derivatives['G'],
                         results['G'])
 
     def test_cook_G_dalton(self):
@@ -193,33 +195,33 @@ class CookTestCase(NachosTestCase):
                     cooking.Cooker.real_fields_from_geometry(r.geometry, fx.molecule), r['min_field'], r['ratio']))
 
                 results = s.results[t_fields]
-                self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''][0])
+                self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''].components[0])
 
                 if level <= 1:
                     electrical_derivatives = fx.property('electrical_derivatives')
                     fr = 0.04282271
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['F']['static'].components, results['F']['static'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FF']['static'].components, results['FF']['static'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FD'][fr].components, results['FD']['1064nm'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FFF']['static'].components, results['FFF']['static'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FDF'][fr].components, results['FDF']['1064nm'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FDD'][fr].components, results['FDD']['1064nm'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FFFF']['static'].components, results['FFFF']['static'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FDFF'][fr].components, results['FDFF']['1064nm'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FDDF'][fr].components, results['FDDF']['1064nm'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FDDd'][fr].components, results['FDDd']['1064nm'])
-                    self.assertArrayAlmostEqual(
-                        electrical_derivatives['FDDD'][fr].components, results['FDDD']['1064nm'])
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['F']['static'], results['F']['static'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FF']['static'], results['FF']['static'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FD'][fr], results['FD']['1064nm'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FFF']['static'], results['FFF']['static'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FDF'][fr], results['FDF']['1064nm'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FDD'][fr], results['FDD']['1064nm'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FFFF']['static'], results['FFFF']['static'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FDFF'][fr], results['FDFF']['1064nm'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FDDF'][fr], results['FDDF']['1064nm'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FDDd'][fr], results['FDDd']['1064nm'], skip_frequency_test=True)
+                    self.assertTensorsAlmostEqual(
+                        electrical_derivatives['FDDD'][fr], results['FDDD']['1064nm'], skip_frequency_test=True)
 
     def test_nachos_cook(self):
         """Test the cooker program"""

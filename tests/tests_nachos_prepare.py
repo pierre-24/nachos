@@ -115,7 +115,7 @@ class PrepareTestCase(NachosTestCase):
             derivatives.Derivative('F', spacial_dof=r.dof),
             dipole_exp)
 
-        self.assertArrayAlmostEqual(alpha.components, t.components, places=3)
+        self.assertArraysAlmostEqual(alpha.components, t.components, places=3)
 
         t, triangles = compute_numerical_derivative_of_tensor(
             r,
@@ -123,7 +123,7 @@ class PrepareTestCase(NachosTestCase):
             derivatives.Derivative('FF', spacial_dof=r.dof),
             energy_exp)
 
-        self.assertArrayAlmostEqual(alpha.components, t.components, places=3)
+        self.assertArraysAlmostEqual(alpha.components, t.components, places=3)
 
         # compute first polarizability
         t, triangles = compute_numerical_derivative_of_tensor(
@@ -132,7 +132,7 @@ class PrepareTestCase(NachosTestCase):
             derivatives.Derivative('FF', spacial_dof=r.dof),
             dipole_exp)
 
-        self.assertArrayAlmostEqual(beta.components, t.components, delta=.001)
+        self.assertArraysAlmostEqual(beta.components, t.components, delta=.001)
 
         t, triangles = compute_numerical_derivative_of_tensor(
             r,
@@ -140,7 +140,7 @@ class PrepareTestCase(NachosTestCase):
             derivatives.Derivative('FFF', spacial_dof=r.dof),
             energy_exp)
 
-        self.assertArrayAlmostEqual(beta.components, t.components, delta=.01)
+        self.assertArraysAlmostEqual(beta.components, t.components, delta=.01)
 
     def test_deform_geometry(self):
         """Test geometry deformation"""
@@ -163,7 +163,7 @@ class PrepareTestCase(NachosTestCase):
         # nothing is deformed
         deformed = preparing.Preparer.deform_geometry(r.geometry, zero_fields)
         for i, a in enumerate(deformed):
-            self.assertArrayAlmostEqual(a.position, r.geometry[i].position)
+            self.assertArraysAlmostEqual(a.position, r.geometry[i].position)
 
         # simple deformation:
         fields = zero_fields.copy()
@@ -176,7 +176,7 @@ class PrepareTestCase(NachosTestCase):
         self.assertEqual(r.geometry[0].position[2], deformed[0].position[2])
 
         for i, a in enumerate(deformed[1:]):
-            self.assertArrayAlmostEqual(a.position, r.geometry[i + 1].position)  # nothing else was deformed !
+            self.assertArraysAlmostEqual(a.position, r.geometry[i + 1].position)  # nothing else was deformed !
 
         self.assertEqual(r.geometry[0].position[0] + r['min_field'] * quantities.AuToAngstrom, deformed[0].position[0])
 
@@ -324,7 +324,7 @@ class PrepareTestCase(NachosTestCase):
             self.assertEqual(fi.other_blocks[1][0], 'O     0')
 
             for i, a in enumerate(fi.molecule):
-                self.assertArrayAlmostEqual(r.geometry[i].position, a.position)  # geometry not modified, it is base
+                self.assertArraysAlmostEqual(r.geometry[i].position, a.position)  # geometry not modified, it is base
 
         path = os.path.join(self.working_directory, name + '_0001b.com')
         self.assertTrue(os.path.exists(path))
@@ -337,7 +337,7 @@ class PrepareTestCase(NachosTestCase):
             self.assertEqual(fi.other_blocks[0][0], 'O     0')
 
             for i, a in enumerate(fi.molecule):
-                self.assertArrayAlmostEqual(r.geometry[i].position, a.position)  # geometry not modified, it is base
+                self.assertArraysAlmostEqual(r.geometry[i].position, a.position)  # geometry not modified, it is base
 
         for _ in range(5):  # 5 random tests that files contains what they should!
             n = random.randrange(1, len(fields) + 1)
@@ -361,7 +361,7 @@ class PrepareTestCase(NachosTestCase):
                     r.geometry, preparing.Preparer.real_fields(fields_n, min_field, 2))
 
                 for i, a in enumerate(fi.molecule):
-                    self.assertArrayAlmostEqual(deformed[i].position, a.position)
+                    self.assertArraysAlmostEqual(deformed[i].position, a.position)
 
     def test_preparer_for_G_dalton(self):
         """Test the preparer class, for dalton"""
@@ -410,7 +410,7 @@ class PrepareTestCase(NachosTestCase):
             self.assertEqual(fi.basis_set, 'STO-3G')
 
             for i, a in enumerate(fi.molecule):
-                self.assertArrayAlmostEqual(r.geometry[i].position, a.position)  # geometry not modified, it is base
+                self.assertArraysAlmostEqual(r.geometry[i].position, a.position)  # geometry not modified, it is base
 
         for _ in range(5):  # 5 random tests that files contains what they should!
             n = random.randrange(1, len(fields) + 1)
@@ -427,7 +427,7 @@ class PrepareTestCase(NachosTestCase):
                     r.geometry, preparing.Preparer.real_fields(fields_n, min_field, 2))
 
                 for i, a in enumerate(fi.molecule):
-                    self.assertArrayAlmostEqual(deformed[i].position, a.position)
+                    self.assertArraysAlmostEqual(deformed[i].position, a.position)
 
     def test_nachos_prepare(self):
         """Test the preparer program"""

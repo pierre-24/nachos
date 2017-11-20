@@ -129,7 +129,11 @@ class Cooker:
         if derivatives.Derivative() in derivatives_in_level and f.file_type != 'DALTON_LOG':
             try:
                 energies = f.property('computed_energies')
-                storage.add_result(fields, '', energies['total'], allow_replace=True)
+                storage.add_result(
+                    fields,
+                    '',
+                    derivatives.Tensor('', components=numpy.array((energies['total'],))),
+                    allow_replace=True)
             except (PropertyNotPresent, PropertyNotDefined):
                 pass
 
@@ -148,7 +152,7 @@ class Cooker:
                                     freq = freq_ir
                                     break
 
-                        e_deriv[freq] = b.components
+                        e_deriv[freq] = b
 
                     storage.add_result(
                         fields,
@@ -162,7 +166,7 @@ class Cooker:
             geometrical_derivatives = f.property('geometrical_derivatives')
             for d in geometrical_derivatives:
                 if d in derivatives_in_level:
-                    storage.add_result(fields, d, geometrical_derivatives[d].components)
+                    storage.add_result(fields, d, geometrical_derivatives[d])
         except (PropertyNotPresent, PropertyNotDefined):
             pass
 

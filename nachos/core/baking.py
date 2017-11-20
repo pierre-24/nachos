@@ -93,8 +93,7 @@ class Baker:
                                 diff_derivative,
                                 self.storage.tensor_element_access,
                                 frequency=freq)
-                            results_per_frequency[freq] = r.components
-
+                            results_per_frequency[freq] = r
                             Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
                     else:
                         r, trigs = compute_numerical_derivative_of_tensor(
@@ -103,14 +102,14 @@ class Baker:
                             diff_derivative,
                             self.storage.tensor_element_access,
                             frequency='static')
-                        results_per_frequency['static'] = r.components
+                        results_per_frequency['static'] = r
                         Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
 
                     f.derivatives[final_derivative.representation()] = results_per_frequency
                 else:
                     r, trigs = compute_numerical_derivative_of_tensor(
                         self.recipe, initial_derivative, diff_derivative, self.storage.tensor_element_access)
-                    f.derivatives[final_derivative.representation()] = r.components
+                    f.derivatives[final_derivative.representation()] = r
 
                     Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
         return f
@@ -219,31 +218,28 @@ def project_geometrical_derivatives(recipe, datafile, mass_weighted_hessian, out
                         x = {}
                         for freq in datafile.derivatives[d_repr]:
                             r = __project_tensor(
-                                derivative, datafile.derivatives[d_repr][freq], mass_weighted_hessian, frequency=freq)
+                                datafile.derivatives[d_repr][freq], mass_weighted_hessian)
                             __output_nm_derivatives(recipe, r, out, verbosity_level)
-                            x[freq] = r.components
+                            x[freq] = r
                     else:
-                        r = __project_tensor(derivative, datafile.derivatives[d_repr], mass_weighted_hessian)
+                        r = __project_tensor(datafile.derivatives[d_repr], mass_weighted_hessian)
                         __output_nm_derivatives(recipe, r, out, verbosity_level)
-                        x = r.components
+                        x = r
 
                     datafile.derivatives[n_repr] = x
 
 
-def __project_tensor(derivative, data, mwh, frequency=None):
+def __project_tensor(data, mwh):
     """Project tensor over displacements to get their normal derivative equivalent
 
-    :param derivative: the derivative
-    :type derivative: qcip_tools.derivatives.Derivative
     :param data: the data
-    :type data: numpy.array|dict
+    :type data: qcip_tools.derivatives.Tensor
     :param mwh: mass weighted hessian
     :type mwh: qcip_tools.derivatives_g.MassWeightedHessian
-    :rtype: numpy.array
+    :rtype: qcip_tools.derivatives.Tensor
     """
 
-    t = derivatives.Tensor(representation=derivative, spacial_dof=mwh.dof, components=data, frequency=frequency)
-    return t.project_over_normal_modes(mwh)
+    return data.project_over_normal_modes(mwh)
 
 
 def __output_nm_derivatives(recipe, final_result, out, verbosity_level=0):
