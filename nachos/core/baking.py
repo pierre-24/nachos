@@ -219,11 +219,11 @@ def project_geometrical_derivatives(recipe, datafile, mass_weighted_hessian, out
                         for freq in datafile.derivatives[d_repr]:
                             r = __project_tensor(
                                 datafile.derivatives[d_repr][freq], mass_weighted_hessian)
-                            __output_nm_derivatives(recipe, r, out, verbosity_level)
+                            __output_nm_derivatives(recipe, r, out, verbosity_level, datafile.trans_plus_rot_dof)
                             x[freq] = r
                     else:
                         r = __project_tensor(datafile.derivatives[d_repr], mass_weighted_hessian)
-                        __output_nm_derivatives(recipe, r, out, verbosity_level)
+                        __output_nm_derivatives(recipe, r, out, verbosity_level, datafile.trans_plus_rot_dof)
                         x = r
 
                     datafile.derivatives[n_repr] = x
@@ -242,9 +242,10 @@ def __project_tensor(data, mwh):
     return data.project_over_normal_modes(mwh)
 
 
-def __output_nm_derivatives(recipe, final_result, out, verbosity_level=0):
+def __output_nm_derivatives(recipe, final_result, out, verbosity_level=0, trans_plus_rot_dof=0):
     if verbosity_level >= 1:
         out.write('\n*** projected ')
         out.write(fancy_output_derivative(final_result.representation, final_result.frequency))
         out.write('\n')
-        out.write(final_result.to_string(molecule=recipe.geometry, threshold=1e-8))
+        out.write(final_result.to_string(
+            molecule=recipe.geometry, threshold=1e-8, skip_trans_plus_rot_dof=trans_plus_rot_dof))
