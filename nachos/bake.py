@@ -96,8 +96,8 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
-    if not os.path.exists(args.data):
-        return exit_failure('Data file {} does not exists'.format(args.data))
+    if not os.path.exists(os.path.join(recipe_directory, args.data)):
+        return exit_failure('Data file {} does not exists'.format(os.path.join(recipe_directory, args.data)))
 
     storage = files.ComputationalResults(recipe, directory=recipe_directory)
     storage.read(args.data)
@@ -125,6 +125,11 @@ def main():
                     hessian = geometrical_derivatives['GG']
                 if hessian.spacial_dof != recipe.dof:
                     return exit_failure('error: hessian shape is incorrect (wrong DOF!)')
+                if not args.do_not_steal:
+                    if args.verbose > 0:
+                        print('!! {} hessian to perform projection'.format(
+                            'replacing' if 'GG' in cf.derivatives else 'adding'))
+                    cf.derivatives['GG'] = hessian
             except (PropertyNotDefined, PropertyNotPresent):
                 return exit_failure('error: file does not contain any hessian (or it cannot find it)')
         else:
