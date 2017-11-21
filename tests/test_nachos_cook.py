@@ -235,7 +235,7 @@ class CookTestCase(NachosTestCase):
 
         # process without copy
         process = self.run_python_script(
-            'nachos/nachos_cook.py', ['-r', recipe_path, '-o', h5_path],
+            'nachos/cook.py', ['-r', recipe_path, '-o', h5_path],
             out_pipe=subprocess.PIPE,
             err_pipe=subprocess.PIPE)
 

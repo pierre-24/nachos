@@ -244,7 +244,7 @@ def __project_tensor(data, mwh):
 
 def __output_nm_derivatives(recipe, final_result, out, verbosity_level=0):
     if verbosity_level >= 1:
-        out.write('\n** projected ')
+        out.write('\n*** projected ')
         out.write(fancy_output_derivative(final_result.representation, final_result.frequency))
         out.write('\n')
         out.write(final_result.to_string(molecule=recipe.geometry, threshold=1e-8))

@@ -13,8 +13,9 @@ __status__ = 'Development'
 
 # List of the scripts that are installed, without the .py extension. The name is used to give the command name.
 provide_scripts = [
-    'nachos_prepare',
-    'nachos_cook'
+    'prepare',
+    'cook',
+    'bake'
 ]
 
 
@@ -30,7 +31,7 @@ def make_console_scripts(package_name='nachos'):
         if not os.path.isfile(path):
             raise FileNotFoundError(path)
 
-        console_scripts.append('{0} = {1}.{0}:main'.format(script, package_name))
+        console_scripts.append('{0} = {1}.{2}:main'.format('nachos_' + script, package_name, script))
 
     return console_scripts
 

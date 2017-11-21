@@ -439,7 +439,7 @@ class PrepareTestCase(NachosTestCase):
 
         # process without copy
         process = self.run_python_script(
-            'nachos/nachos_prepare.py',
+            'nachos/prepare.py',
             ['-r', self.custom_recipe, '-d', self.working_directory],
             out_pipe=subprocess.PIPE,
             err_pipe=subprocess.PIPE)
@@ -457,7 +457,7 @@ class PrepareTestCase(NachosTestCase):
         # process with copy
         other_dir = self.setup_temporary_directory()
         process = self.run_python_script(
-            'nachos/nachos_prepare.py',
+            'nachos/prepare.py',
             ['-r', self.custom_recipe, '-d', other_dir, '-c'],
             out_pipe=subprocess.PIPE,
             err_pipe=subprocess.PIPE)

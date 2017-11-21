@@ -1,10 +1,11 @@
 import os
 import math
+import subprocess
 
 from tests import NachosTestCase
 
 from qcip_tools import derivatives, derivatives_g
-from qcip_tools.chemistry_files import gaussian
+from qcip_tools.chemistry_files import gaussian, chemistry_datafile
 
 from nachos.core import files, baking
 
@@ -202,3 +203,83 @@ class BakeTestCase(NachosTestCase):
             self.assertIn(i, cf.derivatives, msg=i)
 
         self.assertEqual(len(should_be_in), len(cf.derivatives))
+
+    def test_nachos_bake(self):
+        """Test the baking program"""
+
+        self.unzip_it(self.zip_G, self.working_directory)
+        directory = os.path.join(self.working_directory, 'numdiff_G')
+        recipe_path = os.path.join(directory, 'nachos_recipe.yml')
+        storage_path = os.path.join(directory, 'verification', 'nachos_data.h5')
+
+        h5_path = os.path.join(directory, 'out.h5')
+        self.assertFalse(os.path.exists(h5_path))
+
+        # process without projection
+        process = self.run_python_script(
+            'nachos/bake.py', ['-r', recipe_path, '-d', storage_path, '-o', h5_path],
+            out_pipe=subprocess.PIPE,
+            err_pipe=subprocess.PIPE)
+
+        stdout_t, stderr_t = process.communicate()
+
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertEqual(len(stdout_t), 0, msg=stdout_t.decode())
+
+        self.assertTrue(os.path.exists(h5_path))
+
+        # check h5 file
+        cf = chemistry_datafile.ChemistryDataFile()
+        with open(h5_path) as f:
+            cf.read(f)
+
+        must_be_in = ['G', 'GG', '', 'F', 'FF', 'FD', 'G', 'GG', 'GF', 'GFF', 'GFD']
+        for m in must_be_in:
+            self.assertIn(m, cf.derivatives)
+
+        # process with projection
+        process = self.run_python_script(
+            'nachos/bake.py', ['-r', recipe_path, '-d', storage_path, '-o', h5_path, '-p'],
+            out_pipe=subprocess.PIPE,
+            err_pipe=subprocess.PIPE)
+
+        stdout_t, stderr_t = process.communicate()
+
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertEqual(len(stdout_t), 0, msg=stdout_t.decode())
+
+        self.assertTrue(os.path.exists(h5_path))
+
+        # check h5 file
+        cf = chemistry_datafile.ChemistryDataFile()
+        with open(h5_path) as f:
+            cf.read(f)
+
+        must_also_be_in = ['N', 'NN', 'NF', 'NFF', 'NFD']
+        for m in must_be_in:
+            self.assertIn(m, cf.derivatives)
+        for m in must_also_be_in:
+            self.assertIn(m, cf.derivatives)
+
+        # process with only (and "do-not-steal")
+        process = self.run_python_script(
+            'nachos/bake.py', ['-r', recipe_path, '-d', storage_path, '-o', h5_path, '-O', 'F,energy:1', '-S'],
+            out_pipe=subprocess.PIPE,
+            err_pipe=subprocess.PIPE)
+
+        stdout_t, stderr_t = process.communicate()
+
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertEqual(len(stdout_t), 0, msg=stdout_t.decode())
+
+        self.assertTrue(os.path.exists(h5_path))
+
+        # check h5 file
+        cf = chemistry_datafile.ChemistryDataFile()
+        with open(h5_path) as f:
+            cf.read(f)
+
+        must_be_in_x = ['GF', 'G']
+        for m in must_be_in_x:
+            self.assertIn(m, cf.derivatives)
+        self.assertEqual(len(cf.derivatives), 2)
