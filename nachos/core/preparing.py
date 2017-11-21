@@ -140,7 +140,7 @@ class Preparer:
             compute_polar_and_G = compute_polar and (compute_G or compute_GG)
 
             fi = gaussian.Input()
-            real_fields = Preparer.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
+            real_fields = numerical_differentiation.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
 
             if self.recipe['type'] == 'G':
                 fi.molecule = Preparer.deform_geometry(self.recipe.geometry, real_fields)
@@ -318,7 +318,7 @@ class Preparer:
 
             # molecule file
             fi = dalton.MoleculeInput()
-            real_fields = Preparer.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
+            real_fields = numerical_differentiation.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
             fi.molecule = Preparer.deform_geometry(self.recipe.geometry, real_fields)
 
             if not base_m and fields == [0] * len(fields):
@@ -364,21 +364,6 @@ class Preparer:
             )
 
         return deformed
-
-    @staticmethod
-    def real_fields(fields, min_field, ratio):
-        """Return the "real value" of the field applied
-
-        :param fields: input field (in term of ak)
-        :type fields: list
-        :param min_field: minimal field
-        :type min_field: float
-        :param ratio: ratio
-        :type ratio: float
-        :rtype: list
-        """
-
-        return [min_field * numerical_differentiation.ak_shifted(ratio, _) for _ in fields]
 
     @staticmethod
     def nonzero_fields(fields, geometry, t):

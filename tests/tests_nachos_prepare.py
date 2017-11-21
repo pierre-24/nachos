@@ -1,14 +1,13 @@
-import numpy
 import os
 import random
 import subprocess
 import glob
 
-from qcip_tools import derivatives, quantities, derivatives_e
+from qcip_tools import quantities, derivatives_e, numerical_differentiation
 from qcip_tools.chemistry_files import gaussian, dalton
 
-from tests import NachosTestCase, factories
-from nachos.core import files, preparing, compute_numerical_derivative_of_tensor
+from tests import NachosTestCase
+from nachos.core import files, preparing
 
 
 class PrepareTestCase(NachosTestCase):
@@ -46,7 +45,7 @@ class PrepareTestCase(NachosTestCase):
         self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 85)
 
         r['accuracy_level'] = 0
-        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 61)
+        self.assertEqual(len(preparing.fields_needed_by_recipe(r)), 59)
 
         r['differentiation'] = {1: ['energy']}
         r._update(r.recipe)
@@ -60,87 +59,6 @@ class PrepareTestCase(NachosTestCase):
         r['k_max'] = 5
         r._update(r.recipe)
         self.assertEqual(len(preparing.fields_needed_by_recipe(r)), (3 * len(r.geometry)) ** 2 * 2 * r['k_max'] + 1)
-
-    def test_numerical_differentiation(self):
-        energy = 150.
-        mu = factories.FakeElectricDipole()
-        alpha = factories.FakePolarizabilityTensor(input_fields=(0,))
-        beta = factories.FakeFirstHyperpolarizabilityTensor(input_fields=(0, 0))
-
-        def energy_exp(fields, h0, basis, inverse, component, frequency, recipe):
-            """Taylor series of the energy"""
-
-            r_field = preparing.Preparer.real_fields(fields, h0, recipe['ratio'])
-
-            x = energy
-            x += numpy.tensordot(mu.components, r_field, axes=1)
-            x += 1 / 2 * numpy.tensordot(numpy.tensordot(alpha.components, r_field, axes=1), r_field, axes=1)
-            x += 1 / 6 * numpy.tensordot(
-                numpy.tensordot(numpy.tensordot(beta.components, r_field, axes=1), r_field, axes=1), r_field, axes=1)
-
-            return x
-
-        def dipole_exp(fields, h0, basis, inverse, component, frequency, recipe):
-            """Taylor series of the dipole moment"""
-
-            r_field = preparing.Preparer.real_fields(fields, h0, recipe['ratio'])
-
-            x = mu.components.copy()
-            x += numpy.tensordot(alpha.components, r_field, axes=1)
-            x += 1 / 2 * numpy.tensordot(numpy.tensordot(beta.components, r_field, axes=1), r_field, axes=1)
-
-            return x[component]
-
-        opt_dict = dict(
-            flavor='gaussian',
-            type='F',
-            method='HF',
-            basis_set='STO-3G',
-            geometry=self.geometry,
-            differentiation={3: ['energy', 'F', 'FD']},
-            frequencies=['1064nm'],
-            accuracy_level=1,
-            k_max=5,
-            ratio=2,
-            min_field=.0004
-        )
-
-        r = files.Recipe(**opt_dict)
-        r.check_data()
-
-        # compute polarizability
-        t, triangles = compute_numerical_derivative_of_tensor(
-            r,
-            derivatives.Derivative(from_representation='F', spacial_dof=r.dof),
-            derivatives.Derivative('F', spacial_dof=r.dof),
-            dipole_exp)
-
-        self.assertArraysAlmostEqual(alpha.components, t.components, places=3)
-
-        t, triangles = compute_numerical_derivative_of_tensor(
-            r,
-            derivatives.Derivative(from_representation='', spacial_dof=r.dof),
-            derivatives.Derivative('FF', spacial_dof=r.dof),
-            energy_exp)
-
-        self.assertArraysAlmostEqual(alpha.components, t.components, places=3)
-
-        # compute first polarizability
-        t, triangles = compute_numerical_derivative_of_tensor(
-            r,
-            derivatives.Derivative(from_representation='F', spacial_dof=r.dof),
-            derivatives.Derivative('FF', spacial_dof=r.dof),
-            dipole_exp)
-
-        self.assertArraysAlmostEqual(beta.components, t.components, delta=.001)
-
-        t, triangles = compute_numerical_derivative_of_tensor(
-            r,
-            derivatives.Derivative(from_representation='', spacial_dof=r.dof),
-            derivatives.Derivative('FFF', spacial_dof=r.dof),
-            energy_exp)
-
-        self.assertArraysAlmostEqual(beta.components, t.components, delta=.01)
 
     def test_deform_geometry(self):
         """Test geometry deformation"""
@@ -169,7 +87,7 @@ class PrepareTestCase(NachosTestCase):
         fields = zero_fields.copy()
         fields[0] = 1  # x of first atom
         deformed = preparing.Preparer.deform_geometry(
-            r.geometry, preparing.Preparer.real_fields(fields, r['min_field'], r['ratio']))
+            r.geometry, numerical_differentiation.real_fields(fields, r['min_field'], r['ratio']))
 
         self.assertNotEqual(r.geometry[0].position[0], deformed[0].position[0])
         self.assertEqual(r.geometry[0].position[1], deformed[0].position[1])  # only the first coordinate was modified
@@ -185,7 +103,7 @@ class PrepareTestCase(NachosTestCase):
         fields[0] = 3
         fields[4] = -2  # y of second atom
         deformed = preparing.Preparer.deform_geometry(
-            r.geometry, preparing.Preparer.real_fields(fields, r['min_field'], r['ratio']))
+            r.geometry, numerical_differentiation.real_fields(fields, r['min_field'], r['ratio']))
 
         self.assertNotEqual(r.geometry[0].position[0], deformed[0].position[0])
         self.assertNotEqual(r.geometry[1].position[1], deformed[1].position[1])
@@ -266,7 +184,7 @@ class PrepareTestCase(NachosTestCase):
                 self.assertEqual(fi.other_blocks[-2][0], 'O     0')
                 self.assertEqual(
                     [float(a) for a in fi.other_blocks[-1][0].split()],
-                    preparing.Preparer.real_fields(fields_n, min_field, 2.))
+                    numerical_differentiation.real_fields(fields_n, min_field, 2.))
 
     def test_preparer_for_G(self):
         """Test the preparer class"""
@@ -358,7 +276,7 @@ class PrepareTestCase(NachosTestCase):
                 self.assertEqual(fi.other_blocks[-1][0], 'O     0')
 
                 deformed = preparing.Preparer.deform_geometry(
-                    r.geometry, preparing.Preparer.real_fields(fields_n, min_field, 2))
+                    r.geometry, numerical_differentiation.real_fields(fields_n, min_field, 2))
 
                 for i, a in enumerate(fi.molecule):
                     self.assertArraysAlmostEqual(deformed[i].position, a.position)
@@ -424,7 +342,7 @@ class PrepareTestCase(NachosTestCase):
                 self.assertEqual(fi.basis_set, 'STO-3G')
 
                 deformed = preparing.Preparer.deform_geometry(
-                    r.geometry, preparing.Preparer.real_fields(fields_n, min_field, 2))
+                    r.geometry, numerical_differentiation.real_fields(fields_n, min_field, 2))
 
                 for i, a in enumerate(fi.molecule):
                     self.assertArraysAlmostEqual(deformed[i].position, a.position)

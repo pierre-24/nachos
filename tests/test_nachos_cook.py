@@ -2,6 +2,7 @@ import os
 import random
 import subprocess
 
+from qcip_tools import numerical_differentiation
 from qcip_tools.chemistry_files import gaussian, dalton, xyz
 
 from tests import NachosTestCase
@@ -40,7 +41,7 @@ class CookTestCase(NachosTestCase):
             n = random.randrange(1, 3)
             for i in range(n):
                 fields[random.randrange(0, dof)] = random.randrange(-5, 5)
-            real_fields = preparing.Preparer.real_fields(fields, min_field, ratio)
+            real_fields = numerical_differentiation.real_fields(fields, min_field, ratio)
             deformed_geometry = preparing.Preparer.deform_geometry(geometry, real_fields)
 
             self.assertArraysAlmostEqual(
