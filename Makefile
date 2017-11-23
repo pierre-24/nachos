@@ -15,7 +15,7 @@ install-dependencies-dev: install-dependencies
 	pip3 install --upgrade -r requirements-dev.txt
 
 lint:
-	flake8 nachos --max-line-length=120 --ignore=N802
+	flake8 nachos tests --max-line-length=120 --ignore=N802
 
 test:
 	python setup.py test

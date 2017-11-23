@@ -1,0 +1,29 @@
+# flavor
+flavor: gaussian
+method: HF
+basis_set: gen
+geometry: water.xyz
+flavor_extra:
+  convergence: 11
+  cphf_convergence: 10
+  gen_basis: sto-3g.gbs
+  memory: 3Gb
+  procs: 4
+# differentiation:
+differentiation:
+  1:
+    - G
+    - F
+    - FF
+    - FD
+  2:
+    - energy
+type: G
+min_field: 0.01
+ratio: 2
+k_max: 3
+accuracy_level: 1
+frequencies:
+  - 1064nm
+# others:
+name: water_test

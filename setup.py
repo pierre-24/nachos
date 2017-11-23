@@ -15,7 +15,7 @@ for pkg in parse_requirements('requirements.txt', session=session):
 
 setup(
     name='nachos',
-    packages=['nachos'],
+    packages=['nachos', 'nachos.core'],
     version=nachos.__version__,
     author=nachos.__author__,
     author_email=nachos.__email__,
@@ -29,7 +29,7 @@ setup(
     install_requires=pkgs,
     dependency_links=dependency_links,
     python_requires='>=3',
-    # test_suite='tests',
+    test_suite='tests',
     entry_points={
         'console_scripts': nachos.make_console_scripts()
     },
