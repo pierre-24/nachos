@@ -60,7 +60,7 @@ def get_arguments_parser():
     arguments_parser = argparse.ArgumentParser(description=__doc__)
     arguments_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     arguments_parser.add_argument(
-        '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='nachos_recipe.yml')
+        '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='./nachos_recipe.yml')
     arguments_parser.add_argument(
         '-d', '--data', type=str, help='H5 data file (output of nachos_cook)', default='nachos_data.h5')
     arguments_parser.add_argument(

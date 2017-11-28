@@ -115,6 +115,29 @@ class Preparer:
             except Exception as e:
                 raise BadPreparation('error while using custom basis set ({}) : {}'.format(path, e))
 
+        # try to deal with extra sections if any
+        extra_sections = None
+        if 'extra_sections' in self.recipe['flavor_extra'] and self.recipe['flavor_extra']['extra_sections'] != '':
+            path = os.path.join(self.recipe.directory, self.recipe['flavor_extra']['extra_sections'])
+            if not os.path.exists(path):
+                raise BadPreparation('extra section file {} cannot be opened'.format(path))
+
+            with open(path) as f:
+                content = f.readlines()
+
+            extra_sections = []
+            current_section = []
+            for l in content:
+                c = l.strip()
+                if c == '':
+                    extra_sections.append(current_section)
+                    current_section = []
+                else:
+                    current_section.append(c)
+
+            if current_section:
+                extra_sections.append(current_section)
+
         for fields, level in self.fields_needed_by_recipe:
             counter += 1
 
@@ -185,8 +208,8 @@ class Preparer:
             if self.recipe['type'] == 'F':
                 fi.other_blocks.append(['\t'.join(['{: .10f}'.format(a) for a in real_fields])])
 
-            if self.recipe['flavor_extra']['extra_sections']:
-                fi.other_blocks.extend(self.recipe['flavor_extra']['extra_sections'])
+            if extra_sections:
+                fi.other_blocks.extend(extra_sections)
 
             # write files
             if compute_polar:
