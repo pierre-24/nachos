@@ -74,7 +74,7 @@ def main():
         with open(os.path.join(directory, 'nachos_recipe.yml'), 'w') as f:
             recipe.write(f)
 
-    print('cooked {} files'.format(n))
+    print('prepared {} files'.format(n))
 
 if __name__ == '__main__':
     main()

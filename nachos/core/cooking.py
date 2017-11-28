@@ -72,7 +72,6 @@ class Cooker:
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
     def cook(self):
-        """Look into the directory for files in which the information can be"""
 
         storage = files.ComputationalResults(self.recipe, directory=self.directory)
 
@@ -158,7 +157,8 @@ class Cooker:
                         fields,
                         d,
                         e_deriv,
-                        allow_replace=d == 'F')
+                        # NOTE: frequency calculations compute electrical deriv as well, so replace them if any:
+                        allow_replace=d in ['F', 'FF', 'FFF'])
         except (PropertyNotPresent, PropertyNotDefined):
             pass
 

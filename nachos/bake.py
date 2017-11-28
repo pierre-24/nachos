@@ -127,9 +127,10 @@ def main():
                     return exit_failure('error: hessian shape is incorrect (wrong DOF!)')
                 if not args.do_not_steal:
                     if args.verbose > 0:
-                        print('!! {} hessian to perform projection'.format(
+                        print('!! {} hessian to perform projection (and geometry)'.format(
                             'replacing' if 'GG' in cf.derivatives else 'adding'))
                     cf.derivatives['GG'] = hessian
+                    recipe.geometry = args.hessian.molecule
             except (PropertyNotDefined, PropertyNotPresent):
                 return exit_failure('error: file does not contain any hessian (or it cannot find it)')
         else:

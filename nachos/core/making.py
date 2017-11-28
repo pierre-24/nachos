@@ -97,7 +97,7 @@ class BasisCompleter(Completer):
 
     def get_completions(self, document, complete_event):
         text = document.text[:document.cursor_position]
-        prev_comma = text.rfind(',')
+        prev_comma = text.rfind(';')
         current_base = text[prev_comma + 1:]
 
         if text[-1] != ':':
@@ -133,7 +133,7 @@ class BasisValidator(Validator):
         cursor_location = 0
         already_in = []
 
-        for x in text.split(','):
+        for x in text.split(';'):
             info = x.split(':')
             cursor_location += len(x)
 
@@ -206,7 +206,7 @@ class FrequenciesValidator(Validator):
 
         allowed_units = ['nm', 'ev', 'cm-1']
 
-        for x in text.split(','):
+        for x in text.split(';'):
             cursor_location += len(x)
 
             value = None
@@ -261,7 +261,7 @@ class ExtraFlavorCompleter(Completer):
 
     def get_completions(self, document, complete_event):
         text = document.text[:document.cursor_position]
-        prev_comma = text.rfind(',')
+        prev_comma = text.rfind(';')
         current_base = text[prev_comma + 1:]
 
         if text[-1] != '=':
@@ -286,14 +286,17 @@ class ExtraFlavorValidator(Validator):
         if len(text) == 0:
             return
 
-        for x in text.split(','):
+        for x in text.split(';'):
             info = x.split('=')
             cursor_location += len(x)
 
-            if len(info) != 2:
+            if len(info) < 2:
                 raise ValidationError(
                     message='{} is not a correct input (should be "var=value")'.format(x),
                     cursor_position=cursor_location)
+            elif len(info) > 2:
+                info[1] = '='.join(info[1:])
+                info = info[:2]
 
             keyword, value = info
             if keyword not in self.allowed_keywords:
