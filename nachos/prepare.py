@@ -16,6 +16,17 @@ __email__ = 'pierre.beaujean@unamur.be'
 __status__ = 'Development'
 
 
+def copy_file_from_extra(var, recipe, recipe_directory, directory):
+    if var in recipe['flavor_extra'] and recipe['flavor_extra'][var] != '':
+        path = os.path.join(recipe_directory, recipe['flavor_extra'][var])
+        if not os.path.exists(path):
+            return exit_failure('cannot copy {}'.format(path))
+
+        shutil.copy(path, directory)
+        recipe['flavor_extra'][var] = os.path.basename(
+            os.path.join(recipe_directory, recipe['flavor_extra'][var]))
+
+
 # program options
 def get_arguments_parser():
     arguments_parser = argparse.ArgumentParser(description=__doc__)
@@ -24,7 +35,7 @@ def get_arguments_parser():
     arguments_parser.add_argument(
         '-d', '--directory', action='store', help='output directory', default='.', type=is_dir)
     arguments_parser.add_argument(
-        '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='nachos_recipe.yml')
+        '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='./nachos_recipe.yml')
     arguments_parser.add_argument(
         '-c', '--copy-files', action='store_true', help='copy geometry and recipe into destination directory')
 
@@ -56,15 +67,14 @@ def main():
         shutil.copy(os.path.join(recipe_directory, recipe['geometry']), directory)
         recipe['geometry'] = os.path.basename(os.path.join(recipe_directory, recipe['geometry']))
 
-        if 'gen_basis' in recipe['flavor_extra']:
-            shutil.copy(os.path.join(recipe_directory, recipe['flavor_extra']['gen_basis']), directory)
-            recipe['flavor_extra']['gen_basis'] = os.path.basename(
-                os.path.join(recipe_directory, recipe['flavor_extra']['gen_basis']))
+        copy_file_from_extra('gen_basis', recipe, recipe_directory, directory)
+        copy_file_from_extra('extra_sections', recipe, recipe_directory, directory)
 
+        recipe.directory = directory
         with open(os.path.join(directory, 'nachos_recipe.yml'), 'w') as f:
             recipe.write(f)
 
-    print('cooked {} files'.format(n))
+    print('prepared {} files'.format(n))
 
 if __name__ == '__main__':
     main()

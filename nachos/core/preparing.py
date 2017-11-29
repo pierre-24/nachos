@@ -115,6 +115,29 @@ class Preparer:
             except Exception as e:
                 raise BadPreparation('error while using custom basis set ({}) : {}'.format(path, e))
 
+        # try to deal with extra sections if any
+        extra_sections = None
+        if 'extra_sections' in self.recipe['flavor_extra'] and self.recipe['flavor_extra']['extra_sections'] != '':
+            path = os.path.join(self.recipe.directory, self.recipe['flavor_extra']['extra_sections'])
+            if not os.path.exists(path):
+                raise BadPreparation('extra section file {} cannot be opened'.format(path))
+
+            with open(path) as f:
+                content = f.readlines()
+
+            extra_sections = []
+            current_section = []
+            for l in content:
+                c = l.strip()
+                if c == '':
+                    extra_sections.append(current_section)
+                    current_section = []
+                else:
+                    current_section.append(c)
+
+            if current_section:
+                extra_sections.append(current_section)
+
         for fields, level in self.fields_needed_by_recipe:
             counter += 1
 
@@ -122,6 +145,7 @@ class Preparer:
             compute_polar_with_freq = False
             compute_G = False
             compute_GG = False
+            compute_FDx = False
 
             bases = self.recipe.bases(level_min=level)
 
@@ -136,6 +160,8 @@ class Preparer:
                 if not compute_polar_with_freq and 'D' in basis:
                     compute_polar = True
                     compute_polar_with_freq = True
+                if not compute_FDx and (basis in ['FDD', 'FDF']):
+                    compute_FDx = True
 
             compute_polar_and_G = compute_polar and (compute_G or compute_GG)
 
@@ -174,7 +200,7 @@ class Preparer:
             ]
 
             if self.recipe['flavor_extra']['extra_keywords']:
-                input_card.extend(self.recipe['flavor_extra']['extra_keywords'])
+                input_card.extend([self.recipe['flavor_extra']['extra_keywords']])
 
             fi.input_card = input_card
 
@@ -185,13 +211,13 @@ class Preparer:
             if self.recipe['type'] == 'F':
                 fi.other_blocks.append(['\t'.join(['{: .10f}'.format(a) for a in real_fields])])
 
-            if self.recipe['flavor_extra']['extra_sections']:
-                fi.other_blocks.extend(self.recipe['flavor_extra']['extra_sections'])
+            if extra_sections:
+                fi.other_blocks.extend(extra_sections)
 
             # write files
             if compute_polar:
                 extra_line = 'polar{} cphf=(conver={}{})'.format(
-                    '=dcshg' if 'FDD' in bases else '',
+                    '=dcshg' if compute_FDx else '',
                     self.recipe['flavor_extra']['cphf_convergence'],
                     ',rdfreq' if compute_polar_with_freq else ''
                 )
@@ -210,7 +236,8 @@ class Preparer:
 
             if compute_polar_and_G or not compute_polar:
                 if compute_GG:
-                    fi.input_card.append('freq')
+                    fi.input_card.append('freq cphf=(conver={})'.format(
+                        self.recipe['flavor_extra']['cphf_convergence']))
                 elif compute_G:
                     fi.input_card.append('force')
 

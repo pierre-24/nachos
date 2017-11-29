@@ -6,7 +6,7 @@ import numpy
 from nachos.core import preparing
 
 from qcip_tools import derivatives
-from qcip_tools.chemistry_files import helpers, chemistry_datafile
+from qcip_tools.chemistry_files import helpers, chemistry_datafile, PropertyNotDefined, PropertyNotPresent
 
 from nachos.core import CONFIG
 
@@ -112,7 +112,7 @@ class Recipe:
 
             for basis in self['differentiation'][level]:
                 if basis not in config_for_flavor['bases']:
-                    raise BadRecipe('Differentiation of {} not available'.format(basis))
+                    raise BadRecipe('Differentiation of {} not available for this flavor'.format(basis))
 
                 if 'D' in basis and 'frequencies' not in self.recipe:
                     raise BadRecipe('Field dependant basis requested ({}) but no "frequencies" field'.format(basis))
@@ -157,7 +157,7 @@ class Recipe:
         """Set up the default options depending on the flavor, then update their value with what is inside ``kw``."""
 
         # flavor
-        if 'flavor' in self and self['flavor'] in CONFIG:
+        if 'flavor' in kw and self['flavor'] in CONFIG:
             self.recipe['flavor_extra'] = CONFIG[self['flavor']]['default_for_extra_fields'].copy()
 
             if 'flavor_extra' in kw:
@@ -173,7 +173,7 @@ class Recipe:
                         if g.has_property('molecule'):
                             self.geometry = g.property('molecule')
                             self.dof = 3 * len(self.geometry)
-                except helpers.ProbablyNotAChemistryFile:
+                except (helpers.ProbablyNotAChemistryFile, PropertyNotDefined, PropertyNotPresent):
                     pass
 
         # max diff
@@ -192,7 +192,7 @@ class Recipe:
         """
 
         self.check_data()
-        fp.write(yaml.dump(self.recipe))
+        fp.write(yaml.dump(self.recipe, default_flow_style=False))
 
     def __getitem__(self, item):
         return self.recipe[item]
