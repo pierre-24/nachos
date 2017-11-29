@@ -41,7 +41,7 @@ def get_arguments_parser():
     arguments_parser.add_argument('--gen-basis', help='gaussian basis function file (if gen)')
 
     arguments_parser.add_argument(
-        '-r', '--recipe', type=argparse.FileType('w'), help='Output recipe file', default='./nachos_recipe.yml')
+        '-o', '--output', type=argparse.FileType('w'), help='Output recipe file', default='./nachos_recipe.yml')
 
     return arguments_parser
 
@@ -64,7 +64,7 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while making recipe: {}'.format(str(e)))
 
-    recipe.write(args.recipe)
+    recipe.write(args.output)
 
 if __name__ == '__main__':
     main()
