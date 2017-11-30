@@ -50,9 +50,11 @@ class ShakeTestCase(NachosTestCase):
 
         # test!
         frequencies = ['static', 0.02, 0.04, 0.06]
-        # polarizabilities = shaker.compute_zpva('01', derivatives.Derivative('FD'), frequencies)
+        # p = shaker.compute_zpva('01', derivatives.Derivative('FDF'), frequencies)
 
-        polarizabilities = shaker.compute_pv('mu2_02', derivatives.Derivative('FD'), frequencies=frequencies)
+        p1 = shaker.compute_pv('mu3_01', derivatives.Derivative('FDF'), frequencies=frequencies)
+        p2 = shaker.compute_pv('mu3_01', derivatives.Derivative('FDD'), frequencies=frequencies)
 
         for f in frequencies:
-            print('{:<8}'.format(f), '{: .5e}'.format(polarizabilities[f].isotropic_value()))
+            # print('{:<8}'.format(f), '{: .5e}'.format(p1[f].isotropic_value()))
+            print('{:<8}'.format(f), '{: .5e} {: .5e}'.format(p1[f].components[0, 1, 2], p2[f].components[0, 1, 2]))

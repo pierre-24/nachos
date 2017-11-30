@@ -67,9 +67,15 @@ class Shaker:
             'mu2_11': (2, derivatives_e.PolarisabilityTensor, ('NF', 'NNF', 'NNN')),
             'mu2_20': (2, derivatives_e.PolarisabilityTensor, ('NNF',)),
             'mu2_02': (2, derivatives_e.PolarisabilityTensor, ('NF', 'NNN')),
+            'mu_alpha_00': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NFF')),
+            'mu_alpha_11': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NNF', 'NFF', 'NNFF', 'NNN')),
+            'mu_alpha_20': (3, derivatives_e.PolarisabilityTensor, ('NNF', 'NNFF')),
+            'mu_alpha_02': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NFF', 'NNN')),
+            'mu3_10': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NNF')),
+            'mu3_01': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NNN')),
         }
 
-    def check_availability(self, derivatives, is_zpva, m, n, limit_anharmonicity=True):
+    def check_availability(self, derivatives, is_zpva, m, n, limit_anharmonicity_usage=True):
         """Check what is available for the computation
 
         For a given electrical derivative X,
@@ -88,9 +94,9 @@ class Shaker:
         :type m: int
         :param n: order of mechanical anharmonicity
         :type n: int
-        :param limit_anharmonicity: limit the usage of anharmonicity to first order
+        :param limit_anharmonicity_usage: limit the usage of anharmonicity to first order
             (so it accepts m>1, n>1 even if the corresponding derivative is not available)
-        :type limit_anharmonicity: bool
+        :type limit_anharmonicity_usage: bool
         :rtype: bool
         """
 
@@ -107,12 +113,12 @@ class Shaker:
                 return False
 
             for i in range(m + 1):
-                if limit_anharmonicity and i + 1 > 1:
+                if limit_anharmonicity_usage and i + 1 > 1:
                     continue
                 if i + 1 not in self.available[r]:
                     return False
 
-        if limit_anharmonicity:
+        if limit_anharmonicity_usage:
             if n > 0 and 3 not in self.available['energy']:
                 return False
         else:
@@ -272,7 +278,7 @@ class Shaker:
             raise BadShaking('cannot compute vibrational contribution of a geometrical derivative')
 
         if what not in self.computable_pv:
-            raise BadShaking('{} is not computable'.format(what))
+            raise BadShaking('{} is not available'.format(what))
 
         order, tensor_class, needed = self.computable_pv[what]
 
@@ -337,10 +343,16 @@ class Shaker:
         for f in frequencies:
             values[f] = .0
 
-        for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
-            tmp = t_nf[a, coo[0]] * t_nf[a, coo[1]]
-            for f in frequencies:
-                values[f] += Shaker.lambda_(f, self.mwh.frequencies[a]) * tmp
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                tmp = t_nf[a, p[0][0]] * t_nf[a, p[1][0]]
+                for f in frequencies:
+                    values[f] += Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * tmp
+
+        for f in frequencies:
+            values[f] *= 1 / 2 * multiplier
 
         return values
 
@@ -368,9 +380,7 @@ class Shaker:
                             fr_1 = Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * \
                                 Shaker.lambda_(ws, self.mwh.frequencies[c])
 
-                            fr_2 = Shaker.lambda_(ws, self.mwh.frequencies[a])
-
-                            values[f] += (fr_1 * tmp1 + fr_2 * tmp2)
+                            values[f] += (fr_1 * tmp1 + Shaker.lambda_(ws, self.mwh.frequencies[a]) * tmp2)
 
         for f in frequencies:
             values[f] *= - 1 / 4 * multiplier
@@ -436,5 +446,179 @@ class Shaker:
 
         for f in frequencies:
             values[f] *= -1 / 8 * multiplier
+
+        return values
+
+    def _compute_mu_alpha_00_components(self, coo, input_fields, frequencies, t_nf, t_nff):
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                tmp = t_nf[a, p[0][0]] * t_nff[a, p[1][0], p[2][0]]
+                for f in frequencies:
+                    values[f] += Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * tmp
+
+        for f in frequencies:
+            values[f] *= 1 / 2 * multiplier
+
+        return values
+
+    def _compute_mu_alpha_20_components(self, coo, input_fields, frequencies, t_nnf, t_nnff):
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+
+                    tmp = 1 / self.mwh.frequencies[a] * t_nnf[a, b, p[0][0]] * t_nnff[a, b, p[1][0], p[2][0]]
+
+                    for f in frequencies:
+                        values[f] += \
+                            Shaker.lambda_(p[0][1] * f, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp
+
+        for f in frequencies:
+            values[f] *= 1 / 4 * multiplier
+
+        return values
+
+    def _compute_mu_alpha_02_components(self, coo, input_fields, frequencies, t_nf, t_nff, t_nnn):
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                mult_a = 1 / self.mwh.frequencies[a]
+                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    mult_ab = self.mwh.frequencies[b] ** -2
+
+                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+
+                        mult_abc = mult_a * t_nf[c, p[0][0]]
+                        mult_abc_1 = mult_abc * t_nnn[a, a, b] * mult_ab
+                        mult_abc_2 = mult_abc * t_nnn[a, b, c]
+
+                        for d in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                            mult_abcd = t_nff[d, p[1][0], p[2][0]]
+
+                            tmp1 = mult_abcd * mult_abc_1 * t_nnn[b, c, d]
+                            tmp2 = mult_abcd * mult_abc_2 * t_nnn[a, b, d] * 2
+
+                            for f in frequencies:
+                                ws = p[0][1] * f
+                                values[f] -= \
+                                    (tmp1 +
+                                     Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
+                                    self.lambda_(ws, self.mwh.frequencies[c]) * \
+                                    self.lambda_(ws, self.mwh.frequencies[d])
+
+        for f in frequencies:
+            values[f] *= -1 / 8 * multiplier
+
+        return values
+
+    def _compute_mu_alpha_11_components(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nff, t_nnff, t_nnn):
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+
+                    f_ab1 = (1 / self.mwh.frequencies[a] + 1 / self.mwh.frequencies[b])
+                    f_ab2 = self.mwh.frequencies[b] ** -2
+
+                    tmp_ab1 = f_ab1 * t_nnf[a, b, p[0][0]]
+                    tmp_ab3 = f_ab1 * t_nnff[a, b, p[1][0], p[2][0]]
+
+                    tmp_ab2 = f_ab2 * \
+                        (t_nnf[a, b, p[0][0]] * t_nff[a, p[1][0], p[2][0]] +
+                         t_nnff[a, b, p[1][0], p[2][0]] * t_nf[a, p[0][0]])
+
+                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                        tmp1 = (tmp_ab1 * t_nff[c, p[1][0], p[2][0]] + tmp_ab3 * t_nf[c, p[0][0]]) * t_nnn[a, b, c]
+                        tmp2 = tmp_ab2 * t_nnn[b, c, c] * self.mwh.frequencies[c] ** -1
+
+                        for f in frequencies:
+                            ws = p[0][1] * f
+                            fr_1 = Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * \
+                                Shaker.lambda_(ws, self.mwh.frequencies[c])
+
+                            values[f] += (fr_1 * tmp1 + Shaker.lambda_(ws, self.mwh.frequencies[a]) * tmp2)
+
+        for f in frequencies:
+            values[f] *= - 1 / 8 * multiplier
+
+        return values
+
+    def _compute_mu3_10_components(self, coo, input_fields, frequencies, t_nf, t_nnf):
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                tmp_a = t_nf[a, p[0][0]]
+
+                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    tmp_ab = tmp_a * t_nnf[a, b, p[1][0]] * t_nf[b, p[2][0]]
+
+                    for f in frequencies:
+                        values[f] += \
+                            Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                            Shaker.lambda_(p[2][1] * f, self.mwh.frequencies[b]) * tmp_ab
+
+        for f in frequencies:
+            values[f] *= 1 / 2 * multiplier
+
+        return values
+
+    def _compute_mu3_01_components(self, coo, input_fields, frequencies, t_nf, t_nnn):
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                tmp_a = t_nf[a, p[0][0]]
+
+                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    tmp_ab = tmp_a * t_nf[b, p[1][0]]
+
+                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+
+                        tmp_abc = tmp_ab * t_nf[c, p[2][0]] * t_nnn[a, b, c]
+
+                        for f in frequencies:
+                            values[f] += \
+                                Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                                Shaker.lambda_(p[1][1] * f, self.mwh.frequencies[b]) * \
+                                Shaker.lambda_(p[2][1] * f, self.mwh.frequencies[c]) * tmp_abc
+
+        for f in frequencies:
+            values[f] *= -1 / 6 * multiplier
 
         return values
