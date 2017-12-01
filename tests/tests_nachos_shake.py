@@ -15,6 +15,38 @@ class ShakeTestCase(NachosTestCase):
         super().tearDown()
         pass
 
+    def _test_contributions(self, shaker, test_on, frequencies, are_in, are_not_in=None, max_order=2):
+        vibs = shaker.shake(
+            frequencies=frequencies,
+            only=[derivatives.Derivative(d) for d in test_on],
+            max_order=max_order)
+
+        self.assertTrue(len(vibs), len(test_on))
+
+        for i in test_on:
+            self.assertIn(i, vibs)
+
+            c = vibs[i]
+
+            for j in are_in:
+                self.assertIn(j, c)
+
+                if 'D' in i:
+                    self.assertEqual(len(c[j]), len(frequencies))
+                    for f in frequencies:
+                        self.assertIn(f, c[j])
+                        self.assertIsInstance(c[j][f], derivatives.Tensor)
+                        self.assertEqual(i, c[j][f].representation)
+                else:
+                    self.assertEqual(len(c[j]), 1)
+                    self.assertIn('static', c[j])
+                    self.assertIsInstance(c[j]['static'], derivatives.Tensor)
+                    self.assertEqual(i, c[j]['static'].representation)
+
+            if are_not_in:
+                for j in are_not_in:
+                    self.assertNotIn(j, c)
+
     def test_vibrational_contribution(self):
         """Test the class VibrationalContribution"""
 
@@ -76,20 +108,34 @@ class ShakeTestCase(NachosTestCase):
 
         for derivs, m, n in to_check:
             vc = shaking.VibrationalContribution(derivs, m, n)
-            self.assertTrue(shaker.check_availability(vc), msg=vc)
+            self.assertTrue(shaker.check_availability(vc), msg=vc.to_string(fancy=True))
 
         # test contributions:
-        frequencies = [0.02, 0.04, 0.06]
-        p1 = shaker.compute_zpva('10', derivatives.Derivative('FD'), frequencies)
-        p2 = shaker.compute_zpva('01', derivatives.Derivative('FD'), frequencies)
+        self._test_contributions(
+            shaker,
+            ['FF', 'FD'],
+            [0.02, 0.04],
+            ['total', 'total_zpva', 'total_pv', 'F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
 
-        for f in frequencies:
-            print('{:<8}'.format(f), '{: .5e} {: .5e}'.format(p1[f].components[0, 0], p2[f].components[0, 0]))
+        self._test_contributions(
+            shaker,
+            ['FF', 'FD'],
+            [0.02],
+            ['total', 'total_zpva', 'total_pv', 'F_F__0_0'],
+            ['F_F__1_1', 'F_F__2_0', 'F_F__0_2'],
+            max_order=1)
 
-        print('-')
-        frequencies = ['static', 0.02, 0.04, 0.06]
-        p1 = shaker.compute_pv('mu3_10', derivatives.Derivative('FDF'), frequencies=frequencies)
-        p2 = shaker.compute_pv('mu3_10', derivatives.Derivative('FDD'), frequencies=frequencies)
+        self._test_contributions(
+            shaker,
+            ['FFF'],
+            [],
+            ['total', 'total_zpva', 'total_pv', 'F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1', 'F_FF__1_1',
+             'F_FF__2_0', 'F_FF__0_2'])
 
-        for f in frequencies:
-            print('{:<8}'.format(f), '{: .5e} {: .5e}'.format(p1[f].components[0, 1, 2], p2[f].components[0, 1, 2]))
+        self._test_contributions(
+            shaker,
+            ['FFF', 'FDF', 'FDD'],
+            [0.02],
+            ['total', 'total_zpva', 'total_pv', 'F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
+            ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'],
+            max_order=1)

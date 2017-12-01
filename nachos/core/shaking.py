@@ -1,5 +1,8 @@
 import itertools
 import math
+import sys
+
+from nachos.core import fancy_output_derivative
 
 from qcip_tools import derivatives_g, derivatives_e, derivatives
 
@@ -11,6 +14,10 @@ class BadShaking(Exception):
 class DerivativeNotAvailable(BadShaking):
     def __init__(self, representation, frequency='static'):
         super().__init__('Derivative not available: {} @ {}'.format(representation, frequency))
+
+
+ORDER_TO_REPR = {1: 'µ', 2: 'α', 3: 'β', 4: 'γ'}
+FANCY_EXPONENTS = {0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴'}
 
 
 class VibrationalContribution:
@@ -95,8 +102,29 @@ class VibrationalContribution:
 
         return needed
 
+    def to_string(self, fancy=False):
+        if not fancy:
+            return '{}__{}_{}'.format('_'.join(d.representation() for d in self.derivatives), self.m, self.n)
+        else:
+            signs = ''
+            orders = []
+            orders_and_numbers = {}
+            for i in self.derivatives:
+                o = i.order()
+                if o not in orders:
+                    orders.append(o)
+                    orders_and_numbers[o] = 0
+                orders_and_numbers[o] += 1
+
+            orders.sort()
+            for i in orders:
+                k = orders_and_numbers[i]
+                signs += '{}{}'.format(ORDER_TO_REPR[i], FANCY_EXPONENTS[k] if k > 1 else '')
+
+            return '[{}]{}{}'.format(signs, FANCY_EXPONENTS[self.m], FANCY_EXPONENTS[self.n])
+
     def __repr__(self):
-        return '[{}]^({},{})'.format('+'.join(d.representation() for d in self.derivatives), self.m, self.n)
+        return self.to_string()
 
 
 class Shaker:
@@ -113,25 +141,29 @@ class Shaker:
             raise BadShaking('no hessian in datafile')
 
         self.mwh = derivatives_g.MassWeightedHessian(datafile.molecule, self.datafile.derivatives['GG'])
-        self.available = {}
-
+        self.available_geometrical_derivatives = {}
         self.dynamic_frequencies = []
+        self.available_electrical_derivatives = []
 
-        dof = 3 * len(self.datafile.molecule)
+        self.dof = 3 * len(self.datafile.molecule)
 
         self.computable_pv = {
             # polarizability
-            'mu2_00': VibrationalContribution(('F', 'F'), 0, 0, dof),
-            'mu2_11': VibrationalContribution(('F', 'F'), 1, 1, dof),
-            'mu2_20': VibrationalContribution(('F', 'F'), 2, 0, dof),
-            'mu2_02': VibrationalContribution(('F', 'F'), 0, 2, dof),
+            2: [
+                VibrationalContribution(('F', 'F'), 0, 0, self.dof),
+                VibrationalContribution(('F', 'F'), 1, 1, self.dof),
+                VibrationalContribution(('F', 'F'), 2, 0, self.dof),
+                VibrationalContribution(('F', 'F'), 0, 2, self.dof)
+            ],
             # first hyperpolarizability
-            'mu_alpha_00': VibrationalContribution(('F', 'FF'), 0, 0, dof),
-            'mu_alpha_11': VibrationalContribution(('F', 'FF'), 1, 1, dof),
-            'mu_alpha_20': VibrationalContribution(('F', 'FF'), 2, 0, dof),
-            'mu_alpha_02': VibrationalContribution(('F', 'FF'), 0, 2, dof),
-            'mu3_10': VibrationalContribution(('F', 'F', 'F'), 1, 0, dof),
-            'mu3_01': VibrationalContribution(('F', 'F', 'F'), 0, 1, dof),
+            3: [
+                VibrationalContribution(('F', 'FF'), 0, 0, self.dof),
+                VibrationalContribution(('F', 'FF'), 1, 1, self.dof),
+                VibrationalContribution(('F', 'FF'), 2, 0, self.dof),
+                VibrationalContribution(('F', 'FF'), 0, 2, self.dof),
+                VibrationalContribution(('F', 'F', 'F'), 1, 0, self.dof),
+                VibrationalContribution(('F', 'F', 'F'), 0, 1, self.dof)
+            ],
         }
 
         self.__make_availability()
@@ -176,14 +208,18 @@ class Shaker:
                 if base_electrical_derivative == '':
                     base_electrical_derivative = 'energy'
 
-                if base_electrical_derivative not in self.available:
-                    self.available[base_electrical_derivative] = []
+                if base_electrical_derivative not in self.available_geometrical_derivatives:
+                    self.available_geometrical_derivatives[base_electrical_derivative] = []
+                    self.available_electrical_derivatives.append(derivatives.Derivative(
+                        base_electrical_derivative if base_electrical_derivative != 'energy' else '',
+                        spacial_dof=self.dof))
 
-                if num_N not in self.available[base_electrical_derivative]:
-                    self.available[base_electrical_derivative].append(num_N)
+                if num_N not in self.available_geometrical_derivatives[base_electrical_derivative]:
+                    self.available_geometrical_derivatives[base_electrical_derivative].append(num_N)
             else:
-                if k not in self.available:
-                    self.available[k] = []
+                if k not in self.available_geometrical_derivatives:
+                    self.available_geometrical_derivatives[k] = []
+                    self.available_electrical_derivatives.append(derivatives.Derivative(k, spacial_dof=self.dof))
 
         # sort dynamic frequencies
         self.dynamic_frequencies.sort(key=lambda x: derivatives_e.convert_frequency_from_string(x))
@@ -208,10 +244,10 @@ class Shaker:
             if base_electrical == '':
                 base_electrical = 'energy'
 
-            if base_electrical not in self.available:
+            if base_electrical not in self.available_geometrical_derivatives:
                 return False
 
-            if num_N not in self.available[base_electrical]:
+            if num_N not in self.available_geometrical_derivatives[base_electrical]:
                 return False
 
         return True
@@ -259,12 +295,12 @@ class Shaker:
         unique_elements = set(itertools.permutations(shuflable))
         return math.factorial(len(coordinates)) / len(unique_elements), unique_elements
 
-    def compute_zpva(self, what, derivative, frequencies):
+    def compute_zpva(self, vc, derivative, frequencies):
         """Compute a ZPVA contribution to a given derivative. It does not uses _create_tensors() since it is possible
         to go along without permutations (and therefore, work with the all tensor as one).
 
-        :param what: what to compute
-        :type what: str
+        :param vc: what to compute
+        :type vc: VibrationalContribution
         :param derivative: representation
         :type derivative: qcip_tools.derivatives.Derivative
         :param frequencies: list of frequencies
@@ -275,17 +311,12 @@ class Shaker:
         if derivatives.is_geometrical(derivative):
             raise BadShaking('cannot compute vibrational contribution of a geometrical derivative')
 
-        if what not in ['10', '01']:
-            raise BadShaking('cannot compute zpva_{}'.format(what))
+        if not vc.zpva or vc.perturbation_order > 1:
+            raise BadShaking('cannot compute {}'.format(vc))
 
-        t_ = {'10': (1, 0), '01': (0, 1)}
+        return getattr(self, '_compute_zpva_{}{}'.format(vc.m, vc.n))(derivative, frequencies)
 
-        if not self.check_availability(VibrationalContribution((derivative,), *t_[what])):
-            raise BadShaking('unable to compute zpva_{}, some derivatives are missing'.format(what))
-
-        return getattr(self, '_compute_zpva_{}'.format(what))(derivative, frequencies)
-
-    def compute_pv(self, what, derivative, frequencies, limit_anharmonicity_usage=True):
+    def compute_pv(self, vc, derivative, frequencies, limit_anharmonicity_usage=True):
         """Compute a pure vibrational contribution.
 
         .. note::
@@ -293,8 +324,8 @@ class Shaker:
             Expect the callback function to be ``'_compute_' + what + '_components'``,
             and kwargs to looks like ``'t_' + repr``.
 
-        :param what: what to compute
-        :type what: str
+        :param vc: what to compute
+        :type vc: VibrationalContribution
         :param derivative: representation
         :type derivative: qcip_tools.derivatives.Derivative
         :param frequencies: list of frequencies
@@ -307,26 +338,204 @@ class Shaker:
         if derivatives.is_geometrical(derivative):
             raise BadShaking('cannot compute vibrational contribution of a geometrical derivative')
 
-        if what not in self.computable_pv:
-            raise BadShaking('{} is not available'.format(what))
-
-        vc = self.computable_pv[what]
-
         if derivative.order() != vc.order:
-            raise BadShaking('{} does not match order {} for {}'.format(derivative.representation(), vc.order, what))
+            raise BadShaking('{} does not match for {}'.format(derivative.representation(), vc.to_string()))
 
         if not self.check_availability(vc, limit_anharmonicity_usage):
-            raise BadShaking('unable to compute {}, some derivatives are missing!'.format(what))
+            raise BadShaking('unable to compute {}, some derivatives are missing!'.format(vc.to_string()))
 
         kwargs = {}
         for n in vc.derivatives_needed(limit_anharmonicity_usage=limit_anharmonicity_usage):
             r = n.representation()
             kwargs['t_' + r.lower()] = self.get_tensor(r)
 
-        return self._create_tensors(derivative, frequencies, '_compute_{}_components'.format(what), **kwargs)
+        return self._create_tensors(
+            derivative, frequencies, '_compute_{}_components'.format(vc.to_string()), **kwargs)
+
+    def shake(self, only=None, frequencies=None, max_order=2, out=sys.stdout, verbosity_level=0,
+              limit_anharmonicity_usage=True):
+        """Compute the vibrational contributions
+
+        :param only: restrict to the vibrational contribution to certain derivatives
+        :type only: list|tuple of qcip_tools.derivatives.Derivative
+        :param frequencies: frequencies (if not available, ZPVA will not be computed for those ones)
+        :type frequencies: list
+        :param max_order: restrict the order of contribution that may be computed (aka max m+n)
+        :type max_order: int
+        :param out: output if information is needed to be outputed
+        :type out: file
+        :param verbosity_level: how far should we print information
+        :type verbosity_level: int
+        :param limit_anharmonicity_usage: limit the usage of anharmonicity to first order
+        :type limit_anharmonicity_usage: bool
+        :rtype: dict
+        """
+
+        def merge_dict_of_tensors(b, a):
+            for k in b:
+                if k not in a:
+                    continue
+                b[k].components += a[k].components
+
+        # select bases:
+        if not only:
+            bases = [a for a in self.available_electrical_derivatives if a.order() != 0]
+        else:
+            bases = []
+            for i in only:
+                if i not in self.available_electrical_derivatives:
+                    raise BadShaking('{} is not available'.format(i))
+
+                bases.append(i)
+
+        bases.sort(key=lambda x: (x.order(), -x.representation().count('F')))
+
+        # select frequencies:
+        frequencies_for_all = []
+        frequencies_for_pv_only = []
+
+        if not frequencies:
+            frequencies_for_all = frequencies_for_pv_only = self.dynamic_frequencies.copy()
+        else:
+            for f in frequencies:
+                if f in self.dynamic_frequencies:
+                    frequencies_for_all.append(f)
+                frequencies_for_pv_only.append(f)
+
+        vibrational_contributions = {}
+
+        # compute:
+        for base in bases:
+            b_repr = base.representation()
+            is_dynamic = 'D' in b_repr
+
+            if verbosity_level >= 1:
+                out.write('\n**** Computing vibrational contributions of {}:\n'.format(fancy_output_derivative(base)))
+
+            c = {}
+
+            freqs_zpva = frequencies_for_all if is_dynamic else ['static']
+            freqs_pv = frequencies_for_pv_only if is_dynamic else ['static']
+
+            total_zpva = {}
+            total_pv = {}
+            total_vib = {}
+
+            for i in freqs_zpva:
+                total_zpva[i] = derivatives.Tensor(base, spacial_dof=self.dof, frequency=i)
+                total_vib[i] = derivatives.Tensor(base, spacial_dof=self.dof, frequency=i)
+
+            for i in freqs_pv:
+                total_pv[i] = derivatives.Tensor(base, spacial_dof=self.dof, frequency=i)
+
+            to_compute = [VibrationalContribution((base,), 1, 0), VibrationalContribution((base,), 0, 1)]
+            if base.order() in self.computable_pv:
+                to_compute += self.computable_pv[base.order()]
+
+            for vc in to_compute:
+                if vc.perturbation_order > max_order:
+                    Shaker.display_message(
+                        '{} disabled by request, skipping'.format(vc.to_string(fancy=True)),
+                        out,
+                        verbosity_level)
+                    continue
+
+                if self.check_availability(vc, limit_anharmonicity_usage):
+                    Shaker.display_message(
+                        'computing {}{}'.format(
+                            vc.to_string(fancy=True),
+                            ' for all frequencies' if is_dynamic else ''),
+                        out,
+                        verbosity_level)
+
+                    if vc.zpva:
+                        t = self.compute_zpva(vc, base, freqs_zpva)
+                        merge_dict_of_tensors(total_zpva, t)
+                        Shaker.output_tensors(base, vc, t, freqs_zpva, out, verbosity_level)
+                    else:
+                        t = self.compute_pv(vc, base, freqs_pv, limit_anharmonicity_usage)
+                        merge_dict_of_tensors(total_pv, t)
+                        Shaker.output_tensors(base, vc, t, freqs_pv, out, verbosity_level)
+
+                    merge_dict_of_tensors(total_vib, t)
+                    c[str(vc)] = t
+                else:
+                    Shaker.display_message('unable to compute {}, skipping'.format(vc.to_string(fancy=True)))
+
+            # total stuffs
+            if verbosity_level >= 2:
+                out.write('\n*** Total ZPVA contribution to {}:\n'.format(fancy_output_derivative(base)))
+                Shaker.output_tensors(base, None, total_zpva, freqs_zpva, out, verbosity_level, 'ZPVA')
+
+                out.write('\n*** Total pv contribution to {}:\n'.format(fancy_output_derivative(base)))
+                Shaker.output_tensors(base, None, total_zpva, freqs_zpva, out, verbosity_level, 'pv')
+
+            if verbosity_level >= 1:
+                out.write(
+                    '\n*** Total vibrational contribution (ZPVA+pv) to {}:\n'.format(fancy_output_derivative(base)))
+                Shaker.output_tensors(
+                    base, None, total_vib, freqs_zpva, out, verbosity_level, 'total vibrational contribution')
+
+            c['total_zpva'] = total_zpva
+            c['total_pv'] = total_pv
+            c['total'] = total_vib
+
+            vibrational_contributions[b_repr] = c
+
+        return vibrational_contributions
+
+    @staticmethod
+    def display_message(message, out=sys.stdout, verbosity_level=0):
+        """Output a message, if requested
+
+        :param message: the message
+        :type message: str
+        :param out: output if information is needed to be outputed
+        :type out: file
+        :param verbosity_level: how far should we print information
+        :type verbosity_level: int
+        """
+
+        if verbosity_level >= 1:
+            out.write('{}(! {})\n'.format('\n' if verbosity_level > 2 else '', message))
+            out.flush()
+
+    @staticmethod
+    def output_tensors(base, vc, tensors, frequencies, out=sys.stdout, verbosity_level=0, what=''):
+        """Output a bit of information if requested
+
+        :param base: base electrical derivative for which the vibrational contribution is computed
+        :type base: qcip_tools.derivatives.Derivative
+        :param vc: vibrational contribution
+        :type vc: VibrationalContribution
+        :param tensors: list of tensors
+        :type tensors: dict
+        :param frequencies: frequencies
+        :type frequencies: list
+        :param out: output if information is needed to be outputed
+        :type out: file
+        :param verbosity_level: how far should we print information
+        :type verbosity_level: int
+        :param what: used when no vc is given
+        :type what: str
+        """
+
+        if (verbosity_level >= 1 and vc is None) or verbosity_level >= 3:
+            for freq in frequencies:
+                if freq not in tensors:
+                    raise ValueError('{} not in tensors?'.format(freq))
+                if vc is not None:
+                    out.write('\n** Computed {} for {}:\n'.format(
+                        vc.to_string(fancy=True),
+                        fancy_output_derivative(base, freq)))
+                else:
+                    out.write('\n** {} for {}:\n'.format(what, fancy_output_derivative(base, freq)))
+
+                out.write(tensors[freq].to_string(threshold=1e-5))
 
     # --------------------------------------------
     # BELOW, COMPUTATION OF ALL THE CONTRIBUTIONS:
+    #           (so, internal stuffs)
     # --------------------------------------------
 
     def _create_tensors(self, derivative, frequencies, callback, **kwargs):
@@ -341,7 +550,7 @@ class Shaker:
 
         .. note::
 
-            It is probably more efficient to compute the static version separately.
+            It is more efficient to compute the static version separately.
 
         :param derivative: the derivative of the tensor for which the contribution should be computed
         :type derivative: qcip_tools.derivatives.Derivative
@@ -417,7 +626,7 @@ class Shaker:
 
         return tensors
 
-    def _compute_mu2_00_components(self, coo, input_fields, frequencies, t_nf):
+    def _compute_F_F__0_0_components(self, coo, input_fields, frequencies, t_nf):
         values = {}
 
         for f in frequencies:
@@ -436,7 +645,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu2_11_components(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nnn):
+    def _compute_F_F__1_1_components(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nnn):
         values = {}
 
         for f in frequencies:
@@ -467,7 +676,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu2_20_components(self, coo, input_fields, frequencies, t_nnf):
+    def _compute_F_F__2_0_components(self, coo, input_fields, frequencies, t_nnf):
         values = {}
 
         for f in frequencies:
@@ -490,7 +699,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu2_02_components(self, coo, input_fields, frequencies, t_nf, t_nnn):
+    def _compute_F_F__0_2_components(self, coo, input_fields, frequencies, t_nf, t_nnn):
         values = {}
 
         for f in frequencies:
@@ -529,7 +738,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu_alpha_00_components(self, coo, input_fields, frequencies, t_nf, t_nff):
+    def _compute_F_FF__0_0_components(self, coo, input_fields, frequencies, t_nf, t_nff):
         values = {}
 
         for f in frequencies:
@@ -548,7 +757,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu_alpha_20_components(self, coo, input_fields, frequencies, t_nnf, t_nnff):
+    def _compute_F_FF__2_0_components(self, coo, input_fields, frequencies, t_nnf, t_nnff):
         values = {}
 
         for f in frequencies:
@@ -571,7 +780,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu_alpha_02_components(self, coo, input_fields, frequencies, t_nf, t_nff, t_nnn):
+    def _compute_F_FF__0_2_components(self, coo, input_fields, frequencies, t_nf, t_nff, t_nnn):
         values = {}
 
         for f in frequencies:
@@ -610,7 +819,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu_alpha_11_components(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nff, t_nnff, t_nnn):
+    def _compute_F_FF__1_1_components(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nff, t_nnff, t_nnn):
         values = {}
 
         for f in frequencies:
@@ -648,7 +857,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu3_10_components(self, coo, input_fields, frequencies, t_nf, t_nnf):
+    def _compute_F_F_F__1_0_components(self, coo, input_fields, frequencies, t_nf, t_nnf):
         values = {}
 
         for f in frequencies:
@@ -673,7 +882,7 @@ class Shaker:
 
         return values
 
-    def _compute_mu3_01_components(self, coo, input_fields, frequencies, t_nf, t_nnn):
+    def _compute_F_F_F__0_1_components(self, coo, input_fields, frequencies, t_nf, t_nnn):
         values = {}
 
         for f in frequencies:
