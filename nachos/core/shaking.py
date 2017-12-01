@@ -63,16 +63,16 @@ class Shaker:
         """Make the list of computable stuffs"""
 
         self.computable_pv = {
-            'mu2_00': (2, derivatives_e.PolarisabilityTensor, ('NF',)),
-            'mu2_11': (2, derivatives_e.PolarisabilityTensor, ('NF', 'NNF', 'NNN')),
-            'mu2_20': (2, derivatives_e.PolarisabilityTensor, ('NNF',)),
-            'mu2_02': (2, derivatives_e.PolarisabilityTensor, ('NF', 'NNN')),
-            'mu_alpha_00': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NFF')),
-            'mu_alpha_11': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NNF', 'NFF', 'NNFF', 'NNN')),
-            'mu_alpha_20': (3, derivatives_e.PolarisabilityTensor, ('NNF', 'NNFF')),
-            'mu_alpha_02': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NFF', 'NNN')),
-            'mu3_10': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NNF')),
-            'mu3_01': (3, derivatives_e.PolarisabilityTensor, ('NF', 'NNN')),
+            'mu2_00': (2, ('NF',)),
+            'mu2_11': (2, ('NF', 'NNF', 'NNN')),
+            'mu2_20': (2, ('NNF',)),
+            'mu2_02': (2, ('NF', 'NNN')),
+            'mu_alpha_00': (3, ('NF', 'NFF')),
+            'mu_alpha_11': (3, ('NF', 'NNF', 'NFF', 'NNFF', 'NNN')),
+            'mu_alpha_20': (3, ('NNF', 'NNFF')),
+            'mu_alpha_02': (3, ('NF', 'NFF', 'NNN')),
+            'mu3_10': (3, ('NF', 'NNF')),
+            'mu3_01': (3, ('NF', 'NNN')),
         }
 
     def check_availability(self, derivatives, is_zpva, m, n, limit_anharmonicity_usage=True):
@@ -138,7 +138,7 @@ class Shaker:
 
         raise DerivativeNotAvailable(representation, frequency)
 
-    def _create_tensors(self, tensor_class, derivative, frequencies, callback, **kwargs):
+    def _create_tensors(self, derivative, frequencies, callback, **kwargs):
         """Create a list of tensor, by taking advantage of the fact that it may (?) be easier to compute the same
         contribution for many frequencies.
 
@@ -152,8 +152,6 @@ class Shaker:
 
             It is probably more efficient to compute the static version separately.
 
-        :param tensor_class: class of the tensor to create (if possible, a child of BaseElectricalDerivativeTensor)
-        :type tensor_class: class
         :param derivative: the derivative of the tensor for which the contribution should be computed
         :type derivative: qcip_tools.derivatives.Derivative
         :param frequencies: the frequencies
@@ -178,7 +176,7 @@ class Shaker:
             converted_frequency = derivatives_e.convert_frequency_from_string(frequency)
             frequencies_converted.append(converted_frequency)
             frequencies_mapping[converted_frequency] = frequency
-            tensors[frequency] = tensor_class(input_fields=input_fields, frequency=frequency)
+            tensors[frequency] = derivatives.Tensor(representation=derivative, frequency=frequency)
 
         frequencies_converted.sort()
 
@@ -242,20 +240,7 @@ class Shaker:
         if what not in ['10', '01']:
             raise BadShaking('cannot compute zpva_{}'.format(what))
 
-        input_fields = [1 if x == 'D' else 0 for x in derivative.representation()[1:]]
-
-        tensor_classes = {
-            1: derivatives_e.ElectricDipole,
-            2: derivatives_e.PolarisabilityTensor,
-            3: derivatives_e.FirstHyperpolarisabilityTensor,
-            4: derivatives_e.SecondHyperpolarizabilityTensor
-        }
-
-        if derivative.order() not in tensor_classes:
-            raise BadShaking('cannot compute ZPVA contribution to {}'.format(derivative.representation()))
-
-        return getattr(self, '_compute_zpva_{}'.format(what))(
-            derivative, frequencies, tensor_classes[derivative.order()], input_fields)
+        return getattr(self, '_compute_zpva_{}'.format(what))(derivative, frequencies)
 
     def compute_pv(self, what, derivative, frequencies):
         """Compute a pure vibrational contribution.
@@ -280,7 +265,7 @@ class Shaker:
         if what not in self.computable_pv:
             raise BadShaking('{} is not available'.format(what))
 
-        order, tensor_class, needed = self.computable_pv[what]
+        order, needed = self.computable_pv[what]
 
         if derivative.order() != order:
             raise BadShaking('{} does not match order {} for {}'.format(derivative.representation(), order, what))
@@ -290,7 +275,6 @@ class Shaker:
             kwargs['t_' + n.lower()] = self.get_tensor(n)
 
         return self._create_tensors(
-            tensor_class,
             derivative,
             frequencies,
             '_compute_{}_components'.format(what),
@@ -300,13 +284,13 @@ class Shaker:
     # BELOW, COMPUTATION OF ALL THE CONTRIBUTIONS:
     # --------------------------------------------
 
-    def _compute_zpva_10(self, derivative, frequencies, tensor_class, input_fields):
+    def _compute_zpva_10(self, derivative, frequencies):
         tensors = {}
         b_repr = derivative.representation()
 
         for frequency in frequencies:
             t_nnx = self.get_tensor('NN' + b_repr, frequency)
-            t = tensor_class(input_fields=input_fields, frequency=frequency)
+            t = derivatives.Tensor(representation=derivative, frequency=frequency)
 
             for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
                 t.components += 1 / self.mwh.frequencies[a] * t_nnx[a, a]
@@ -316,14 +300,14 @@ class Shaker:
 
         return tensors
 
-    def _compute_zpva_01(self, derivative, frequencies, tensor_class, input_fields):
+    def _compute_zpva_01(self, derivative, frequencies):
         tensors = {}
         b_repr = derivative.representation()
 
         for frequency in frequencies:
             t_nx = self.get_tensor('N' + b_repr, frequency)
             t_nnn = self.get_tensor('NNN')
-            t = tensor_class(input_fields=input_fields, frequency=frequency)
+            t = derivatives.Tensor(representation=derivative, frequency=frequency)
 
             for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
                 ccc = 0
