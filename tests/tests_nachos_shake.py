@@ -15,6 +15,30 @@ class ShakeTestCase(NachosTestCase):
         super().tearDown()
         pass
 
+    def test_vibrational_contribution(self):
+        """Test the class VibrationalContribution"""
+
+        vcs = [
+            # ZPVA
+            (('FDF',), 1, 0, ('NNFDF',)),
+            (('FDF',), 0, 1, ('NFDF', 'NNN')),
+            # pv contrib to beta
+            (('F', 'F', 'F'), 1, 0, ('NF', 'NNF')),
+            (('F', 'F', 'F'), 0, 1, ('NF', 'NNN')),
+            (('F', 'FF'), 0, 0, ('NF', 'NFF')),
+            (('F', 'FF'), 1, 1, ('NF', 'NFF', 'NNF', 'NNFF', 'NNN')),
+            (('F', 'FF'), 2, 0, ('NNF', 'NNFF')),  # with limitation of the electrical anharmonicity
+            (('F', 'FF'), 0, 2, ('NF', 'NFF', 'NNN')),  # with limitation of the electrical anharmonicity
+        ]
+
+        for derivs, m, n, needed in vcs:
+            vc = shaking.VibrationalContribution(derivs, m, n)
+            n = vc.derivatives_needed()
+
+            self.assertEqual(len(needed), len(n), msg=vc)
+            for nx in needed:
+                self.assertIn(nx, n)
+
     def test_shaking_alpha_beta(self):
         """Test the shaking class on data from gaussian"""
 
@@ -26,35 +50,46 @@ class ShakeTestCase(NachosTestCase):
         shaker = shaking.Shaker(datafile=df)
 
         # Check everything is there:
-        to_ZPVA = ['F', 'FF', 'FD', 'FFF', 'FDF', 'FDD']
-        for t in to_ZPVA:
-            self.assertTrue(shaker.check_availability((derivatives.Derivative(t),), True, 1, 0), msg=t)  # []¹⁰
-            self.assertTrue(shaker.check_availability((derivatives.Derivative(t),), True, 0, 1), msg=t)  # []⁰¹
+        to_check = [
+            # ZPVA
+            (('F',), 1, 0),
+            (('F',), 0, 1),
+            (('FD',), 1, 0),
+            (('FD',), 0, 1),
+            (('FDF',), 1, 0),
+            (('FDF',), 0, 1),
+            (('FDD',), 1, 0),
+            (('FDD',), 0, 1),
+            # alpha
+            (('F', 'F'), 0, 0),
+            (('F', 'F'), 1, 1),
+            (('F', 'F'), 2, 0),
+            (('F', 'F'), 0, 2),
+            # beta:
+            (('F', 'F', 'F'), 1, 0),
+            (('F', 'F', 'F'), 0, 1),
+            (('F', 'FF'), 0, 0),
+            (('F', 'FF'), 1, 1),
+            (('F', 'FF'), 2, 0),
+            (('F', 'FF'), 0, 2),
+        ]
 
-        self.assertTrue(shaker.check_availability((derivatives.Derivative('F'),), False, 0, 0))  # [µ²]⁰⁰
-        self.assertTrue(shaker.check_availability((derivatives.Derivative('F'),), False, 1, 1))  # [µ²]¹¹
-        self.assertTrue(shaker.check_availability((derivatives.Derivative('F'),), False, 2, 0))  # [µ²]²⁰
-        self.assertTrue(shaker.check_availability((derivatives.Derivative('F'),), False, 0, 2))  # [µ²]⁰²
+        for derivs, m, n in to_check:
+            vc = shaking.VibrationalContribution(derivs, m, n)
+            self.assertTrue(shaker.check_availability(vc), msg=vc)
 
-        self.assertTrue(shaker.check_availability(
-            (derivatives.Derivative('F'), derivatives.Derivative('FF')), False, 0, 0))  # [µa]⁰⁰
-        self.assertTrue(shaker.check_availability(
-            (derivatives.Derivative('F'), derivatives.Derivative('FF')), False, 1, 1))  # [µa]¹¹
-        self.assertTrue(shaker.check_availability(
-            (derivatives.Derivative('F'), derivatives.Derivative('FF')), False, 2, 0))  # [µa]²⁰
-        self.assertTrue(shaker.check_availability(
-            (derivatives.Derivative('F'), derivatives.Derivative('FF')), False, 0, 2))  # [µa]⁰²
-
-        self.assertTrue(shaker.check_availability((derivatives.Derivative('F'),), False, 1, 0))  # [µ³]¹⁰
-        self.assertTrue(shaker.check_availability((derivatives.Derivative('F'),), False, 0, 1))  # [µ³]⁰¹
-
-        # test!
-        frequencies = ['static', 0.02, 0.04, 0.06]
-        # p = shaker.compute_zpva('01', derivatives.Derivative('FDF'), frequencies)
-
-        p1 = shaker.compute_pv('mu3_01', derivatives.Derivative('FDF'), frequencies=frequencies)
-        p2 = shaker.compute_pv('mu3_01', derivatives.Derivative('FDD'), frequencies=frequencies)
+        # test contributions:
+        frequencies = [0.02, 0.04, 0.06]
+        p1 = shaker.compute_zpva('10', derivatives.Derivative('FD'), frequencies)
+        p2 = shaker.compute_zpva('01', derivatives.Derivative('FD'), frequencies)
 
         for f in frequencies:
-            # print('{:<8}'.format(f), '{: .5e}'.format(p1[f].isotropic_value()))
+            print('{:<8}'.format(f), '{: .5e} {: .5e}'.format(p1[f].components[0, 0], p2[f].components[0, 0]))
+
+        print('-')
+        frequencies = ['static', 0.02, 0.04, 0.06]
+        p1 = shaker.compute_pv('mu3_10', derivatives.Derivative('FDF'), frequencies=frequencies)
+        p2 = shaker.compute_pv('mu3_10', derivatives.Derivative('FDD'), frequencies=frequencies)
+
+        for f in frequencies:
             print('{:<8}'.format(f), '{: .5e} {: .5e}'.format(p1[f].components[0, 1, 2], p2[f].components[0, 1, 2]))
