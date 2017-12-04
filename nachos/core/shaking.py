@@ -352,16 +352,14 @@ class Shaker:
         return self._create_tensors(
             derivative, frequencies, '_compute_{}_components'.format(vc.to_string()), **kwargs)
 
-    def shake(self, only=None, frequencies=None, max_order=2, out=sys.stdout, verbosity_level=0,
+    def shake(self, only=None, frequencies=None, out=sys.stdout, verbosity_level=0,
               limit_anharmonicity_usage=True):
         """Compute the vibrational contributions
 
         :param only: restrict to the vibrational contribution to certain derivatives
-        :type only: list|tuple of qcip_tools.derivatives.Derivative
+        :type only: list|tuple of qcip_tools.derivatives.Derivative, int
         :param frequencies: frequencies (if not available, ZPVA will not be computed for those ones)
         :type frequencies: list
-        :param max_order: restrict the order of contribution that may be computed (aka max m+n)
-        :type max_order: int
         :param out: output if information is needed to be outputed
         :type out: file
         :param verbosity_level: how far should we print information
@@ -379,16 +377,16 @@ class Shaker:
 
         # select bases:
         if not only:
-            bases = [a for a in self.available_electrical_derivatives if a.order() != 0]
+            bases = [(a, 2) for a in self.available_electrical_derivatives if a.order() > 0]
         else:
             bases = []
-            for i in only:
+            for i, max_level in only:
                 if i not in self.available_electrical_derivatives:
                     raise BadShaking('{} is not available'.format(i))
 
-                bases.append(i)
+                bases.append((i, max_level))
 
-        bases.sort(key=lambda x: (x.order(), -x.representation().count('F')))
+        bases.sort(key=lambda x: (x[0].order(), -x[0].representation().count('F')))
 
         # select frequencies:
         frequencies_for_all = []
@@ -405,7 +403,7 @@ class Shaker:
         vibrational_contributions = {}
 
         # compute:
-        for base in bases:
+        for base, max_level in bases:
             b_repr = base.representation()
             is_dynamic = 'D' in b_repr
 
@@ -433,7 +431,7 @@ class Shaker:
                 to_compute += self.computable_pv[base.order()]
 
             for vc in to_compute:
-                if vc.perturbation_order > max_order:
+                if vc.perturbation_order > max_level:
                     Shaker.display_message(
                         '{} disabled by request, skipping'.format(vc.to_string(fancy=True)),
                         out,
@@ -468,7 +466,7 @@ class Shaker:
                 Shaker.output_tensors(base, None, total_zpva, freqs_zpva, out, verbosity_level, 'ZPVA')
 
                 out.write('\n*** Total pv contribution to {}:\n'.format(fancy_output_derivative(base)))
-                Shaker.output_tensors(base, None, total_zpva, freqs_zpva, out, verbosity_level, 'pv')
+                Shaker.output_tensors(base, None, total_pv, freqs_pv, out, verbosity_level, 'pv')
 
             if verbosity_level >= 1:
                 out.write(
@@ -507,7 +505,7 @@ class Shaker:
         :param base: base electrical derivative for which the vibrational contribution is computed
         :type base: qcip_tools.derivatives.Derivative
         :param vc: vibrational contribution
-        :type vc: VibrationalContribution
+        :type vc: VibrationalContribution|None
         :param tensors: list of tensors
         :type tensors: dict
         :param frequencies: frequencies

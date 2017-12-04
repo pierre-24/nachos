@@ -15,18 +15,18 @@ class ShakeTestCase(NachosTestCase):
         super().tearDown()
         pass
 
-    def _test_contributions(self, shaker, test_on, frequencies, are_in, are_not_in=None, max_order=2):
+    def _test_contributions(self, shaker, test_on, frequencies, are_in, are_not_in=None):
         vibs = shaker.shake(
             frequencies=frequencies,
-            only=[derivatives.Derivative(d) for d in test_on],
-            max_order=max_order)
+            only=[(derivatives.Derivative(d[0]), d[1]) for d in test_on])
 
         self.assertTrue(len(vibs), len(test_on))
 
-        for i in test_on:
+        for i, max_level in test_on:
             self.assertIn(i, vibs)
 
             c = vibs[i]
+            self.assertEqual(len(c), len(are_in) + 2)  # the "+2" comes from the two ZPVA contributions
 
             for j in are_in:
                 self.assertIn(j, c)
@@ -113,29 +113,27 @@ class ShakeTestCase(NachosTestCase):
         # test contributions:
         self._test_contributions(
             shaker,
-            ['FF', 'FD'],
+            [('FF', 2), ('FD', 2)],
             [0.02, 0.04],
             ['total', 'total_zpva', 'total_pv', 'F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
 
         self._test_contributions(
             shaker,
-            ['FF', 'FD'],
+            [('FF', 1), ('FD', 1)],
             [0.02],
             ['total', 'total_zpva', 'total_pv', 'F_F__0_0'],
-            ['F_F__1_1', 'F_F__2_0', 'F_F__0_2'],
-            max_order=1)
+            ['F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
 
         self._test_contributions(
             shaker,
-            ['FFF'],
+            [('FFF', 2)],
             [],
             ['total', 'total_zpva', 'total_pv', 'F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1', 'F_FF__1_1',
              'F_FF__2_0', 'F_FF__0_2'])
 
         self._test_contributions(
             shaker,
-            ['FFF', 'FDF', 'FDD'],
+            [('FFF', 1), ('FDF', 1), ('FDD', 1)],
             [0.02],
             ['total', 'total_zpva', 'total_pv', 'F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
-            ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'],
-            max_order=1)
+            ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'])
