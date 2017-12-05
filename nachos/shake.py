@@ -93,7 +93,10 @@ def get_arguments_parser():
         '-O', '--only', help='only compute the contribution of given derivatives')
 
     arguments_parser.add_argument(
-        '-F', '--frequencies', help='compute vibrational contribution for set of frequencies')
+        '-f', '--frequencies', help='compute vibrational contribution for set of frequencies')
+
+    arguments_parser.add_argument(
+        '-A', '--do-not-append', action='store_true', help='do not include vibrational contribution in data file')
 
     return arguments_parser
 
@@ -111,7 +114,7 @@ def main():
         with open(args.data) as f:
             df.read(f)
     except chemistry_datafile.BadChemistryDataFile as e:
-        return exit_failure('error whil opening data file: {}'.format(str(e)))
+        return exit_failure('error while opening data file: {}'.format(str(e)))
 
     shaker = shaking.Shaker(df)
 
@@ -120,7 +123,7 @@ def main():
         try:
             only = treat_only_arg(args.only)
         except ValueError as e:
-            return exit_failure('error while treating arg: {}'.format(str(e)))
+            return exit_failure('error while treating derivatives: {}'.format(str(e)))
 
     frequencies = None
     if args.frequencies:
@@ -130,9 +133,12 @@ def main():
             return exit_failure('error while treating frequencies: {}'.format(str(e)))
 
     try:
-        shaker.shake(verbosity_level=args.verbose, only=only, frequencies=frequencies)
+        contributions = shaker.shake(verbosity_level=args.verbose, only=only, frequencies=frequencies)
     except shaking.BadShaking as e:
-        return exit_failure('error while making recipe: {}'.format(str(e)))
+        return exit_failure('error while shaking: {}'.format(str(e)))
+
+    if not args.do_not_append:
+        shaking.save_vibrational_contributions(args.data, contributions)
 
 if __name__ == '__main__':
     main()

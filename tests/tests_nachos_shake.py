@@ -47,6 +47,8 @@ class ShakeTestCase(NachosTestCase):
                 for j in are_not_in:
                     self.assertNotIn(j, c)
 
+        return vibs
+
     def test_vibrational_contribution(self):
         """Test the class VibrationalContribution"""
 
@@ -70,6 +72,11 @@ class ShakeTestCase(NachosTestCase):
             self.assertEqual(len(needed), len(n), msg=vc)
             for nx in needed:
                 self.assertIn(nx, n)
+
+            # test from representation
+            vcx = shaking.VibrationalContribution.from_representation(vc.to_string())
+            self.assertEqual(vcx.derivatives, vc.derivatives)
+            self.assertEqual((vcx.m, vcx.n), (vc.m, vc.n))
 
     def test_shaking_alpha_beta(self):
         """Test the shaking class on data from gaussian"""
@@ -137,3 +144,36 @@ class ShakeTestCase(NachosTestCase):
             [0.02],
             ['total', 'total_zpva', 'total_pv', 'F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
             ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'])
+
+    def test_shaking_save_and_load(self):
+        """Test that we are able to save and load vibrational contributions"""
+
+        df = chemistry_datafile.ChemistryDataFile()
+
+        with open(self.datafile) as f:
+            df.read(f)
+
+        shaker = shaking.Shaker(datafile=df)
+
+        must_be_in = ['total', 'total_zpva', 'total_pv', 'F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
+        vibs = self._test_contributions(
+            shaker,
+            [('FF', 2), ('FD', 2)],
+            [0.02, 0.04],
+            must_be_in)
+
+        # test saving
+        shaking.save_vibrational_contributions(self.datafile, vibs)
+
+        # test loading:
+        nvibs = shaking.load_vibrational_contributions(self.datafile, df.spacial_dof)
+
+        self.assertIn('FF', nvibs)
+        self.assertIn('FD', nvibs)
+
+        for i in ['FF', 'FD']:
+            for j in vibs[i]:
+                self.assertIn(j, nvibs[i])
+                for freq in vibs[i][j]:
+                    self.assertIn(freq, nvibs[i][j])
+                    self.assertTensorsAlmostEqual(vibs[i][j][freq], nvibs[i][j][freq])

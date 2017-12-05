@@ -64,7 +64,7 @@ def compute_numerical_derivative_of_tensor(
     :param tensor_func: function to access to the tensor
     :param frequency: frequency if electrical derivative
     :type frequency: float|str
-    :param dry_run: do not fill the tensor or perform romberg analysis
+    :param dry_run: do not fill the tensor or perform Romberg analysis
     :type dry_run: bool
     :param kwargs: args passed to tensor_func
     :type kwargs: dict
