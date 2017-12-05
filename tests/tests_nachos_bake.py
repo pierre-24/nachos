@@ -263,7 +263,7 @@ class BakeTestCase(NachosTestCase):
 
         # process with only (and "do-not-steal")
         process = self.run_python_script(
-            'nachos/bake.py', ['-r', recipe_path, '-d', storage_path, '-o', h5_path, '-O', 'F,energy:1', '-S'],
+            'nachos/bake.py', ['-r', recipe_path, '-d', storage_path, '-o', h5_path, '-O', 'F;energy:1', '-S'],
             out_pipe=subprocess.PIPE,
             err_pipe=subprocess.PIPE)
 
