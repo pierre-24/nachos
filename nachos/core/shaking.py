@@ -95,8 +95,8 @@ class VibrationalContributionsData:
             chemistry_datafile.ChemistryDataFile.write_derivative_in_dataset(
                 group, k, self.derivative, self.vibrational_contributions[k])
 
-        zpva_contribs.extend([p.to_string() for p in self.per_type['zpva']])
-        pv_contribs.extend([p.to_string() for p in self.per_type['pv']])
+        zpva_contribs.extend([p.to_string() for p in self.per_type['zpva'] if p.to_string() not in zpva_contribs])
+        pv_contribs.extend([p.to_string() for p in self.per_type['pv'] if p.to_string() not in pv_contribs])
 
         group.attrs['zpva_contributions'] = ','.join(zpva_contribs)
         group.attrs['pv_contributions'] = ','.join(pv_contribs)
@@ -598,7 +598,7 @@ class Shaker:
 
         # select bases:
         if not only:
-            bases = [(a, 2) for a in self.available_electrical_derivatives if a.order() > 0]
+            bases = [(a, 2) for a in self.available_electrical_derivatives if a.order() > 1]
         else:
             bases = []
             for i, max_level in only:
@@ -607,7 +607,7 @@ class Shaker:
 
                 bases.append((i, max_level))
 
-        bases.sort(key=lambda x: (x[0].order(), -x[0].representation().count('F')))
+        bases.sort(key=lambda x: (x[0].order(), x[0].raw_representation().count('D')))
 
         # select frequencies:
         frequencies_for_all = []
