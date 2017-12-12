@@ -1,3 +1,5 @@
+import subprocess
+
 from qcip_tools import derivatives
 from qcip_tools.chemistry_files import chemistry_datafile
 
@@ -202,3 +204,38 @@ class ShakeTestCase(NachosTestCase):
                     self.assertIn(freq, cx.total_vibrational)
                     self.assertTensorsAlmostEqual(
                         c.total_vibrational[freq], cx.total_vibrational[freq])
+
+    def test_nachos_shake(self):
+        """Test the shake command"""
+
+        must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
+        d = ['FF', 'FD']
+        notd = ['F', 'FFF', 'FDF', 'FDD']
+        freqs = [0.02, 0.04]
+
+        # process
+        process = self.run_python_script(
+            'nachos/shake.py', ['-d', self.datafile, '-O', ';'.join(d), '-f', ';'.join(str(a) for a in freqs)],
+            out_pipe=subprocess.PIPE,
+            err_pipe=subprocess.PIPE)
+
+        stdout_t, stderr_t = process.communicate()
+
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertEqual(len(stdout_t), 0, msg=stdout_t.decode())
+
+        nvibs = shaking.load_vibrational_contributions(self.datafile, 15)
+
+        for i in d:
+            self.assertIn(i, nvibs)
+            cx = nvibs[i]
+            for j in must_be_in:
+                self.assertIn(j, cx.vibrational_contributions)
+
+                if 'D' in i:
+                    for f in freqs:
+                        self.assertIn(f, cx.vibrational_contributions[j])
+                else:
+                    self.assertIn('static', cx.vibrational_contributions[j])
+        for i in notd:
+            self.assertNotIn(i, nvibs)
