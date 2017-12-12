@@ -17,6 +17,110 @@ def _merge_dict_of_tensors(b, a):
         b[k].components += a[k].components
 
 
+class VibrationalContributionsData:
+    """Store the different vibrational contributions for a given derivative
+
+    :param derivative: the derivative
+    :type derivative: qcip_tools.derivatives.Derivative
+    """
+
+    def __init__(self, derivative, spacial_dof):
+        if derivatives.is_geometrical(derivative):
+            raise ValueError('vibrational contributions only to electrical derivatives')
+
+        self.derivative = derivative
+        self.vibrational_contributions = {}
+        self.spacial_dof = spacial_dof
+
+        self.per_type = {'zpva': [], 'pv': []}
+
+        self.total_zpva = {}
+        self.frequencies_zpva = []
+
+        self.total_pv = {}
+        self.frequencies_pv = []
+
+        self.total_vibrational = {}
+
+    def add_contribution(self, vc, values):
+        """add a contribution
+
+        :param vc: vibrational contribution
+        :type vc: VibrationalContribution
+        :param values: values (per frequencies)
+        :type values: dict
+        """
+
+        t = 'zpva' if vc.zpva else 'pv'
+        if vc in self.per_type[t]:
+            raise ValueError('{} already defined for {}'.format(vc.to_string(), self.derivative))
+
+        for k in values:
+            if vc.zpva:
+                if k not in self.frequencies_zpva:
+                    self.frequencies_zpva.append(k)
+                    self.total_zpva[k] = derivatives.Tensor(
+                        self.derivative, spacial_dof=self.spacial_dof, frequency=k)
+                    self.total_vibrational[k] = derivatives.Tensor(
+                        self.derivative, spacial_dof=self.spacial_dof, frequency=k)
+            else:
+                if k not in self.frequencies_pv:
+                    self.frequencies_pv.append(k)
+                    self.total_pv[k] = derivatives.Tensor(
+                        self.derivative, spacial_dof=self.spacial_dof, frequency=k)
+
+        self.per_type[t].append(vc)
+        self.vibrational_contributions[vc.to_string()] = values
+
+        if vc.zpva:
+            _merge_dict_of_tensors(self.total_zpva, values)
+        else:
+            _merge_dict_of_tensors(self.total_pv, values)
+
+        _merge_dict_of_tensors(self.total_vibrational, values)
+
+    def write_in_group(self, group):
+        """Write in an h5py group
+
+        :param group: the group
+        :type group: h5py.Group
+        """
+
+        zpva_contribs = \
+            group.attrs['zpva_contributions'].split(',') if 'zpva_contributions' in group.attrs else []
+        pv_contribs = \
+            group.attrs['pv_contributions'].split(',') if 'pv_contributions' in group.attrs else []
+
+        for k in self.vibrational_contributions:
+            chemistry_datafile.ChemistryDataFile.write_derivative_in_dataset(
+                group, k, self.derivative, self.vibrational_contributions[k])
+
+        zpva_contribs.extend([p.to_string() for p in self.per_type['zpva'] if p.to_string() not in zpva_contribs])
+        pv_contribs.extend([p.to_string() for p in self.per_type['pv'] if p.to_string() not in pv_contribs])
+
+        group.attrs['zpva_contributions'] = ','.join(zpva_contribs)
+        group.attrs['pv_contributions'] = ','.join(pv_contribs)
+
+    def read_from_group(self, group):
+
+        if 'zpva_contributions' not in group.attrs:
+            raise ValueError('no zpva_contributions in {} attrs'.format(self.derivative))
+        if 'pv_contributions' not in group.attrs:
+            raise ValueError('no zpva_contributions in {} attrs'.format(self.derivative))
+
+        zpva_contribs = group.attrs['zpva_contributions'].split(',')
+        pv_contribs = group.attrs['pv_contributions'].split(',')
+        contributions = zpva_contribs + pv_contribs
+
+        for c in contributions:
+            if c not in group:
+                raise ValueError('{} not found in {}'.format(c, self.derivative))
+
+            vc = VibrationalContribution.from_representation(c)
+            values = chemistry_datafile.ChemistryDataFile.read_derivative_from_dataset(group[c], self.derivative)
+            self.add_contribution(vc, values)
+
+
 def save_vibrational_contributions(path, contributions):
     """Save the contributions in an h5file
 
@@ -39,32 +143,13 @@ def save_vibrational_contributions(path, contributions):
             vib_group.attrs['derivatives_available'].split(',') if 'derivatives_available' in vib_group.attrs else []
 
         for k in contributions:
-            d = derivatives.Derivative(k)
             if k not in vib_group:
                 d_group = vib_group.create_group(k)
                 derivatives_available.append(k)
             else:
                 d_group = vib_group[k]
 
-            zpva_contribs = \
-                d_group.attrs['zpva_contributions'].split(',') if 'zpva_contributions' in d_group.attrs else []
-            pv_contribs = \
-                d_group.attrs['pv_contributions'].split(',') if 'pv_contributions' in d_group.attrs else []
-
-            for i in contributions[k]:
-                if 'total' not in i:
-                    vc = VibrationalContribution.from_representation(i)
-                    if vc.zpva:
-                        if i not in zpva_contribs:
-                            zpva_contribs.append(i)
-                    else:
-                        if i not in pv_contribs:
-                            pv_contribs.append(i)
-
-                    chemistry_datafile.ChemistryDataFile.write_derivative_in_dataset(d_group, i, d, contributions[k][i])
-
-            d_group.attrs['zpva_contributions'] = ','.join(zpva_contribs)
-            d_group.attrs['pv_contributions'] = ','.join(pv_contribs)
+            contributions[k].write_in_group(d_group)
 
         vib_group.attrs['derivatives_available'] = ','.join(derivatives_available)
 
@@ -99,64 +184,11 @@ def load_vibrational_contributions(path, spacial_dof):
             except derivatives.RepresentationError:
                 raise BadShaking('wrong derivative {}'.format(derivative))
 
-            v_contributions[derivative] = {}
-
-            d_group = g[derivative]
-            if 'zpva_contributions' not in d_group.attrs:
-                raise BadShaking('no zpva_contributions in {} attrs'.format(derivative))
-            if 'pv_contributions' not in d_group.attrs:
-                raise BadShaking('no zpva_contributions in {} attrs'.format(derivative))
-
-            zpva_contribs = d_group.attrs['zpva_contributions'].split(',')
-            pv_contribs = d_group.attrs['pv_contributions'].split(',')
-            contributions = zpva_contribs + pv_contribs
-
-            freqs_zpva = []
-            freqs_pv = []
-
-            for c in contributions:
-                if c not in d_group:
-                    raise BadShaking('{} not found in {}'.format(c, derivative))
-
-                try:
-                    vc = VibrationalContribution.from_representation(c)
-                except ValueError:
-                    raise BadShaking('wrong contribution {} in {}'.format(c, derivative))
-
-                value = chemistry_datafile.ChemistryDataFile.read_derivative_from_dataset(d_group[c], d)
-
-                for k in value:
-                    if vc.zpva:
-                        if k not in freqs_zpva:
-                            freqs_zpva.append(k)
-                    else:
-                        if k not in freqs_pv:
-                            freqs_pv.append(k)
-
-                v_contributions[derivative][c] = value
-
-            total_zpva = {}
-            total_pv = {}
-            total_vib = {}
-
-            for i in freqs_zpva:
-                total_zpva[i] = derivatives.Tensor(d, spacial_dof=spacial_dof, frequency=i)
-                total_vib[i] = derivatives.Tensor(d, spacial_dof=spacial_dof, frequency=i)
-
-            for i in freqs_pv:
-                total_pv[i] = derivatives.Tensor(d, spacial_dof=spacial_dof, frequency=i)
-
-            for c in zpva_contribs:
-                _merge_dict_of_tensors(total_zpva, v_contributions[derivative][c])
-                _merge_dict_of_tensors(total_vib, v_contributions[derivative][c])
-
-            for c in pv_contribs:
-                _merge_dict_of_tensors(total_pv, v_contributions[derivative][c])
-                _merge_dict_of_tensors(total_vib, v_contributions[derivative][c])
-
-            v_contributions[derivative]['total_zpva'] = total_zpva
-            v_contributions[derivative]['total_pv'] = total_pv
-            v_contributions[derivative]['total'] = total_vib
+            try:
+                v_contributions[derivative] = VibrationalContributionsData(d, spacial_dof)
+                v_contributions[derivative].read_from_group(g[derivative])
+            except ValueError as e:
+                raise BadShaking('error while reading {}: {}'.format(derivative, str(e)))
 
     return v_contributions
 
@@ -317,6 +349,9 @@ class VibrationalContribution:
                 raise ValueError('wrong derivative {}'.format(i))
 
         return VibrationalContribution(converted, m, n, dof)
+
+    def __eq__(self, other):
+        return self.to_string() == other.to_string()
 
 
 class Shaker:
@@ -563,7 +598,7 @@ class Shaker:
 
         # select bases:
         if not only:
-            bases = [(a, 2) for a in self.available_electrical_derivatives if a.order() > 0]
+            bases = [(a, 2) for a in self.available_electrical_derivatives if a.order() > 1]
         else:
             bases = []
             for i, max_level in only:
@@ -572,7 +607,7 @@ class Shaker:
 
                 bases.append((i, max_level))
 
-        bases.sort(key=lambda x: (x[0].order(), -x[0].representation().count('F')))
+        bases.sort(key=lambda x: (x[0].order(), x[0].raw_representation().count('D')))
 
         # select frequencies:
         frequencies_for_all = []
@@ -596,21 +631,10 @@ class Shaker:
             if verbosity_level >= 1:
                 out.write('\n**** Computing vibrational contributions of {}:\n'.format(fancy_output_derivative(base)))
 
-            c = {}
-
             freqs_zpva = frequencies_for_all if is_dynamic else ['static']
             freqs_pv = frequencies_for_pv_only if is_dynamic else ['static']
 
-            total_zpva = {}
-            total_pv = {}
-            total_vib = {}
-
-            for i in freqs_zpva:
-                total_zpva[i] = derivatives.Tensor(base, spacial_dof=self.dof, frequency=i)
-                total_vib[i] = derivatives.Tensor(base, spacial_dof=self.dof, frequency=i)
-
-            for i in freqs_pv:
-                total_pv[i] = derivatives.Tensor(base, spacial_dof=self.dof, frequency=i)
+            c = VibrationalContributionsData(base, self.dof)
 
             to_compute = [VibrationalContribution((base,), 1, 0), VibrationalContribution((base,), 0, 1)]
             if base.order() in self.computable_pv:
@@ -634,35 +658,28 @@ class Shaker:
 
                     if vc.zpva:
                         t = self.compute_zpva(vc, base, freqs_zpva)
-                        _merge_dict_of_tensors(total_zpva, t)
                         Shaker.output_tensors(base, vc, t, freqs_zpva, out, verbosity_level)
                     else:
                         t = self.compute_pv(vc, base, freqs_pv, limit_anharmonicity_usage)
-                        _merge_dict_of_tensors(total_pv, t)
                         Shaker.output_tensors(base, vc, t, freqs_pv, out, verbosity_level)
 
-                    _merge_dict_of_tensors(total_vib, t)
-                    c[str(vc)] = t
+                    c.add_contribution(vc, t)
                 else:
                     Shaker.display_message('unable to compute {}, skipping'.format(vc.to_string(fancy=True)))
 
             # total stuffs
             if verbosity_level >= 2:
                 out.write('\n*** Total ZPVA contribution to {}:\n'.format(fancy_output_derivative(base)))
-                Shaker.output_tensors(base, None, total_zpva, freqs_zpva, out, verbosity_level, 'ZPVA')
+                Shaker.output_tensors(base, None, c.total_zpva, freqs_zpva, out, verbosity_level, 'ZPVA')
 
                 out.write('\n*** Total pv contribution to {}:\n'.format(fancy_output_derivative(base)))
-                Shaker.output_tensors(base, None, total_pv, freqs_pv, out, verbosity_level, 'pv')
+                Shaker.output_tensors(base, None, c.total_pv, freqs_pv, out, verbosity_level, 'pv')
 
             if verbosity_level >= 1:
                 out.write(
                     '\n*** Total vibrational contribution (ZPVA+pv) to {}:\n'.format(fancy_output_derivative(base)))
                 Shaker.output_tensors(
-                    base, None, total_vib, freqs_zpva, out, verbosity_level, 'total vibrational contribution')
-
-            c['total_zpva'] = total_zpva
-            c['total_pv'] = total_pv
-            c['total'] = total_vib
+                    base, None, c.total_vibrational, freqs_zpva, out, verbosity_level, 'total vibrational contribution')
 
             vibrational_contributions[b_repr] = c
 

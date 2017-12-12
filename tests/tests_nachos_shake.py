@@ -1,3 +1,5 @@
+import subprocess
+
 from qcip_tools import derivatives
 from qcip_tools.chemistry_files import chemistry_datafile
 
@@ -26,26 +28,37 @@ class ShakeTestCase(NachosTestCase):
             self.assertIn(i, vibs)
 
             c = vibs[i]
-            self.assertEqual(len(c), len(are_in) + 2)  # the "+2" comes from the two ZPVA contributions
+            self.assertEqual(len(c.vibrational_contributions), len(are_in) + 2)
+            # the "+2" comes from the two ZPVA contributions
 
             for j in are_in:
-                self.assertIn(j, c)
+                self.assertIn(j, c.vibrational_contributions)
+                vc = shaking.VibrationalContribution.from_representation(j)
+                if vc.zpva:
+                    self.assertIn(vc, c.per_type['zpva'])
+                else:
+                    self.assertIn(vc, c.per_type['pv'])
 
                 if 'D' in i:
-                    self.assertEqual(len(c[j]), len(frequencies))
+                    self.assertEqual(len(c.vibrational_contributions[j]), len(frequencies))
                     for f in frequencies:
-                        self.assertIn(f, c[j])
-                        self.assertIsInstance(c[j][f], derivatives.Tensor)
-                        self.assertEqual(i, c[j][f].representation)
+                        if vc.zpva:
+                            self.assertIn(f, c.frequencies_zpva)
+                        else:
+                            self.assertIn(f, c.frequencies_pv)
+
+                        self.assertIn(f, c.vibrational_contributions[j])
+                        self.assertIsInstance(c.vibrational_contributions[j][f], derivatives.Tensor)
+                        self.assertEqual(i, c.vibrational_contributions[j][f].representation)
                 else:
-                    self.assertEqual(len(c[j]), 1)
-                    self.assertIn('static', c[j])
-                    self.assertIsInstance(c[j]['static'], derivatives.Tensor)
-                    self.assertEqual(i, c[j]['static'].representation)
+                    self.assertEqual(len(c.vibrational_contributions[j]), 1)
+                    self.assertIn('static', c.vibrational_contributions[j])
+                    self.assertIsInstance(c.vibrational_contributions[j]['static'], derivatives.Tensor)
+                    self.assertEqual(i, c.vibrational_contributions[j]['static'].representation)
 
             if are_not_in:
                 for j in are_not_in:
-                    self.assertNotIn(j, c)
+                    self.assertNotIn(j, c.vibrational_contributions)
 
         return vibs
 
@@ -122,27 +135,27 @@ class ShakeTestCase(NachosTestCase):
             shaker,
             [('FF', 2), ('FD', 2)],
             [0.02, 0.04],
-            ['total', 'total_zpva', 'total_pv', 'F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
+            ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
 
         self._test_contributions(
             shaker,
             [('FF', 1), ('FD', 1)],
             [0.02],
-            ['total', 'total_zpva', 'total_pv', 'F_F__0_0'],
+            ['F_F__0_0'],
             ['F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
 
         self._test_contributions(
             shaker,
             [('FFF', 2)],
             [],
-            ['total', 'total_zpva', 'total_pv', 'F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1', 'F_FF__1_1',
+            ['F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1', 'F_FF__1_1',
              'F_FF__2_0', 'F_FF__0_2'])
 
         self._test_contributions(
             shaker,
             [('FFF', 1), ('FDF', 1), ('FDD', 1)],
             [0.02],
-            ['total', 'total_zpva', 'total_pv', 'F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
+            ['F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
             ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'])
 
     def test_shaking_save_and_load(self):
@@ -155,7 +168,7 @@ class ShakeTestCase(NachosTestCase):
 
         shaker = shaking.Shaker(datafile=df)
 
-        must_be_in = ['total', 'total_zpva', 'total_pv', 'F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
+        must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
         vibs = self._test_contributions(
             shaker,
             [('FF', 2), ('FD', 2)],
@@ -172,8 +185,57 @@ class ShakeTestCase(NachosTestCase):
         self.assertIn('FD', nvibs)
 
         for i in ['FF', 'FD']:
-            for j in vibs[i]:
-                self.assertIn(j, nvibs[i])
-                for freq in vibs[i][j]:
-                    self.assertIn(freq, nvibs[i][j])
-                    self.assertTensorsAlmostEqual(vibs[i][j][freq], nvibs[i][j][freq])
+            c = vibs[i]
+            cx = nvibs[i]
+            for j in c.vibrational_contributions:
+                self.assertIn(j, cx.vibrational_contributions)
+                for freq in c.vibrational_contributions[j]:
+                    self.assertIn(freq, cx.vibrational_contributions[j])
+                    self.assertTensorsAlmostEqual(
+                        c.vibrational_contributions[j][freq], cx.vibrational_contributions[j][freq])
+
+                for freq in c.total_zpva:
+                    self.assertIn(freq, cx.total_zpva)
+                    self.assertTensorsAlmostEqual(
+                        c.total_zpva[freq], cx.total_zpva[freq])
+                    self.assertIn(freq, cx.total_pv)
+                    self.assertTensorsAlmostEqual(
+                        c.total_pv[freq], cx.total_pv[freq])
+                    self.assertIn(freq, cx.total_vibrational)
+                    self.assertTensorsAlmostEqual(
+                        c.total_vibrational[freq], cx.total_vibrational[freq])
+
+    def test_nachos_shake(self):
+        """Test the shake command"""
+
+        must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
+        d = ['FF', 'FD']
+        notd = ['F', 'FFF', 'FDF', 'FDD']
+        freqs = [0.02, 0.04]
+
+        # process
+        process = self.run_python_script(
+            'nachos/shake.py', ['-d', self.datafile, '-O', ';'.join(d), '-f', ';'.join(str(a) for a in freqs)],
+            out_pipe=subprocess.PIPE,
+            err_pipe=subprocess.PIPE)
+
+        stdout_t, stderr_t = process.communicate()
+
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertEqual(len(stdout_t), 0, msg=stdout_t.decode())
+
+        nvibs = shaking.load_vibrational_contributions(self.datafile, 15)
+
+        for i in d:
+            self.assertIn(i, nvibs)
+            cx = nvibs[i]
+            for j in must_be_in:
+                self.assertIn(j, cx.vibrational_contributions)
+
+                if 'D' in i:
+                    for f in freqs:
+                        self.assertIn(f, cx.vibrational_contributions[j])
+                else:
+                    self.assertIn('static', cx.vibrational_contributions[j])
+        for i in notd:
+            self.assertNotIn(i, nvibs)
