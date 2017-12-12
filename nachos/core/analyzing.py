@@ -114,6 +114,8 @@ class Analyzer:
         bases = [b for b in bases if not derivatives.is_geometrical(b)]
         bases.sort(key=lambda x: (x.order(), x.raw_representation().count('D')))
 
+        no_val = ' ' * 6 + '*' * 3 + ' ' * 6 + ' '
+
         for base in bases:
 
             b_repr = base.representation()
@@ -173,7 +175,7 @@ class Analyzer:
                         out.write('{: .8e} '.format(g.execute(self.datafile.derivatives[b_repr][frequency])))
                         sum_tensor.components += self.datafile.derivatives[b_repr][frequency].components
                     else:
-                        out.write('-' * 15 + '-')
+                        out.write(no_val)
 
                     if vibrational_contribution_available:
                         v = vibrational_contribution_available.vibrational_contributions
@@ -188,7 +190,7 @@ class Analyzer:
                                 vibrational_contribution_available.total_zpva[frequency].components
                         else:
                             for i in range(len(vibrational_contribution_available.per_type['zpva']) + 1):
-                                out.write('-' * 15 + '-')
+                                out.write(no_val)
 
                         if frequency in vibrational_contribution_available.frequencies_pv:
                             for c in vibrational_contribution_available.per_type['pv']:
@@ -200,13 +202,13 @@ class Analyzer:
                                 vibrational_contribution_available.total_pv[frequency].components
                         else:
                             for i in range(len(vibrational_contribution_available.per_type['pv']) + 1):
-                                out.write('-' * 15 + '-')
+                                out.write(no_val)
 
                         if frequency in vibrational_contribution_available.frequencies_zpva:
                             out.write('{: .8e} '.format(
                                 g.execute(vibrational_contribution_available.total_vibrational[frequency])))
                         else:
-                            out.write('-' * 15 + '-')
+                            out.write(no_val)
 
                         out.write('{: .8e} '.format(g.execute(sum_tensor)))
 

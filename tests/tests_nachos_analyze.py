@@ -1,7 +1,6 @@
 from qcip_tools import derivatives, derivatives_e
-from qcip_tools.chemistry_files import chemistry_datafile
 
-from nachos.core import analyzing, shaking
+from nachos.core import analyzing
 
 from tests import NachosTestCase, factories
 
@@ -47,30 +46,3 @@ class AnalyzeTestCase(NachosTestCase):
             function='norm')
 
         self.assertEqual(e.execute(tx), t.norm())
-
-    def test_analyzing(self):
-        """Test the analysis"""
-
-        df = chemistry_datafile.ChemistryDataFile()
-
-        with open(self.datafile) as f:
-            df.read(f)
-
-        vibs = shaking.load_vibrational_contributions(self.datafile, df.spacial_dof)
-
-        analyzer = analyzing.Analyzer(df, vibs)
-        analyzer.analyze({
-            2: [
-                analyzing.GetPropertyOfTensor(
-                    analyzing.property_access,
-                    analyzing.get_tensor_converter(derivatives_e.PolarisabilityTensor),
-                    explain='isotropic_value',
-                    function='isotropic_value')
-            ],
-            3: [
-                analyzing.GetPropertyOfTensor(
-                    analyzing.component_access,
-                    explain='beta_xyz',
-                    component=(0, 1, 2))
-            ]
-        })

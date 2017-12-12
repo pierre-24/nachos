@@ -17,7 +17,8 @@ provide_scripts = [
     'prepare',
     'cook',
     'bake',
-    'shake'
+    'shake',
+    'analyze'
 ]
 
 
