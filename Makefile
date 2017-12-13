@@ -6,6 +6,7 @@ help:
 	@echo "  install-dependencies-dev    to install python dependencies (for dev) through pip"
 	@echo "  lint                        to lint backend code (flake8)"
 	@echo "  test                        to run test suite"
+	@echo "  doc                         to build documentation"
 	@echo "  help                        to get this help"
 
 install-dependencies:
@@ -19,3 +20,6 @@ lint:
 
 test:
 	python setup.py test
+
+doc:
+	cd documentation; make html
