@@ -383,6 +383,10 @@ The ``-V 1`` option allows you to know how much files where generated.
 
     You need to launch as many calculations as there is lines in this file.
 
+    For the gaussian program, just run as many calculation as there is input files, all are useful.
+
+    Note that the program tries to optimize things as much as possible and request the computation of things that are needed at a given level (no need to do a gradient calculation for second order if not requested, for example, which explains the multiple dal files, and why some calculations may be faster than other).
+
 
 .. autoprogram:: nachos.cook:get_arguments_parser()
     :prog: nachos_cook
@@ -435,7 +439,95 @@ The output depends on the value of ``-V``, which can be:
     + Projection over normal mode of all the geometrical derivatives is requested via the ``-p`` option, but you can also request that the cartesian hessian used to do so is different, with the ``-H`` option (which only accepts FCHK with cartesian hessian in it as argument, for the moment).
 
 
+.. autoprogram:: nachos.shake:get_arguments_parser()
+    :prog: nachos_shake
 
+.. warning::
+
+    Obviously, you can only compute vibrational contribution to electrical derivatives (dipole, polarizability, hyperpolarizabilities).
+
+
+From the information available in the *final file*, the program decide which vibrational contributions are computable, and compute them.
+Stores them back into the same file, except if the ``-A`` option was used.
+
+
+.. note::
+
+    Vibrational contribution are written :math:`[xyz]^{m,n}`, where :math:`m` is the level of electrical anharmonicity and :math:`n` is the level of mecanical anharmonicity.
+    The ``-O`` options allows to restrict the **total** (:math:`m+n`) level, so that, for example, if ``-O "FF:1"`` (see below), :math:`[]^{0,0}`, :math:`[]^{1,0}` and :math:`[]^{0,1}`-like contributions will be computed, but not the :math:`[]^{1,1}`-like contributions.
+
+    Also, the more the level, the more the time.
+
+
+You can restrict the number of vibrational contribution with the ``-O`` option, which takes a semicolon separated list of stuff of the form ``quantity[:level]``, which are the quantities for which vibrational contribution should be added, and what is the maximum level of vibrational contribution to compute for it.
+If this second part is not provided, default maximum (2) is assumed.
+
+The first order ZPVA contributions (:math:`[]^{1,0}` and :math:`[]^{0,1}`) are available for any quantities (if first and second order geometrical derivatives of these quantities and ``NNN`` are available).
+
+The pure vibrational (pv) contributions depends on the quantity:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 20 10 40
+
+   * - Quantity
+     - Vibrational contribution
+     - Level
+     - Derivatives needed
+   * - Polarizability (``FF``, ``FD``)
+     - :math:`[\mu^2]^{0,0}`
+     - 0
+     - ``NF``
+   * -
+     - :math:`[\mu^2]^{1,1}`
+     - 2
+     - ``NF``, ``NNF``, ``NNN``
+   * -
+     - :math:`[\mu^2]^{2,0}`
+     - 2
+     - ``NNF`` (part with ``NNNF`` not implemented)
+   * -
+     - :math:`[\mu^2]^{0,2}`
+     - 2
+     - ``NF``, ``NNN`` (part with ``NNNN`` not implemented)
+   * - First hyperpolarizability (``FFF``, ``FDF``, ``FDD``)
+     - :math:`[\mu\alpha]^{0,0}`
+     - 0
+     - ``NF``, ``NFF``
+   * -
+     - :math:`[\mu^3]^{1,0}`
+     - 1
+     - ``NF``, ``NNF``
+   * -
+     - :math:`[\mu^3]^{0,1}`
+     - 1
+     - ``NF``, ``NNN``
+   * -
+     - :math:`[\mu\alpha]^{1,1}`
+     - 2
+     - ``NF``, ``NNF``, ``NFF``, ``NNFF``, ``NNN``
+   * -
+     - :math:`[\mu\alpha]^{2,0}`
+     - 2
+     - ``NNF``, ``NNFF`` (part with ``NNNF`` and ``NNNFF`` not implemented)
+   * -
+     - :math:`[\mu\alpha]^{0,2}`
+     - 2
+     - ``NF``, ``NFF``, ``NNN``  (part with ``NNNN`` not implemented)
+
+
+The output depends on the value of ``-V``, which can be:
+
+- ``-V 0`` nothing is outputted (this is default) ;
+- ``-V 1`` outputs only the final vibrational tensors that are obtained ;
+- ``-V 2`` also outputs the total pv and ZPVA tensors ;
+- ``-V 3`` also outputs the tensors for **each** contribution.
+
+.. note::
+
+    The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.
+    Even though ZPVA requires derivatives of the dynamic quantities to be computed, this is not the case for the pv part, for which any frequency could be used.
+    Therefore, the ZPVA part is only computed for available frequencies, and the pv part is computed for all (!) frequencies.
 
 Appendix
 --------
