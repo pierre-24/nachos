@@ -365,6 +365,8 @@ Note that you don't have to redefine every variable, since they have a default v
 The program will prepare as many input files as needed.
 By using ``-d``, you can decide where the input files should be generated, but keep in mind that they should be in the same directory as the recipe for the next step (use ``-c`` if needed).
 
+The ``-V 1`` option allows you to know how much files where generated.
+
 .. note::
 
     To helps the dalton program, a file called ``inputs_matching.txt`` is created for this *flavor*, where each lines contains the combination of dal and mol file to launch (because there may be different dal files).
@@ -380,6 +382,18 @@ By using ``-d``, you can decide where the input files should be generated, but k
 
     You need to launch as many calculations as there is lines in this file.
 
+
+.. autoprogram:: nachos.cook:get_arguments_parser()
+    :prog: nachos_cook
+
+The program fetch the different computational results from each files that it can fin (it looks for FCHK files with gaussian, TAR archive and OUT files for dalton), and mix them together in a single *data file*.
+
+The ``-V 1`` option allows you to know which files the program actually discovered and used.
+
+
+.. warning::
+
+    The program looks for output files **in the same directory as the recipe**, and there is no way to change this behavior.
 
 Appendix
 --------

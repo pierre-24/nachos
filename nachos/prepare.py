@@ -31,6 +31,7 @@ def copy_file_from_extra(var, recipe, recipe_directory, directory):
 def get_arguments_parser():
     arguments_parser = argparse.ArgumentParser(description=__doc__)
     arguments_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
+    arguments_parser.add_argument('-V', '--verbose', type=int, help='Level of details (0 or 1)', default=0)
 
     arguments_parser.add_argument(
         '-d', '--directory', action='store', help='output directory', default='.', type=is_dir)
@@ -75,7 +76,8 @@ def main():
         with open(os.path.join(directory, 'nachos_recipe.yml'), 'w') as f:
             recipe.write(f)
 
-    print('prepared {} files'.format(n))
+    if args.verbose >= 1:
+        print('prepared {} files'.format(n))
 
 if __name__ == '__main__':
     main()
