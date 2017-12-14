@@ -69,7 +69,30 @@ In short,
 6. (*optional*) ``nachos_analyze`` allow to quickly get a given property for each quantity stored in the *final file* (e.g. a tensor component, an average, ...) ;
 7. (*optional*) if possible, ``nachos_shake`` will add the different vibrational contribution to the electrical derivatives of the energy.
 
-See below for more details.
+Therefore, it should looks like:
+
+.. sourcecode:: bash
+
+    # create subdirectory:
+    mkdir new_directory
+    cd new_directory
+
+    # create recipe and inputs:
+    nachos_make && nachos_prepare
+
+    # ... run all the inputs ...
+
+    # carry out and perform numerical differentiation:
+    nachos_cook && nachos_bake # or nachos_bake -P
+
+    # ... eventually, add vibrational contributions:
+    nachos_shake
+
+    # ... eventually, post-analyze:
+    nachos_analyze -p "xxxx"
+
+
+See below for more details on every command.
 
 .. autoprogram:: nachos.make:get_arguments_parser()
     :prog: nachos_make
@@ -120,7 +143,7 @@ The program prompts for different information in order to create a *recipe file*
      - *path to a gbs file*
      - Only if ``gaussian`` and ``gen``
    * - ``--differentiation``
-     - "Differentiation?"
+     - "What to differentiate?"
      - :ref:`see below <nachos_make_note_2>`
      -
    * - ``--frequencies``
@@ -253,6 +276,7 @@ For example,
   To get the same property from the dipole moment and the static polarizability, the input is ``F:2;FF:1``.
 + If you want to get the vibrational contribution to a given property (say, the polarizability), you need to select ``G`` for the type of differentiation, then you need at least second order derivative of the dipole moment polariability with respect to that (the first one is automatically computed if the second is), and the cubic force field, so an input could look like ``FF:2;F:2;GG:1`` (and eventually ``FD:2``).
 
+:ref:`See above <nachos_make_note_1>` for the list of quantities that you can differentiate depending on the *flavor* and the method.
 
 -------
 

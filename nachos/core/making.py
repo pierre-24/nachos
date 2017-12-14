@@ -459,7 +459,7 @@ class Maker:
         self._make_var(
             args,
             'differentiation',
-            'Differentiation?',
+            'What to differentiate?',
             SetRecipeBasesAction(recipe),
             completer=BasisCompleter(config['bases']),
             validator=BasisValidator(config['bases'], max_diff, recipe['method']))
