@@ -37,7 +37,8 @@ def get_arguments_parser():
     arguments_parser.add_argument(
         '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='./nachos_recipe.yml')
     arguments_parser.add_argument(
-        '-c', '--copy-files', action='store_true', help='copy geometry and recipe into destination directory')
+        '-c', '--copy-files', action='store_true',
+        help='copy geometry, extra files, and recipe into destination directory')
 
     return arguments_parser
 

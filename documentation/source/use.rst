@@ -89,7 +89,7 @@ Therefore, it should looks like:
     nachos_shake
 
     # ... eventually, post-analyze:
-    nachos_analyze -p "xxxx"
+    nachos_analyze -p "xxxx" > nachos.log
 
 
 See below for more details on every command.
@@ -103,6 +103,7 @@ See below for more details on every command.
     + For some terminal, it is not possible to use the extended prompt toolkit, use ``-N`` to get an alternative.
     + Default behavior is if there is an error in the input argument, the corresponding question is asked again.
       If you just want the program to fail (because you are using it in a script), use the ``-S`` option.
+    + ``F`` differentiation is **only possible** with gaussian.
 
 The program prompts for different information in order to create a *recipe file*, if not given in command line, and generate a recipe in output (``-o`` option, default is ``nachos_recipe.yml``).
 
@@ -356,6 +357,28 @@ Note that you don't have to redefine every variable, since they have a default v
          - ``ND``
          - Prefix for the different ``.dal`` files
 
+
+.. autoprogram:: nachos.prepare:get_arguments_parser()
+    :prog: nachos_prepare
+
+
+The program will prepare as many input files as needed.
+By using ``-d``, you can decide where the input files should be generated, but keep in mind that they should be in the same directory as the recipe for the next step (use ``-c`` if needed).
+
+.. note::
+
+    To helps the dalton program, a file called ``inputs_matching.txt`` is created for this *flavor*, where each lines contains the combination of dal and mol file to launch (because there may be different dal files).
+
+    If you use job arrays, you may therefor use a job file that contains the following lines (here with  `slurm <https://slurm.schedmd.com/>`_, but it is the same with other schedulers):
+
+    .. code-block:: bash
+
+      # get the files from the line:
+      INPUT_FILES=$(sed -n "${SLURM_ARRAY_TASK_ID}p" inputs_matching.txt)
+      # launch dalton:
+      dalton $INPUT_FILES
+
+    You need to launch as many calculations as there is lines in this file.
 
 
 Appendix
