@@ -10,18 +10,18 @@ Concepts
 
    .. math::
 
-      \left.\frac{\partial f(x)}{\partial x}\right|_{x=0} = \lim_{h_0\rightarrow 0} \frac{f(h_0)-f(0)}{h_0},
+      \left.\frac{\partial f(x)}{\partial x}\right|_{x=0} = \lim_{h_0\rightarrow 0} \underbrace{\frac{f(h_0)-f(0)}{h_0}}_{\text{forward derivative}} = \lim_{h_0\rightarrow 0} \underbrace{\frac{f(h_0)-f(-h_0)}{2\,h_0}}_{\text{centered derivative}},
 
    where :math:`h_0` is the minimal field (``min_field`` parameter).
 
 +  The code use the Romberg procedure to remove contamination from higher orders (see `this publication <dx.doi.org/10.1002/qua.24685>`_ for more details).
-   The derivative is computed for different values of :math:`f=a^k\,f_0`, with :math:`k<k_{max}` the field amplitude (which lead to the ``k_max`` parameter), and :math:`a` is the common ratio (``ratio`` parameter).
+   The derivative is computed for different values of :math:`h=a^k\,h_0`, with :math:`k<k_{max}` the field amplitude (which lead to the ``k_max`` parameter), and :math:`a` is the common ratio (``ratio`` parameter).
    The procedure goes as follow:
 
    .. math::
 
       \begin{align}
-      &H_{k,0} = \frac{f(a^k\,h_0)-f(0)}{a^k\,h_0},\\
+      &H_{k,0} = \frac{f(a^kh_0)-f(-a^kh_0)}{2\,a^kh_0},\\
       &H_{k,m+1} = \frac{a^{2m}\,H_{k,m}-H_{k+1,m}}{a^{2m}-1},
       \end{align}
 
@@ -62,13 +62,13 @@ Here is the schematic of the workflow with the nachos package:
 
 In short,
 
-1. ``nachos_make`` create a *recipe* (``nachos_recipe.yml``, but you can change that), which is the file that explains what to do and how to do it ;
-2. ``nachos_prepare`` uses the recipe to generate the different input files for the quantum chemistry program of your choice (currently Gaussian and Dalton) ;
+1. `nachos_make <#id1>`_ creates a *recipe* (``nachos_recipe.yml``, but you can change that), which is the file that explains what to do and how to do it ;
+2. `nachos_prepare <#id2>`_ uses the recipe to generate the different input files for the quantum chemistry program of your choice (currently Gaussian and Dalton) ;
 3. The quantum chemistry program process the different input files and generate output files ;
-4. ``nachos_cook`` carry out all the information that it can get from output files (FCHK files for gaussian, TAR archives and OUT files for Dalton) and store them in a *data file* (``nachos_data.h5``, but you can change that) ;
-5. ``nachos_bake`` perform the requested numerical differentiation(s) out of the data from the *data file*, and store them in a *final file* (``molecule_nd.h5``, but you can change that) ;
-6. (*optional*) ``nachos_analyze`` allow to quickly get a given property for each quantity stored in the *final file* (e.g. a tensor component, an average, ...) ;
-7. (*optional*) if possible, ``nachos_shake`` will add the different vibrational contribution to the electrical derivatives of the energy.
+4. `nachos_cook <#id3>`_ carry out all the information that it can get from output files (FCHK files for gaussian, TAR archives and OUT files for Dalton) and store them in a *data file* (``nachos_data.h5``, but you can change that) ;
+5. `nachos_bake <#id4>`_ perform the requested numerical differentiation(s) out of the data from the *data file*, and store them in a *final file* (``molecule_nd.h5``, but you can change that) ;
+6. (*optional*) `nachos_analyze <#id6>`_ allow to quickly get a given property for each quantity stored in the *final file* (e.g. a tensor component, an average, ...) ;
+7. (*optional*) if possible, `nachos_shake <#id5>`_ will add the different vibrational contribution to the electrical derivatives of the energy.
 
 Therefore, it should looks like:
 
@@ -459,8 +459,9 @@ Stores them back into the same file, except if the ``-A`` option was used.
     Also, the more the level, the more the time.
 
 
-You can restrict the number of vibrational contribution with the ``-O`` option, which takes a semicolon separated list of stuff of the form ``quantity[:level]``, which are the quantities for which vibrational contribution should be added, and what is the maximum level of vibrational contribution to compute for it.
-If this second part is not provided, default maximum (2) is assumed.
+You can restrict the number of vibrational contribution with the ``-O`` option, which takes a semicolon separated list of stuff of the form ``quantity:level``, which are the quantities for which vibrational contribution should be added, and what is the maximum level of vibrational contribution to compute for it.
+If this second part is not provided, default maximum (2) is assumed, so you can simply provide quantity.
+For example, ``-O "FF;FFF:1"`` will compute all vibrational contribution to polarizability, but only first-order contribution to hyperpolarizability.
 
 The first order ZPVA contributions (:math:`[]^{1,0}` and :math:`[]^{0,1}`) are available for any quantities (if first and second order geometrical derivatives of these quantities and ``NNN`` are available).
 
@@ -526,8 +527,38 @@ The output depends on the value of ``-V``, which can be:
 .. note::
 
     The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.
-    Even though ZPVA requires derivatives of the dynamic quantities to be computed, this is not the case for the pv part, for which any frequency could be used.
+    Even though ZPVA requires derivatives of the dynamic quantities to be available, this is not the case for the pure vibrational part, for which any frequency could be used.
     Therefore, the ZPVA part is only computed for available frequencies, and the pv part is computed for all (!) frequencies.
+
+.. autoprogram:: nachos.analyze:get_arguments_parser()
+    :prog: nachos_analyze
+
+This program allows you to quickly access to a (eletrical derivative) property.
+
+The properties have the form ``tensor:property`` or ``tensor::component``, where ``tensor`` is either ``m`` (dipole, ``F``), ``a`` (polarizability, ``FF`` or ``FD``), ``b`` (first hyperpolarizability, ``FFF``, ``FDF`` or ``FDD``) or ``g`` (second hyperpolarizability).
+
++ If you use the form ``tensor::component``, you can directly access to a given component, like ``a::xx`` or ``b::xyz`` (obviously, the number of components should match the size of the tensor).
++ On the other hand, with the form ``tensor:property``, ``property`` differs from one tensor to another. Values may be the following:
+
+  * For ``m``: ``norm``
+  * For ``a``: ``isotropic_value``, ``anisotropic_value``
+  * For ``b``:
+
+    - For any process: ``beta_parallel``, ``beta_perpendicular``, ``beta_kerr``
+    - For SHG: ``beta_squared_zxx``, ``beta_squared_zzz``, ``beta_hrs``, ``depolarization_ratio``, ``dipolar_contribution_squared``, ``octupolar_contribution_squared``, ``nonlinear_anisotropy``
+
+  * For ``g``:
+
+    - For any process: ``gamma_parallel``, ``gamma_perpendicular``, ``gamma_kerr``
+    - For THS: ``gamma_squared_zzzz``, ``gamma_squared_zxxx``, ``gamma_ths``, ``depolarization_ratio``, ``isotropic_contribution_squared``, ``quadrupolar_contribution_squared``, ``hexadecapolar_contribution_squared``
+
+You can restrict the number of vibrational contribution with the ``-O`` option, which takes a semicolon separated list of quantities.
+
+.. note::
+
+    + The different properties are actually function of the corresponding tensors in `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_, so this list may not be exhaustive (but at your own risks).
+    + Please use the ``-O`` option to restrict the effect when fetching SHG or THS properties.
+    + If vibrational contribution have been added via ``nachos_shake`` to the program, the different values for each contribution will be printed.
 
 Appendix
 --------
@@ -564,7 +595,7 @@ Note that it would be better to respect the order for the different derivatives 
      - EOP first hyperpolarizability
    * - :math:`\beta(-2\omega;\omega,\omega)`
      - ``FDD``
-     - SHG first hyperpolarizability
+     - SHG/SHS first hyperpolarizability
    * - :math:`\gamma(0;0,0,0)`
      - ``FFFF``
      - Static second hyperpolarizability
@@ -579,7 +610,7 @@ Note that it would be better to respect the order for the different derivatives 
      - DFWM second hyperpolarizability
    * - :math:`\gamma(-3\omega;\omega,\omega,\omega)`
      - ``FDDD``
-     - THG second hyperpolarizability
+     - THG/THS second hyperpolarizability
    * - :math:`\frac{\partial V(x)}{\partial x}`
      - ``G``
      - (cartesian) gradient
