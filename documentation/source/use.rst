@@ -47,6 +47,7 @@ Concepts
 +  Nachos is abble to perform differentiation with respect to static electric field (``F``) and cartesian coordinate (``G``).
    Given the cartesian hessian, ``nachos_bake`` (see below) perform a vibrational analysis and is able to project ``G`` derivatives over normal mode, giving the corresponding ``N`` ones.
 
++ Nachos (because of the underlying library, `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_) takes advantage of permutation symmetry and `Shwarz's theorem <https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem>`_ (referred as "Kleinman symmetry" in the field of nonlinear optics).
 
 General workflow
 ----------------
@@ -394,6 +395,47 @@ The ``-V 1`` option allows you to know which files the program actually discover
 .. warning::
 
     The program looks for output files **in the same directory as the recipe**, and there is no way to change this behavior.
+
+.. autoprogram:: nachos.bake:get_arguments_parser()
+    :prog: nachos_bake
+
+The ``-O`` option to control what is actually differentiated.
+It expects a semicolon list like the ``--differentiation`` option of ``nachos_make`` (:ref:`see above <nachos_make_note_2>`), but you don't have to provide the number of time if you want the number in the recipe to be used.
+
+So, for example, if you have a recipe that contains:
+
+.. code-block:: yaml
+
+    type: G
+    # ... other stuffs ...
+    differentiation:
+      2:
+        - F
+        - FF
+        - FD
+      1:
+        - GG
+
+Using ``-O "F:1;FF:1"`` will request to peform the first order geometrical derivatives **only** for the dipole moment and static polarizability, while ``-O "F;FF:1"`` will request the same for static hyperpolarizability, but adds the second order for the dipole moment (as written in the recipe).
+In both cases, dynamic polarizability is not differentiated.
+
+The output depends on the value of ``-V``, which can be:
+
+- ``-V 0`` nothing is outputted (this is default) ;
+- ``-V 1`` outputs the final tensors that are obtained ;
+- ``-V 2`` also outputs Romberg triangle and best values (for each nonredudant components) ;
+- ``-V 3`` also output the decision process to find best value in Romberg triangle.
+
+.. note::
+
+    + If you request second order (or third, or ...) derivative, the lower order derivatives are also computed.
+      There is no way to change this behavior.
+    + By default, the program also include the base tensors calculated in the process.
+      The ``-S`` option prevents this (that may be useful in the case of electric field differentiation)
+    + Projection over normal mode of all the geometrical derivatives is requested via the ``-p`` option, but you can also request that the cartesian hessian used to do so is different, with the ``-H`` option (which only accepts FCHK with cartesian hessian in it as argument, for the moment).
+
+
+
 
 Appendix
 --------
