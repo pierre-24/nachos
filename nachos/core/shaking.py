@@ -817,7 +817,7 @@ class Shaker:
             t_nnx = self.get_tensor('NN' + b_repr, frequency)
             t = derivatives.Tensor(representation=derivative, frequency=frequency)
 
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 t.components += 1 / self.mwh.frequencies[a] * t_nnx[a, a]
 
             t.components *= 1 / 4
@@ -847,9 +847,9 @@ class Shaker:
             t_nnn = self.get_tensor('NNN')
             t = derivatives.Tensor(representation=derivative, frequency=frequency)
 
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 ccc = 0
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                for b in self.mwh.included_modes:
                     ccc += t_nnn[b, b, a] / self.mwh.frequencies[b]
 
                 t.components += 1 / (self.mwh.frequencies[a] ** 2) * ccc * t_nx[a]
@@ -886,7 +886,7 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 tmp = t_nf[a, p[0][0]] * t_nf[a, p[1][0]]
                 for f in frequencies:
                     values[f] += Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * tmp
@@ -932,13 +932,13 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
 
                     tmp_ab1 = (1 / self.mwh.frequencies[a] + 1 / self.mwh.frequencies[b]) * t_nnf[a, b, p[0][0]]
                     tmp_ab2 = self.mwh.frequencies[b] ** -2 * t_nnf[a, b, p[0][0]] * t_nf[a, p[1][0]]
 
-                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    for c in self.mwh.included_modes:
                         tmp1 = tmp_ab1 * t_nf[c, p[1][0]] * t_nnn[a, b, c]
                         tmp2 = tmp_ab2 * t_nnn[b, c, c] * self.mwh.frequencies[c] ** -1
 
@@ -983,8 +983,8 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
 
                     tmp = 1 / self.mwh.frequencies[a] * t_nnf[a, b, p[0][0]] * t_nnf[a, b, p[1][0]]
 
@@ -1029,18 +1029,18 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 mult_a = 1 / self.mwh.frequencies[a]
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                for b in self.mwh.included_modes:
                     mult_ab = self.mwh.frequencies[b] ** -2
 
-                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    for c in self.mwh.included_modes:
 
                         mult_abc = mult_a * t_nf[c, p[0][0]]
                         mult_abc_1 = mult_abc * t_nnn[a, a, b] * mult_ab
                         mult_abc_2 = mult_abc * t_nnn[a, b, c]
 
-                        for d in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                        for d in self.mwh.included_modes:
                             mult_abcd = t_nf[d, p[1][0]]
 
                             tmp1 = mult_abcd * mult_abc_1 * t_nnn[b, c, d]
@@ -1089,7 +1089,7 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 tmp = t_nf[a, p[0][0]] * t_nff[a, p[1][0], p[2][0]]
                 for f in frequencies:
                     values[f] += Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * tmp
@@ -1130,8 +1130,8 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
 
                     tmp = 1 / self.mwh.frequencies[a] * t_nnf[a, b, p[0][0]] * t_nnff[a, b, p[1][0], p[2][0]]
 
@@ -1178,18 +1178,18 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 mult_a = 1 / self.mwh.frequencies[a]
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                for b in self.mwh.included_modes:
                     mult_ab = self.mwh.frequencies[b] ** -2
 
-                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    for c in self.mwh.included_modes:
 
                         mult_abc = mult_a * t_nf[c, p[0][0]]
                         mult_abc_1 = mult_abc * t_nnn[a, a, b] * mult_ab
                         mult_abc_2 = mult_abc * t_nnn[a, b, c]
 
-                        for d in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                        for d in self.mwh.included_modes:
                             mult_abcd = t_nff[d, p[1][0], p[2][0]]
 
                             tmp1 = mult_abcd * mult_abc_1 * t_nnn[b, c, d]
@@ -1250,8 +1250,8 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
 
                     f_ab1 = (1 / self.mwh.frequencies[a] + 1 / self.mwh.frequencies[b])
                     f_ab2 = self.mwh.frequencies[b] ** -2
@@ -1263,7 +1263,7 @@ class Shaker:
                         (t_nnf[a, b, p[0][0]] * t_nff[a, p[1][0], p[2][0]] +
                          t_nnff[a, b, p[1][0], p[2][0]] * t_nf[a, p[0][0]])
 
-                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    for c in self.mwh.included_modes:
                         tmp1 = (tmp_ab1 * t_nff[c, p[1][0], p[2][0]] + tmp_ab3 * t_nf[c, p[0][0]]) * t_nnn[a, b, c]
                         tmp2 = tmp_ab2 * t_nnn[b, c, c] * self.mwh.frequencies[c] ** -1
 
@@ -1310,10 +1310,10 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 tmp_a = t_nf[a, p[0][0]]
 
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                for b in self.mwh.included_modes:
                     tmp_ab = tmp_a * t_nnf[a, b, p[1][0]] * t_nf[b, p[2][0]]
 
                     for f in frequencies:
@@ -1357,13 +1357,13 @@ class Shaker:
         multiplier, unique_elemts = self.get_iterator(coo, input_fields)
 
         for p in unique_elemts:
-            for a in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+            for a in self.mwh.included_modes:
                 tmp_a = t_nf[a, p[0][0]]
 
-                for b in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                for b in self.mwh.included_modes:
                     tmp_ab = tmp_a * t_nf[b, p[1][0]]
 
-                    for c in range(self.mwh.trans_plus_rot_dof, self.mwh.dof):
+                    for c in self.mwh.included_modes:
 
                         tmp_abc = tmp_ab * t_nf[c, p[2][0]] * t_nnn[a, b, c]
 

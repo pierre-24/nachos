@@ -15,8 +15,8 @@ def get_tensor_converter(type_):
             }
         else:
             kw = {
-                'input_fields': [
-                    derivatives_e.representation_to_field[a] for a in obj.representation.representation()[1:]],
+                'input_fields': tuple(
+                    derivatives_e.representation_to_field[a] for a in obj.representation.representation()[1:]),
                 'frequency': obj.frequency,
                 'tensor': obj.components
             }
