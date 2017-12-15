@@ -2,6 +2,7 @@ import os
 import glob
 import math
 import numpy
+import sys
 
 from qcip_tools import quantities, derivatives, derivatives_g, derivatives_e
 from qcip_tools.chemistry_files import helpers, gaussian, PropertyNotPresent, PropertyNotDefined, dalton
@@ -71,7 +72,7 @@ class Cooker:
         self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
-    def cook(self):
+    def cook(self, out=sys.stdout, verbosity_level=0):
 
         storage = files.ComputationalResults(self.recipe, directory=self.directory)
 
@@ -79,11 +80,18 @@ class Cooker:
 
         for l in look_for:
             for i in glob.glob('{}/{}'.format(self.directory, l)):
+                if verbosity_level >= 1:
+                    out.write('* cooking with {} ... '.format(i))
+
                 with open(i) as f:
                     try:
                         fx = helpers.open_chemistry_file(f)
                         self.cook_from_file(fx, i, storage)
+                        if verbosity_level >= 1:
+                            out.write('ok\n')
                     except helpers.ProbablyNotAChemistryFile:
+                        if verbosity_level >= 1:
+                            out.write('skipped\n')
                         continue
 
         return storage

@@ -29,7 +29,7 @@ def get_arguments_parser():
     arguments_parser.add_argument('--method', help='computational method')
     arguments_parser.add_argument('--basis-set', help='basis set')
     arguments_parser.add_argument('--geometry', help='geometry of the molecule')
-    arguments_parser.add_argument('--differentiation', help='differentiation')
+    arguments_parser.add_argument('--differentiation', help='quantities to differentiate')
     arguments_parser.add_argument('--frequencies', help='frequencies (if dynamic quantities)')
     arguments_parser.add_argument('--name', help='Name of the files')
     arguments_parser.add_argument('--min-field', help='Minimum field (F_0)')

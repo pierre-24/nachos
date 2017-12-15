@@ -19,6 +19,7 @@ __status__ = 'Development'
 def get_arguments_parser():
     arguments_parser = argparse.ArgumentParser(description=__doc__)
     arguments_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
+    arguments_parser.add_argument('-V', '--verbose', type=int, help='Level of details (0 to 1)', default=0)
     arguments_parser.add_argument(
         '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='./nachos_recipe.yml')
     arguments_parser.add_argument(
@@ -42,7 +43,7 @@ def main():
     cooker = cooking.Cooker(recipe, directory=recipe_directory)
 
     try:
-        storage = cooker.cook()
+        storage = cooker.cook(verbosity_level=args.verbose)
     except cooking.BadCooking as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 

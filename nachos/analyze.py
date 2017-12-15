@@ -113,8 +113,6 @@ def get_arguments_parser():
     arguments_parser.add_argument(
         '-d', '--data', type=str, help='Input h5 file', default='molecule_nd.h5')
 
-    arguments_parser.add_argument('-V', '--verbose', type=int, help='Level of details (0 to 3)', default=0)
-
     arguments_parser.add_argument(
         '-O', '--only', help='only fetch the properties of given derivatives')
 
