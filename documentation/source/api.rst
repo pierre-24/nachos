@@ -48,8 +48,14 @@ Baking (``nachos.core.baking``)
 Shaking (``nachos.core.shaking``)
 ---------------------------------
 
+.. math::
+
+    \newcommand{\tdiff}[2]{\left(\frac{\partial #1}{ \partial #2}\right)}
+    \newcommand{\lb}[2]{\lambda^{\pm #1}_{#2}}
+
 .. automodule:: nachos.core.shaking
     :members:
+    :private-members:
 
 
 Analyzing (``nachos.core.analyzing``)

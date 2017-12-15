@@ -493,9 +493,16 @@ class Shaker:
     def lambda_(up, down):
         """Compute the lambda quantity found in the papers of Kirtman and Bishop
 
-        :param up: upper argument (optical frequencies)
+        .. math::
+            \\begin{align}
+            \\lambda^{\pm ij\\ldots}_{xy\\ldots}= [(\\omega_x+\\omega_y+\\ldots)& +(\\omega_i+\\omega_j+\\ldots)]^{-1}
+            \\times\\\\
+             &[(\\omega_x+\\omega_y+\\ldots)-(\\omega_i+\\omega_j+\\ldots)]^{-1}
+            \\end{align}
+
+        :param up: upper argument (optical frequencies: :math:`\\omega_{i}`, ...)
         :type up: float|list|tuple
-        :param down: down argument (vibrational frequencies)
+        :param down: down argument (vibrational frequencies: :math:`\\omega_{x}`, ...)
         :type down: float|list|tuple
         :rtype: float
         """
@@ -548,7 +555,7 @@ class Shaker:
 
         .. note::
 
-            Expect the callback function to be ``'_compute_' + what + '_components'``,
+            Expect the callback function to be ``'_compute_' + what + '_component'``,
             and kwargs to looks like ``'t_' + repr``.
 
         :param vc: what to compute
@@ -577,7 +584,7 @@ class Shaker:
             kwargs['t_' + r.lower()] = self.get_tensor(r)
 
         return self._create_tensors(
-            derivative, frequencies, '_compute_{}_components'.format(vc.to_string()), **kwargs)
+            derivative, frequencies, '_compute_{}_component'.format(vc.to_string()), **kwargs)
 
     def shake(self, only=None, frequencies=None, out=sys.stdout, verbosity_level=0,
               limit_anharmonicity_usage=True):
@@ -791,6 +798,18 @@ class Shaker:
         return tensors
 
     def _compute_zpva_10(self, derivative, frequencies):
+        """Compute the ZPVA contribution from electrical anharmonicity:
+
+        .. math::
+
+            [p]^{1,0} = \\frac{1}{4}\\,\\sum_a \\tdiff{^2p}{Q_a^2}\\,\\omega_a^{-1}
+
+        :param derivative: the derivative
+        :type derivative: qcip_tools.derivatives.Derivative
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :rtype: qcip_tools.derivatives.Tensor
+        """
         tensors = {}
         b_repr = derivative.representation()
 
@@ -807,6 +826,19 @@ class Shaker:
         return tensors
 
     def _compute_zpva_01(self, derivative, frequencies):
+        """Compute the ZPVA contribution from mechanical anharmonicity:
+
+        .. math::
+
+            [p]^{0,1} = -\\frac{1}{4}\\,\\sum_{ab} F_{abb}\\,\\tdiff{p}{Q_a}\\,\\omega_a^{-2}\\,\\omega_b^{-1}
+
+        :param derivative: the derivative
+        :type derivative: qcip_tools.derivatives.Derivative
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :rtype: qcip_tools.derivatives.Tensor
+        """
+
         tensors = {}
         b_repr = derivative.representation()
 
@@ -827,7 +859,25 @@ class Shaker:
 
         return tensors
 
-    def _compute_F_F__0_0_components(self, coo, input_fields, frequencies, t_nf):
+    def _compute_F_F__0_0_component(self, coo, input_fields, frequencies, t_nf):
+        """Compute a component of the :math:`[\\mu^2]^{0,0}` contribution
+
+        .. math::
+
+            [\\mu^2]^{0,0} = \\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_a
+            \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\mu_j}{Q_a}\\,\\lb{\\sigma}{a}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :rtype: list of float
+        """
+
         values = {}
 
         for f in frequencies:
@@ -846,7 +896,34 @@ class Shaker:
 
         return values
 
-    def _compute_F_F__1_1_components(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nnn):
+    def _compute_F_F__1_1_component(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nnn):
+        """Compute a component of the :math:`[\\mu^2]^{1,1}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu^2]^{1,1} &= -\\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abc} F_{abc}\\,
+            \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_j}{Q_c}\\,
+            \\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,(\\omega_a^{-1}+\\omega_b^{-1})\\\\
+            &+ F_{bcc}\\,\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_j}{Q_a}\\,
+            \\lb{\\sigma}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nnf: ``NNF`` components
+        :type t_nnf: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+
         values = {}
 
         for f in frequencies:
@@ -877,7 +954,27 @@ class Shaker:
 
         return values
 
-    def _compute_F_F__2_0_components(self, coo, input_fields, frequencies, t_nnf):
+    def _compute_F_F__2_0_component(self, coo, input_fields, frequencies, t_nnf):
+        """Compute a component of the :math:`[\\mu^2]^{2,0}` contribution
+
+         .. math::
+
+            \\begin{align}
+            [\\mu^2]^{2,0} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{ab}
+            \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,
+            \\lb{\\sigma}{ab}\\,(\\omega_a^{-1}+\\omega_b^{-1})
+            \\end{align}
+
+         :param coo: coordinates
+         :type coo: tuple|list
+         :param input_fields: input fields
+         :type input_fields: tuple|list
+         :param frequencies: the frequencies
+         :type frequencies: list of float|str
+         :param t_nnf: ``NNF`` components
+         :type t_nnf: numpy.ndarray
+         :rtype: list of float
+         """
         values = {}
 
         for f in frequencies:
@@ -900,7 +997,30 @@ class Shaker:
 
         return values
 
-    def _compute_F_F__0_2_components(self, coo, input_fields, frequencies, t_nf, t_nnn):
+    def _compute_F_F__0_2_component(self, coo, input_fields, frequencies, t_nf, t_nnn):
+        """Compute a component of the :math:`[\\mu^2]^{0,2}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu^2]^{0,2} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abcd}
+            \\tdiff{\\mu_i}{Q_c}\\tdiff{\\mu_j}{Q_d}\\times\\\\
+            &\\left[F_{aab}\\,F_{bcd}\\,\\lb{\\sigma}{c}\\lb{\\sigma}{d}\\,\\omega_b^{-2}
+            +2\\,F_{abc}\\,F_{abd}\\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\right]
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
         values = {}
 
         for f in frequencies:
@@ -939,7 +1059,28 @@ class Shaker:
 
         return values
 
-    def _compute_F_FF__0_0_components(self, coo, input_fields, frequencies, t_nf, t_nff):
+    def _compute_F_FF__0_0_component(self, coo, input_fields, frequencies, t_nf, t_nff):
+        """Compute a component of the :math:`[\\mu\\alpha]^{0,0}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu\\alpha]^{0,0} &= \\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_a
+            \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\alpha_{jk}}{Q_a}\\,\\lb{\\sigma}{a}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :rtype: list of float
+        """
         values = {}
 
         for f in frequencies:
@@ -958,7 +1099,29 @@ class Shaker:
 
         return values
 
-    def _compute_F_FF__2_0_components(self, coo, input_fields, frequencies, t_nnf, t_nnff):
+    def _compute_F_FF__2_0_component(self, coo, input_fields, frequencies, t_nnf, t_nnff):
+        """Compute a component of the :math:`[\\mu\\alpha]^{2,0}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu\\alpha]^{2,0} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{ab}
+            \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\,
+            \\lb{\\sigma}{ab}\\,(\\omega_a^{-1}+\\omega_b^{-1})\\\\
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nnf: ``NNF`` components
+        :type t_nnf: numpy.ndarray
+        :param t_nnff: ``NNFF`` components
+        :type t_nnff: numpy.ndarray
+        :rtype: list of float
+        """
         values = {}
 
         for f in frequencies:
@@ -981,7 +1144,32 @@ class Shaker:
 
         return values
 
-    def _compute_F_FF__0_2_components(self, coo, input_fields, frequencies, t_nf, t_nff, t_nnn):
+    def _compute_F_FF__0_2_component(self, coo, input_fields, frequencies, t_nf, t_nff, t_nnn):
+        """Compute a component of the :math:`[\\mu\\alpha]^{0,2}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu\\alpha]^{0,2} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{abcd}
+            \\tdiff{\\mu_i}{Q_c}\\tdiff{\\alpha_{jk}}{Q_d}\\times\\\\
+            &\\left[ F_{aab}\\,F_{bcd}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\,\\omega_b^{-2}
+            +2\\,F_{abc}\\,F_{abd}\\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\right]
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
         values = {}
 
         for f in frequencies:
@@ -1020,7 +1208,40 @@ class Shaker:
 
         return values
 
-    def _compute_F_FF__1_1_components(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nff, t_nnff, t_nnn):
+    def _compute_F_FF__1_1_component(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nff, t_nnff, t_nnn):
+        """Compute a component of the :math:`[\\mu\\alpha]^{1,1}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu\\alpha]^{1,1} &= -\\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abc}
+            F_{abc}\\times\\\\
+            &\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{jk}}{Q_c}+
+            \\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_i}{Q_c}\\right]\\times\\\\
+            &\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,(\\omega_a^{-1}+\\omega_b^{-1}) \\\\
+            &+ F_{bcc}\\,\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{jk}}{Q_a}
+            +\\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_i}{Q_a}\\right]\\times\\\\
+            &\\lb{\\sigma}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nnf: ``NNF`` components
+        :type t_nnf: numpy.ndarray
+        :param t_nnff: ``NNFF`` components
+        :type t_nnff: numpy.ndarray
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
         values = {}
 
         for f in frequencies:
@@ -1058,7 +1279,29 @@ class Shaker:
 
         return values
 
-    def _compute_F_F_F__1_0_components(self, coo, input_fields, frequencies, t_nf, t_nnf):
+    def _compute_F_F_F__1_0_component(self, coo, input_fields, frequencies, t_nf, t_nnf):
+        """Compute a component of the :math:`[\\mu^3]^{1,0}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu^3]^{1,0} &= \\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{ab}
+            \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,
+            \\tdiff{\\mu_k}{Q_b}\\,\\lb{\\sigma}{a}\\,\\lb{2}{b}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nnf: ``NNF`` components
+        :type t_nnf: numpy.ndarray
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :rtype: list of float
+        """
         values = {}
 
         for f in frequencies:
@@ -1083,7 +1326,29 @@ class Shaker:
 
         return values
 
-    def _compute_F_F_F__0_1_components(self, coo, input_fields, frequencies, t_nf, t_nnn):
+    def _compute_F_F_F__0_1_component(self, coo, input_fields, frequencies, t_nf, t_nnn):
+        """Compute a component of the :math:`[\\mu^3]^{0,1}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu^3]^{0,1} &= -\\frac{1}{6}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{abc} F_{abc}
+            \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\mu_j}{Q_b}\\,\\tdiff{\\mu_k}{Q_c}\\,
+            \\lb{\\sigma}{a}\\,\\lb{1}{b}\\,\\lb{2}{c}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
         values = {}
 
         for f in frequencies:
