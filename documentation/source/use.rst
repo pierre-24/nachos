@@ -524,6 +524,11 @@ The output depends on the value of ``-V``, which can be:
 - ``-V 2`` also outputs the total pv and ZPVA tensors ;
 - ``-V 3`` also outputs the tensors for **each** contribution.
 
+You can change the vibrational mode included in the computation of vibrational contributions with the ``-m`` option (default is all non-trans+rot modes).
+This options takes a list of comma separated modes, positive numbers to add a mode, negative number to remove one (modes starts at 1, so modes 1-6 are trans+rot modes if molecule is nonlinear, 1-5 otherwise).
+Therefore, you could do something ``-m "+1;-7`` to add first mode and remove mode 7 (if, for example, ordering is incorrect).
+Note that if you only want to remove modes, for example using ``-m "-7;-8"`` would not work (because of the way some terminals works), so you can add a ``:`` at the beginning to avoid the ``-`` to be interpreted as another command, so ``-m ":-7;-8"`` in this case.
+
 .. note::
 
     The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.

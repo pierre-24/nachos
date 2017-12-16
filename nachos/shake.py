@@ -79,6 +79,40 @@ def treat_frequencies_arg(frequencies_arg):
     return frequencies
 
 
+def treat_exclude_argument(x, shaker):
+    if x[0] == ':':
+        x = x[1:]
+
+    frequencies_to_exclude = x.split(';')
+
+    for f in frequencies_to_exclude:
+        if not f:
+            continue
+
+        try:
+            n = int(f)
+        except ValueError:
+            raise ValueError('{} is not a valid number'.format(f))
+
+        if n < 1:
+            n = abs(n) - 1
+            if not (n < shaker.mwh.dof):
+                raise ValueError('{} is not in the range of allowed frequencies (1-{})'.format(n, shaker.mwh.dof))
+
+            try:
+                index = shaker.mwh.included_modes.index(n)
+                if index >= 0:
+                    shaker.mwh.included_modes.pop(index)
+            except ValueError:
+                raise ValueError('{} is not a valid possibility'.format(n))
+        else:
+            if (n - 1) in shaker.mwh.included_modes:
+                raise ValueError('{} already included'.format(n))
+            shaker.mwh.included_modes.append(n - 1)
+
+    shaker.mwh.included_modes.sort()
+
+
 # program options
 def get_arguments_parser():
     arguments_parser = argparse.ArgumentParser(description=__doc__)
@@ -97,6 +131,9 @@ def get_arguments_parser():
 
     arguments_parser.add_argument(
         '-A', '--do-not-append', action='store_true', help='do not include vibrational contribution in data file')
+
+    arguments_parser.add_argument(
+        '-m', '--modify-modes', action='store', help='Exclude or include vibrational modes')
 
     return arguments_parser
 
@@ -131,6 +168,14 @@ def main():
             frequencies = treat_frequencies_arg(args.frequencies)
         except ValueError as e:
             return exit_failure('error while treating frequencies: {}'.format(str(e)))
+
+    if args.modify_modes:
+        try:
+            treat_exclude_argument(args.modify_modes, shaker)
+        except ValueError as e:
+            return exit_failure('error while treating exclusion of mode: {}'.format(str(e)))
+
+        print('(! list of modes is now {})'.format(', '.join(str(a + 1) for a in shaker.mwh.included_modes)))
 
     try:
         contributions = shaker.shake(verbosity_level=args.verbose, only=only, frequencies=frequencies)
