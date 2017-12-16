@@ -8,9 +8,12 @@ Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) versi
 ## Installation
 
 See [the instalation page](./documentation/source/install.rst) for the procedure.
+
 ## Documentation
 
-*None yet* ;)
+A (maybe outdated) PDF file explaining how to use nachos is available [here](./documentation/source/nachos-howto.pdf).
+
+You can build the full documentation with `make doc`.
 
 ## Contributing
 
