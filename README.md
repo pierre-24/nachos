@@ -5,6 +5,12 @@ Maintained by [Pierre Beaujean](pierre.beaujean@unamur.be) and created in the fr
 
 Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) version [0.4.1](https://gitlab.unamur.be/pierre.beaujean/qcip_tools/tree/release-v0.4.1).
 
+<!-- STABLE: -->
+
+
+<!-- PREVIOUS: -->
+
+
 ## Installation
 
 See [the instalation page](./documentation/source/install.rst) for the procedure.
