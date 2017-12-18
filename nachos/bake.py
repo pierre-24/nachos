@@ -150,5 +150,6 @@ def main():
     with open(args.output, 'w') as f:
         cf.write(f)
 
+
 if __name__ == '__main__':
     main()

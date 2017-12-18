@@ -206,11 +206,11 @@ def project_geometrical_derivatives(recipe, datafile, mass_weighted_hessian, out
         b_repr = basis.representation()
 
         if derivatives.is_geometrical(b_repr) or recipe['type'] == 'G':
-            for l in range(0, level + 1):
-                if l == 0:
+            for lvl in range(0, level + 1):
+                if lvl == 0:
                     derivative = basis
                 else:
-                    derivative = basis.differentiate(recipe['type'] * l)
+                    derivative = basis.differentiate(recipe['type'] * lvl)
                 d_repr = derivative.representation()
                 n_repr = d_repr.replace('G', 'N')
                 if d_repr in datafile.derivatives and n_repr not in datafile.derivatives:

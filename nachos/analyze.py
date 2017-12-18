@@ -162,5 +162,6 @@ def main():
 
     analyzer.analyze(properties, only=only)
 
+
 if __name__ == '__main__':
     main()

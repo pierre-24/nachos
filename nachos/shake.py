@@ -185,5 +185,6 @@ def main():
     if not args.do_not_append:
         shaking.save_vibrational_contributions(args.data, contributions)
 
+
 if __name__ == '__main__':
     main()

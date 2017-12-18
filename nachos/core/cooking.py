@@ -44,8 +44,8 @@ def dalton__output__get_gradient(obj, *args, **kwargs):
         gradient = numpy.zeros((len(obj.molecule), 3))
 
         for i in range(len(obj.molecule)):
-            l = obj.lines[x + 3 + i].split()
-            gradient[i] = [float(a) for a in l[1:]]
+            line = obj.lines[x + 3 + i].split()
+            gradient[i] = [float(a) for a in line[1:]]
         return {'G': derivatives_g.BaseGeometricalDerivativeTensor(
             representation='G', components=gradient, spacial_dof=3 * len(obj.molecule))}
 

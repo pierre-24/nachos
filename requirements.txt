@@ -1,4 +1,4 @@
-git+ssh://git@git.pierrebeaujean.net/pierre/qcip_tools.git@release-v0.4.1#egg=qcip_tools >=0.4.1,<0.5
+git+ssh://git@gitlab.unamur.be/pierre.beaujean/qcip_tools.git@release-v0.4.2#egg=qcip_tools==0.4.2
 setuptools == 38.2.4
 pyyaml==3.12
 h5py==2.7.1

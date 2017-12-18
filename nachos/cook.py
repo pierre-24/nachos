@@ -65,5 +65,6 @@ def main():
     else:
         storage.write(args.output)
 
+
 if __name__ == '__main__':
     main()

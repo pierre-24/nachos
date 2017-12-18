@@ -10,9 +10,12 @@ To install nachos for a day-to-day use:
 .. code-block:: bash
 
   # install qcip_tools (base library):
-  pip3 install --user --upgrade git+ssh://git@git.pierrebeaujean.net/pierre/qcip_tools.git@dev
-  # install the scripts:
-  pip3 install --user --upgrade git+ssh://git@git.pierrebeaujean.net/pierre/nachos.git
+  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/qcip_tools.git@release-v0.4.2
+  # install nachos:
+  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/nachos.git
+
+Add ``@release-vXX`` at the end of the last line to fetch a given version (listed `in the README <https://gitlab.unamur.be/pierre.beaujean/nachos/blob/master/README.md>`_).
+
 
 Note that ``--user`` allow you to install the package without being superuser (see `here <https://pip.pypa.io/en/stable/user_guide/#user-installs>`_).
 You will probably need to add ``$HOME/.local/bin`` to ``$PATH`` for this to work:

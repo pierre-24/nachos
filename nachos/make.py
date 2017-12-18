@@ -66,5 +66,6 @@ def main():
 
     recipe.write(args.output)
 
+
 if __name__ == '__main__':
     main()
