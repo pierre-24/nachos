@@ -528,6 +528,7 @@ class Shaker:
 
         unique_elements = set(itertools.permutations(shuflable))
         return math.factorial(len(coordinates)) / len(unique_elements), unique_elements
+        # return 1, itertools.permutations(shuflable)
 
     def compute_zpva(self, vc, derivative, frequencies):
         """Compute a ZPVA contribution to a given derivative. It does not uses _create_tensors() since it is possible
@@ -758,7 +759,9 @@ class Shaker:
 
         .. note::
 
-            It is more efficient to compute the static version separately.
+            + It is more efficient to compute the static version separately (because of permutations)
+            + Permutation of the full tensor is not used: the first coordinate is separated from the rest.
+
 
         :param derivative: the derivative of the tensor for which the contribution should be computed
         :type derivative: qcip_tools.derivatives.Derivative
@@ -788,11 +791,29 @@ class Shaker:
 
         frequencies_converted.sort()
 
-        for i in derivative.smart_iterator():
+        coordinates = []
+
+        if 'D' in derivative.representation():
+            dp = derivatives.Derivative(derivative.representation()[1:])
+            for a in derivatives.COORDINATES_LIST:
+                for i in dp.smart_iterator():
+                    full_coo_s = tuple([a] + list(i))
+                    inverse_smart_iterator = []
+                    for j in dp.inverse_smart_iterator(i):
+                        inverse_smart_iterator.append(tuple([a] + list(j)))
+                    coordinates.append((full_coo_s, inverse_smart_iterator))
+        else:
+            for i in derivative.smart_iterator():
+                inverse_smart_iterator = []
+                for j in derivative.inverse_smart_iterator(i):
+                    inverse_smart_iterator.append(j)
+                coordinates.append((i, inverse_smart_iterator))
+
+        for i, inverse_smart_iterator in coordinates:
             v = getattr(self, callback)(i, input_fields, frequencies_converted, **kwargs)
             for frequency, value in v.items():
                 initial_frequency = frequencies_mapping[frequency]
-                for j in derivative.inverse_smart_iterator(i):
+                for j in inverse_smart_iterator:
                     tensors[initial_frequency].components[j] = value
 
         return tensors
