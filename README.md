@@ -6,9 +6,10 @@ Maintained by [Pierre Beaujean](pierre.beaujean@unamur.be) and created in the fr
 Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) version [0.4.2](https://gitlab.unamur.be/pierre.beaujean/qcip_tools/tree/release-v0.4.2).
 
 <!-- STABLE: -->
-Current version: [release-v0.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1) (December 18, 2017)
+Current version: [release-v0.1.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1.1) (December 22, 2017)
 
 <!-- PREVIOUS: -->
++  [release-v0.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1) (December 18, 2017)
 
 
 ## Installation
