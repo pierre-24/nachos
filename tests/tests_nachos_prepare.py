@@ -295,14 +295,15 @@ class PrepareTestCase(NachosTestCase):
         opt_dict = dict(
             flavor='dalton',
             type='G',
-            method='CCS',
+            method='CC',
             basis_set='STO-3G',
             geometry=self.geometry,
             differentiation=differentiation,
             frequencies=['1064nm'],
             name=name,
             min_field=min_field,
-            k_max=3
+            k_max=3,
+            flavor_extra={'CC': 'CCS'}
         )
 
         r = files.Recipe(**opt_dict)
