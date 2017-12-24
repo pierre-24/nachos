@@ -431,6 +431,13 @@ class Maker:
                 'Which XC functionnal?',
                 SetRecipeExtraFlavorAction(recipe))
 
+        if recipe['method'] == 'CC':
+            self._make_var(
+                args,
+                'CC',
+                'Which Coupled Cluster level?',
+                SetRecipeExtraFlavorAction(recipe))
+
         max_diff = next(a[1] for a in config['methods'] if a[0] == recipe['method'])
 
         self._make_var(

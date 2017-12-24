@@ -132,6 +132,10 @@ The program prompts for different information in order to create a *recipe file*
      - "Which XC functionnal?"
      - *XC functional*
      - Only if ``DFT``
+   * - ``--CC``
+     - "Which Coupled Cluster method?"
+     - ``CCS`` | ``CC2`` | ``CCSD`` | ``CC3``
+     - Only if ``CC`` (and dalton)
    * - ``--geometry``
      - "Where is the geometry? "
      - *path to a .com/.xyz/.fchk/.mol* file
@@ -263,7 +267,30 @@ This also determine the maximum derivative available at this level i.e. what you
 
   Some method are not available, but may be added in the future if needed (CI methods, for example).
 
-+ For ``dalton`` you can request ``CCS``, ``CC2``, ``CCSD`` and ``CC3``, for which you can request derivatives up to second hyperpolarizability, and the gradient.
++ For ``dalton``:
+
+  .. list-table::
+       :header-rows: 1
+       :widths: 30 20 20 30
+
+       * - Method
+         - Maximum level of electrical differentiation
+         - Maximum level of geometrical differentiation
+         - Available
+       * - ``HF``
+         - 4
+         - 2
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
+       * - ``DFT``
+         - 3
+         - 2
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``
+       * - ``CC``
+         - 4
+         - 1
+         - ``energy``, ``G``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
+
+  Note that for the ``DFT`` method, only a few XC functional allow to compute more than the polarizability.
 
 -------
 
@@ -334,7 +361,7 @@ Note that you don't have to redefine every variable, since they have a default v
          - Apply a *vshift* (helps for the electric field differentiation)
 
   Note that the value of ``extra_section`` is not tested here.
-  Also, ``XC`` and ``gen_basis`` are available, but that would increase their previous values.
+  Also, ``XC`` and ``gen_basis`` are available, but that would modify their previous values.
 
 + For ``dalton``, the options are
 
@@ -349,14 +376,26 @@ Note that you don't have to redefine every variable, since they have a default v
          - ``2500``
          - Maximum number of iteration for the response function computation
        * - ``threshold``
-         - ``1e-6``
-         - Convergence criterion for the SCF
+         - ``1e-11``
+         - Convergence criterion for the SCF gradient
        * - ``cc_threshold``
          - ``1e-11``
-         - Convergence criterion for CC energy and response functions
+         - Convergence criterion for the CC gradient
+       * - ``response_threshold``
+         - ``1e-5``
+         - Convergence criterion for response functions
        * - ``dal_name``
          - ``ND``
          - Prefix for the different ``.dal`` files
+       * - ``response_max_it``
+         - ``500``
+         - Maximum number of iteration to solve linear equations (not relevant for CC)
+       * - ``response_max_ito``
+         - ``10``
+         - Maximum number of trial vector microiterations (not relevant for CC)
+
+  Note that the value of ``extra_section`` is not tested here.
+  Also, ``XC`` and ``CC`` are available, but that would modify their previous values.
 
 
 .. autoprogram:: nachos.prepare:get_arguments_parser()
