@@ -1,4 +1,8 @@
-# Change log
+# Changelog
+
+## Next version
+
++ Separate dalton *dal* inputs (#5) 
 
 ## Version 0.1.1
 
