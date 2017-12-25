@@ -3,6 +3,7 @@
 ## Next version
 
 + Separate dalton *dal* inputs (#5) 
++ Allow to perform HF and DFT calculation with dalton (#6)
 
 ## Version 0.1.1
 

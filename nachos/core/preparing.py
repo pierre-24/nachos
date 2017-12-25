@@ -319,6 +319,10 @@ class Preparer:
                     groups[201] = [groups[2][i]]
                     del groups[2][i]
 
+                    if 'G' in groups[0]:  # since hessian compute also gradient, no need to do it here
+                        i = groups[0].index('G')
+                        del groups[0][i]
+
             bases_reprs = []
             for _, bases in groups.items():
                 bases_reprs.append(tuple([b.representation() for b in bases]))

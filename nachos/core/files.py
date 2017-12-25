@@ -216,8 +216,8 @@ class Recipe:
         for level in self['differentiation']:
                 if level >= level_min:
                     for basis in self['differentiation'][level]:
-                        bases.append(
-                            (derivatives.Derivative(basis if basis != 'energy' else '', spacial_dof=self.dof), level))
+                        d = derivatives.Derivative(basis if basis != 'energy' else '', spacial_dof=self.dof)
+                        bases.append((d, level))
 
         return bases
 
