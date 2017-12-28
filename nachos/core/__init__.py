@@ -50,6 +50,8 @@ CONFIG = {
             'dal_name': 'ND',
             'CC': '',
             'XC': '',
+            'split_level_3': 1,
+            'split_level_4': 1
         }
     }
 }

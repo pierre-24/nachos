@@ -393,6 +393,12 @@ Note that you don't have to redefine every variable, since they have a default v
        * - ``response_max_ito``
          - ``10``
          - Maximum number of trial vector microiterations (not relevant for CC)
+       * - ``split_level_3``
+         - ``1``
+         - Split first hyperpolarizability calculations over separate dal files
+       * - ``split_level_4``
+         - ``1``
+         - Split second hyperpolarizability calculations over separate dal files
 
   Note that the value of ``extra_section`` is not tested here.
   Also, ``XC`` and ``CC`` are available, but that would modify their previous values.

@@ -3,11 +3,12 @@
 Code for numerical differentiation of energy (oriented toward computation of vibrational contributions).
 Maintained by [Pierre Beaujean](pierre.beaujean@unamur.be) and created in the frame of my PhD thesis in the [University of Namur](https://www.unamur.be).
 
-Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) version [0.4.2](https://gitlab.unamur.be/pierre.beaujean/qcip_tools/tree/release-v0.4.2).
+Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) version [0.4.3](https://gitlab.unamur.be/pierre.beaujean/qcip_tools/tree/release-v0.4.3).
 
 <!-- STABLE: -->
 Current version: [release-v0.1.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1.1) (December 22, 2017)
 
+Previous releases (see [the changelog](./CHANGELOG.md)):
 <!-- PREVIOUS: -->
 +  [release-v0.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1) (December 18, 2017)
 

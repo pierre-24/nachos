@@ -280,7 +280,6 @@ class Preparer:
             counter += 1
 
             bases = self.recipe.bases(level_min=level)
-            # bases_repr = tuple([b[0].representation() for b in bases])
 
             # separate in group
             groups = {}
@@ -292,11 +291,16 @@ class Preparer:
             # merge energy, eventual order 1 and 2
             m_group = []
             x_merge = [0, 1]
-            x_split = [3, 4]
+            x_split = []
+
+            if int(self.recipe['flavor_extra']['split_level_3']) != 0:
+                x_split.append(3)
+
+            if int(self.recipe['flavor_extra']['split_level_4']) != 0:
+                x_split.append(4)
 
             if self.recipe['method'] == 'CC':
                 x_merge = [0, 1, 2]
-                x_split = [3, 4]
 
             for i in x_merge:
                 if i in groups:
@@ -466,8 +470,15 @@ class Preparer:
                             dal['RESPONSE']['QUADRATIC']['.MAXITO'] = dalton.InputCard(
                                 parameters=[self.recipe['flavor_extra']['response_max_ito']])
 
+                            fx = frequencies
+                            num_frequencies = len(self.recipe['frequencies'])
+                            if 'FFF' in bases_repr:
+                                fx = '0.0 ' + fx
+                                num_frequencies += 1
+
                             if any([x in bases_repr for x in ['FDF', 'FDD']]):
-                                dal['RESPONSE']['QUADRATIC']['.FREQUE'] = copy.copy(freq_card)
+                                dal['RESPONSE']['QUADRATIC']['.FREQUE'] = dalton.InputCard(
+                                    parameters=[num_frequencies, fx])
 
                                 if 'FDF' in bases_repr:
                                     dal['RESPONSE']['QUADRATIC']['.POCKEL'] = dalton.InputCard()
@@ -484,8 +495,15 @@ class Preparer:
                             dal['RESPONSE']['CUBIC']['.MAXITO'] = dalton.InputCard(
                                 parameters=[self.recipe['flavor_extra']['response_max_ito']])
 
+                            fx = frequencies
+                            num_frequencies = len(self.recipe['frequencies'])
+                            if 'FFFF' in bases_repr:
+                                fx = '0.0 ' + fx
+                                num_frequencies += 1
+
                             if any([x in bases_repr for x in ['FDFF', 'FDDF', 'FDDd', 'FDDD']]):
-                                dal['RESPONSE']['CUBIC']['.FREQUE'] = copy.copy(freq_card)
+                                dal['RESPONSE']['CUBIC']['.FREQUE'] = dalton.InputCard(
+                                    parameters=[num_frequencies, fx])
 
                                 if 'FDFF' in bases_repr:
                                     dal.update('**RESPONSE\n*CUBIC\n.DC-KERR')
