@@ -302,6 +302,12 @@ class Preparer:
             if self.recipe['method'] == 'CC':
                 x_merge = [0, 1, 2]
 
+                if int(self.recipe['flavor_extra']['merge_level_3']) != 0:
+                    x_merge.append(3)
+
+                if int(self.recipe['flavor_extra']['merge_level_4']) != 0:
+                    x_merge.append(4)
+
             for i in x_merge:
                 if i in groups:
                     m_group.extend(groups[i])

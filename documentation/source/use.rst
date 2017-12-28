@@ -399,9 +399,17 @@ Note that you don't have to redefine every variable, since they have a default v
        * - ``split_level_4``
          - ``1``
          - Split second hyperpolarizability calculations over separate dal files
+       * - ``merge_level_3``
+         - ``0``
+         - Merge first hyperpolarizability calculations with lower order calculations (only for ``CC``). Priority over splitting.
+       * - ``merge_level_4``
+         - ``0``
+         - Merge second hyperpolarizability calculations with lower order calculations (only for ``CC``). Priority over splitting.
 
   Note that the value of ``extra_section`` is not tested here.
   Also, ``XC`` and ``CC`` are available, but that would modify their previous values.
+
+  Splitting and merging modify the number of calculation, but also the times it takes (because Dalton tries to solve all response functions at the same time).
 
 
 .. autoprogram:: nachos.prepare:get_arguments_parser()

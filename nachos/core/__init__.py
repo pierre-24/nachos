@@ -51,7 +51,9 @@ CONFIG = {
             'CC': '',
             'XC': '',
             'split_level_3': 1,
-            'split_level_4': 1
+            'split_level_4': 1,
+            'merge_level_3': 0,
+            'merge_level_4': 0
         }
     }
 }
