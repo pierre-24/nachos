@@ -36,17 +36,17 @@ CONFIG = {
         'types': ['G'],
         'methods': [
             ('HF', {'G': 2, 'F': 4}),
-            ('DFT', {'G': 2, 'F': 3}),  # with some XC functionals only :o
+            ('DFT', {'G': 2, 'F': 4}),  # with some XC functionals only :o
             ('CC', {'G': 1, 'F': 4}),
         ],
         'bases': ['energy', 'G', 'GG', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD', 'FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD'],
         'default_for_extra_fields': {
-            'max_iteration': 2500,
             'threshold': 1e-11,
             'cc_threshold': 1e-11,
-            'response_threshold': 1e-5,
-            'response_max_it': 500,
+            'response_threshold': 1e-10,
+            'response_max_it': 2500,
             'response_max_ito': 10,
+            'response_dim_reduced_space': 2500,
             'dal_name': 'ND',
             'CC': '',
             'XC': '',

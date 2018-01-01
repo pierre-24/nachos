@@ -58,7 +58,7 @@ CC_WAVE_FUNCTION = """
 .MAX IT
 {max_it}
 .MAXRED
-{max_it}
+{rm}
 .MXLRV
 {max_it}
 .THRENR
@@ -354,7 +354,8 @@ class Preparer:
 
                         dal.update(CC_WAVE_FUNCTION.format_map({
                             'method': self.recipe['flavor_extra']['CC'],
-                            'max_it': self.recipe['flavor_extra']['max_iteration'],
+                            'max_it': self.recipe['flavor_extra']['response_max_it'],
+                            'rm': self.recipe['flavor_extra']['response_dim_reduced_space'],
                             'conv': '{:.1e}'.format(float(self.recipe['flavor_extra']['threshold'])).replace('e', 'D'),
                             'cc_conv': '{:.1e}'.format(
                                 float(self.recipe['flavor_extra']['cc_threshold'])).replace('e', 'D'),
@@ -446,7 +447,7 @@ class Preparer:
                             dal.update('**DALTON INPUT\n.RUN RESPONSE')
                             dal.update('**RESPONSE')
                             dal['RESPONSE']['.MAXRM'] = dalton.InputCard(parameters=[
-                                self.recipe['flavor_extra']['max_iteration']])
+                                self.recipe['flavor_extra']['response_dim_reduced_space']])
 
                         # polarizability
                         if any([x in bases_repr for x in ['FF', 'FD']]):

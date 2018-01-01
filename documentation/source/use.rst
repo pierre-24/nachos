@@ -282,15 +282,35 @@ This also determine the maximum derivative available at this level i.e. what you
          - 2
          - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
        * - ``DFT``
-         - 3
+         - 4
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
        * - ``CC``
          - 4
          - 1
          - ``energy``, ``G``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
 
-  Note that for the ``DFT`` method, only a few XC functional allow to compute more than the polarizability.
+  Note that for the ``DFT`` method, only a few XC functional allow to compute more than the polarizability (this list may not be accurate, and it is not checked by the program):
+
+  + B1LYP
+  + B2PLYP
+  + B3LYP
+  + B86x
+  + Becke
+  + BHandH
+  + BHandHLYP
+  + BLYP
+  + BVWN
+  + Camb3lyp
+  + KMLYP
+  + LDA
+  + LYP
+  + pbex
+  + Slater
+  + SVWN5
+  + WL90c
+  + XAlpha
+
 
 -------
 
@@ -372,27 +392,27 @@ Note that you don't have to redefine every variable, since they have a default v
        * - Option
          - Default value
          - Note
-       * - ``max_iteration``
-         - ``2500``
-         - Maximum number of iteration for the response function computation
        * - ``threshold``
          - ``1e-11``
          - Convergence criterion for the SCF gradient
        * - ``cc_threshold``
          - ``1e-11``
-         - Convergence criterion for the CC gradient
-       * - ``response_threshold``
-         - ``1e-5``
-         - Convergence criterion for response functions
+         - Convergence criterion for the CC energy gradient
        * - ``dal_name``
          - ``ND``
          - Prefix for the different ``.dal`` files
+       * - ``response_threshold``
+         - ``1e-10``
+         - Convergence criterion for response functions
        * - ``response_max_it``
-         - ``500``
-         - Maximum number of iteration to solve linear equations (not relevant for CC)
+         - ``2500``
+         - Maximum number of iteration to solve linear equations for response functions
        * - ``response_max_ito``
          - ``10``
          - Maximum number of trial vector microiterations (not relevant for CC)
+       * - ``response_dim_reduced_space``
+         - ``2500``
+         - Maximum dimension of the reduced space (should be increased if large number of frequency or sharp convergence criterion).
        * - ``split_level_3``
          - ``1``
          - Split first hyperpolarizability calculations over separate dal files
@@ -409,7 +429,7 @@ Note that you don't have to redefine every variable, since they have a default v
   Note that the value of ``extra_section`` is not tested here.
   Also, ``XC`` and ``CC`` are available, but that would modify their previous values.
 
-  Splitting and merging modify the number of calculation, but also the times it takes (because Dalton tries to solve all response functions at the same time).
+  Splitting and merging modify the number of calculation, but also the times it takes (because Dalton tries to solve all response functions at the same time, therefore you may need to increase ``response_max_it``).
 
 
 .. autoprogram:: nachos.prepare:get_arguments_parser()
@@ -489,7 +509,7 @@ The output depends on the value of ``-V``, which can be:
       There is no way to change this behavior.
     + By default, the program also include the base tensors calculated in the process.
       The ``-S`` option prevents this (that may be useful in the case of electric field differentiation)
-    + Projection over normal mode of all the geometrical derivatives is requested via the ``-p`` option, but you can also request that the cartesian hessian used to do so is different, with the ``-H`` option (which only accepts FCHK with cartesian hessian in it as argument, for the moment).
+    + Projection over normal mode of all the geometrical derivatives is requested via the ``-p`` option, but you can also request that the cartesian hessian used to do so is different, with the ``-H`` option (which accepts FCHK and dalton archives with cartesian hessian in it as argument).
 
 
 .. autoprogram:: nachos.shake:get_arguments_parser()
