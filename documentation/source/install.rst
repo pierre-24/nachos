@@ -10,7 +10,7 @@ To install nachos for a day-to-day use:
 .. code-block:: bash
 
   # install qcip_tools (base library):
-  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/qcip_tools.git@release-v0.4.3
+  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/qcip_tools.git@release-v0.5
   # install nachos:
   pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/nachos.git
 

@@ -791,29 +791,11 @@ class Shaker:
 
         frequencies_converted.sort()
 
-        coordinates = []
-
-        if 'D' in derivative.representation():
-            dp = derivatives.Derivative(derivative.representation()[1:])
-            for a in derivatives.COORDINATES_LIST:
-                for i in dp.smart_iterator():
-                    full_coo_s = tuple([a] + list(i))
-                    inverse_smart_iterator = []
-                    for j in dp.inverse_smart_iterator(i):
-                        inverse_smart_iterator.append(tuple([a] + list(j)))
-                    coordinates.append((full_coo_s, inverse_smart_iterator))
-        else:
-            for i in derivative.smart_iterator():
-                inverse_smart_iterator = []
-                for j in derivative.inverse_smart_iterator(i):
-                    inverse_smart_iterator.append(j)
-                coordinates.append((i, inverse_smart_iterator))
-
-        for i, inverse_smart_iterator in coordinates:
+        for i in derivative.smart_iterator():
             v = getattr(self, callback)(i, input_fields, frequencies_converted, **kwargs)
             for frequency, value in v.items():
                 initial_frequency = frequencies_mapping[frequency]
-                for j in inverse_smart_iterator:
+                for j in derivative.inverse_smart_iterator(i):
                     tensors[initial_frequency].components[j] = value
 
         return tensors

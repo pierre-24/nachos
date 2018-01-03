@@ -33,10 +33,10 @@ Concepts
    Accordingly,
 
    + ``F`` means *derivatives with respect to static electric field* ;
-   + ``D`` means *derivatives with respect to dynamic electric field* (with a given frequency), and ``d`` means the same, but with inverse frequency (:math:`-\omega`) ;
+   + ``D`` means *derivatives with respect to dynamic electric field* (with a given frequency), ``d`` means the same, but with inverse frequency (:math:`-\omega`) and ``X`` means any multiple (:math:`\pm i\omega`) ;
    + ``N`` means *derivatives with respect to normal coordinates*.
 
-   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``FDF`` for EOP  [:math:`\beta(-\omega;\omega,0)`] and ``FDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
+   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``dFD`` for EOP  [:math:`\beta(-\omega;0,\omega)`] and ``XDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
    See the list `below <#list-of-the-derivatives>`_.
 
    Geometrical derivatives of an electrical derivative are written with the geometrical derivatives **first**.
@@ -199,7 +199,7 @@ For example, this is an input to compute vibrational contribution to the polaria
       2:
         - F
         - FF
-        - FD
+        - dD
       1:
         - GG
     type: G
@@ -243,11 +243,11 @@ This also determine the maximum derivative available at this level i.e. what you
        * - ``HF``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
        * - ``DFT``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
        * - ``MP2``
          - 2
          - 2
@@ -278,17 +278,17 @@ This also determine the maximum derivative available at this level i.e. what you
          - Maximum level of geometrical differentiation
          - Available
        * - ``HF``
-         - 4
+         - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
        * - ``DFT``
-         - 4
+         - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
        * - ``CC``
          - 4
          - 1
-         - ``energy``, ``G``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``, ``FFFF``, ``FDFF``, ``FDDF``, ``FDDd``, ``FDDD``
+         - ``energy``, ``G``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``, ``FFFF``, ``dFFD``, ``XDDF``, ``dDDd``, ``XDDD``
 
   Note that for the ``DFT`` method, only a few XC functional allow to compute more than the polarizability (this list may not be accurate, and it is not checked by the program):
 
@@ -312,6 +312,11 @@ This also determine the maximum derivative available at this level i.e. what you
   + XAlpha
 
 
+.. warning::
+
+    By default, second hyperpolarizability with HF or DFT does not compute all components of the gamma tensor, but only the one that contribute to :math:`\gamma_{||}`.
+    Therefore, the ability to perform numerical differentiation of second hyperpolarizability is disabled.
+
 -------
 
 .. _nachos_make_note_2:
@@ -323,7 +328,7 @@ For example,
 
 + If you want to do an electric field differentiation (``F``) to obtain the static first hyperpolarizability (``FFF``) from the energy, input should be ``energy:3``, because you want to differentiate energy 3 times.
   To get the same property from the dipole moment and the static polarizability, the input is ``F:2;FF:1``.
-+ If you want to get the vibrational contribution to a given property (say, the polarizability), you need to select ``G`` for the type of differentiation, then you need at least second order derivative of the dipole moment polariability with respect to that (the first one is automatically computed if the second is), and the cubic force field, so an input could look like ``FF:2;F:2;GG:1`` (and eventually ``FD:2``).
++ If you want to get the vibrational contribution to a given property (say, the polarizability), you need to select ``G`` for the type of differentiation, then you need at least second order derivative of the dipole moment polariability with respect to that (the first one is automatically computed if the second is), and the cubic force field, so an input could look like ``FF:2;F:2;GG:1`` (and eventually ``dD:2``).
 
 :ref:`See above <nachos_make_note_1>` for the list of quantities that you can differentiate depending on the *flavor* and the method.
 
@@ -548,7 +553,7 @@ The pure vibrational (pv) contributions depends on the quantity:
      - Vibrational contribution
      - Level
      - Derivatives needed
-   * - Polarizability (``FF``, ``FD``)
+   * - Polarizability (``FF``, ``dD``)
      - :math:`[\mu^2]^{0,0}`
      - 0
      - ``NF``
@@ -564,7 +569,7 @@ The pure vibrational (pv) contributions depends on the quantity:
      - :math:`[\mu^2]^{0,2}`
      - 2
      - ``NF``, ``NNN`` (part with ``NNNN`` not implemented)
-   * - First hyperpolarizability (``FFF``, ``FDF``, ``FDD``)
+   * - First hyperpolarizability (``FFF``, ``dFD``, ``XDD``)
      - :math:`[\mu\alpha]^{0,0}`
      - 0
      - ``NF``, ``NFF``
@@ -644,7 +649,7 @@ Appendix
 List of the derivatives
 ***********************
 
-Note that it would be better to respect the order for the different derivatives (``FDF``, not ``FFD``, for example).
+Note that it would be better to respect the order for the different derivatives (``dFD``, not ``FdD``, for example).
 
 .. list-table::
    :header-rows: 1
@@ -663,31 +668,31 @@ Note that it would be better to respect the order for the different derivatives 
      - ``FF``
      - Static polarizability
    * - :math:`\alpha(-\omega;\omega)`
-     - ``FD``
+     - ``dD``
      - Dynamic polarizability
    * - :math:`\beta(0;0,0)`
      - ``FFF``
      - Static first hyperpolarizability
    * - :math:`\beta(-\omega;\omega,0)`
-     - ``FDF``
+     - ``dFD``
      - EOP first hyperpolarizability
    * - :math:`\beta(-2\omega;\omega,\omega)`
-     - ``FDD``
+     - ``XDD``
      - SHG/SHS first hyperpolarizability
    * - :math:`\gamma(0;0,0,0)`
      - ``FFFF``
      - Static second hyperpolarizability
    * - :math:`\gamma(-\omega;\omega,0,0)`
-     - ``FDFF``
+     - ``dFFD``
      - Kerr second hyperpolarizability
    * - :math:`\gamma(-2\omega;\omega,\omega,0)`
-     - ``FDDF``
+     - ``XDDF``
      - ESHG second hyperpolarizability
    * - :math:`\gamma(-\omega;\omega,\omega,-\omega)`
-     - ``FDDd``
+     - ``dDDd``
      - DFWM second hyperpolarizability
    * - :math:`\gamma(-3\omega;\omega,\omega,\omega)`
-     - ``FDDD``
+     - ``XDDD``
      - THG/THS second hyperpolarizability
    * - :math:`\frac{\partial V(x)}{\partial x}`
      - ``G``

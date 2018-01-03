@@ -67,8 +67,8 @@ class ShakeTestCase(NachosTestCase):
 
         vcs = [
             # ZPVA
-            (('FDF',), 1, 0, ('NNFDF',)),
-            (('FDF',), 0, 1, ('NFDF', 'NNN')),
+            (('dFD',), 1, 0, ('NNdFD',)),
+            (('dFD',), 0, 1, ('NdFD', 'NNN')),
             # pv contrib to beta
             (('F', 'F', 'F'), 1, 0, ('NF', 'NNF')),
             (('F', 'F', 'F'), 0, 1, ('NF', 'NNN')),
@@ -106,12 +106,12 @@ class ShakeTestCase(NachosTestCase):
             # ZPVA
             (('F',), 1, 0),
             (('F',), 0, 1),
-            (('FD',), 1, 0),
-            (('FD',), 0, 1),
-            (('FDF',), 1, 0),
-            (('FDF',), 0, 1),
-            (('FDD',), 1, 0),
-            (('FDD',), 0, 1),
+            (('dD',), 1, 0),
+            (('dD',), 0, 1),
+            (('dFD',), 1, 0),
+            (('dFD',), 0, 1),
+            (('XDD',), 1, 0),
+            (('XDD',), 0, 1),
             # alpha
             (('F', 'F'), 0, 0),
             (('F', 'F'), 1, 1),
@@ -133,13 +133,13 @@ class ShakeTestCase(NachosTestCase):
         # test contributions:
         self._test_contributions(
             shaker,
-            [('FF', 2), ('FD', 2)],
+            [('FF', 2), ('dD', 2)],
             [0.02, 0.04],
             ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
 
         self._test_contributions(
             shaker,
-            [('FF', 1), ('FD', 1)],
+            [('FF', 1), ('dD', 1)],
             [0.02],
             ['F_F__0_0'],
             ['F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
@@ -153,7 +153,7 @@ class ShakeTestCase(NachosTestCase):
 
         self._test_contributions(
             shaker,
-            [('FFF', 1), ('FDF', 1), ('FDD', 1)],
+            [('FFF', 1), ('dFD', 1), ('XDD', 1)],
             [0.02],
             ['F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
             ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'])
@@ -171,7 +171,7 @@ class ShakeTestCase(NachosTestCase):
         must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
         vibs = self._test_contributions(
             shaker,
-            [('FF', 2), ('FD', 2)],
+            [('FF', 2), ('dD', 2)],
             [0.02, 0.04],
             must_be_in)
 
@@ -182,9 +182,9 @@ class ShakeTestCase(NachosTestCase):
         nvibs = shaking.load_vibrational_contributions(self.datafile, df.spacial_dof)
 
         self.assertIn('FF', nvibs)
-        self.assertIn('FD', nvibs)
+        self.assertIn('dD', nvibs)
 
-        for i in ['FF', 'FD']:
+        for i in ['FF', 'dD']:
             c = vibs[i]
             cx = nvibs[i]
             for j in c.vibrational_contributions:
@@ -209,8 +209,8 @@ class ShakeTestCase(NachosTestCase):
         """Test the shake command"""
 
         must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
-        d = ['FF', 'FD']
-        notd = ['F', 'FFF', 'FDF', 'FDD']
+        d = ['FF', 'dD']
+        notd = ['F', 'FFF', 'dFD', 'XDD']
         freqs = [0.02, 0.04]
 
         # process
