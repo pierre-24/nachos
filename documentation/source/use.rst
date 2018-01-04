@@ -36,7 +36,7 @@ Concepts
    + ``D`` means *derivatives with respect to dynamic electric field* (with a given frequency), ``d`` means the same, but with inverse frequency (:math:`-\omega`) and ``X`` means any multiple (:math:`\pm i\omega`) ;
    + ``N`` means *derivatives with respect to normal coordinates*.
 
-   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``dFD`` for EOP  [:math:`\beta(-\omega;0,\omega)`] and ``XDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
+   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``dDF`` for EOP  [:math:`\beta(-\omega;0,\omega)`] and ``XDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
    See the list `below <#list-of-the-derivatives>`_.
 
    Geometrical derivatives of an electrical derivative are written with the geometrical derivatives **first**.
@@ -243,11 +243,11 @@ This also determine the maximum derivative available at this level i.e. what you
        * - ``HF``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
        * - ``DFT``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
        * - ``MP2``
          - 2
          - 2
@@ -280,15 +280,15 @@ This also determine the maximum derivative available at this level i.e. what you
        * - ``HF``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
        * - ``DFT``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
        * - ``CC``
          - 4
          - 1
-         - ``energy``, ``G``, ``F``, ``FF``, ``dD``, ``dFD``, ``XDD``, ``FFFF``, ``dFFD``, ``XDDF``, ``dDDd``, ``XDDD``
+         - ``energy``, ``G``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``, ``FFFF``, ``dFFD``, ``XDDF``, ``dDDd``, ``XDDD``
 
   Note that for the ``DFT`` method, only a few XC functional allow to compute more than the polarizability (this list may not be accurate, and it is not checked by the program):
 
@@ -569,7 +569,7 @@ The pure vibrational (pv) contributions depends on the quantity:
      - :math:`[\mu^2]^{0,2}`
      - 2
      - ``NF``, ``NNN`` (part with ``NNNN`` not implemented)
-   * - First hyperpolarizability (``FFF``, ``dFD``, ``XDD``)
+   * - First hyperpolarizability (``FFF``, ``dDF``, ``XDD``)
      - :math:`[\mu\alpha]^{0,0}`
      - 0
      - ``NF``, ``NFF``
@@ -649,7 +649,7 @@ Appendix
 List of the derivatives
 ***********************
 
-Note that it would be better to respect the order for the different derivatives (``dFD``, not ``FdD``, for example).
+Note that it would be better to respect the order for the different derivatives (``dDF``, not ``FdD``, for example).
 
 .. list-table::
    :header-rows: 1
@@ -674,7 +674,7 @@ Note that it would be better to respect the order for the different derivatives 
      - ``FFF``
      - Static first hyperpolarizability
    * - :math:`\beta(-\omega;\omega,0)`
-     - ``dFD``
+     - ``dDF``
      - EOP first hyperpolarizability
    * - :math:`\beta(-2\omega;\omega,\omega)`
      - ``XDD``

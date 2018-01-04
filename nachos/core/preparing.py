@@ -167,7 +167,7 @@ class Preparer:
                 if not compute_polar_with_freq and 'D' in basis:
                     compute_polar = True
                     compute_polar_with_freq = True
-                if not compute_FDx and (basis in ['FDD', 'FDF']):
+                if not compute_FDx and (basis in ['XDD', 'dDF']):
                     compute_FDx = True
 
             compute_polar_and_G = compute_polar and (compute_G or compute_GG)
@@ -377,42 +377,42 @@ class Preparer:
                             dal.update('**WAVE FUNCTION\n*DERIVATIVES')
 
                         # polarizability
-                        if any([x in bases_repr for x in ['FF', 'FD']]):
+                        if any([x in bases_repr for x in ['FF', 'dD']]):
                             dal.update('**WAVE FUNC\n*CCLR\n.DIPOLE\n.STATIC')
 
-                            if 'FD' in bases_repr:
+                            if 'dD' in bases_repr:
                                 dal['WAVE FUNC']['CCLR']['.FREQUE'] = copy.copy(freq_card)
 
                         # first hyperpolarizability
-                        if any([x in bases_repr for x in ['FFF', 'FDF', 'FDD']]):
+                        if any([x in bases_repr for x in ['FFF', 'dDF', 'XDD']]):
                             dal.update('**WAVE FUNC\n*CCQR\n.DIPOLE')
 
                             if 'FFF' in bases_repr:
                                 dal['WAVE FUNC']['CCQR']['.STATIC'] = dalton.InputCard()
 
-                            if 'FDF' in bases_repr:
+                            if 'dDF' in bases_repr:
                                 dal['WAVE FUNC']['CCQR']['.EOPEFR'] = copy.copy(freq_card)
 
-                            if 'FDD' in bases_repr:
+                            if 'XDD' in bases_repr:
                                 dal['WAVE FUNC']['CCQR']['.SHGFRE'] = copy.copy(freq_card)
 
                         # second hyperpolarizability
-                        if any([x in bases_repr for x in ['FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD']]):
+                        if any([x in bases_repr for x in ['FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD']]):
                             dal.update('**WAVE FUNC\n*CCCR\n.DIPOLE')
 
                             if 'FFFF' in bases_repr:
                                 dal['WAVE FUNC']['CCCR']['.STATIC'] = dalton.InputCard()
 
-                            if 'FDFF' in bases_repr:
+                            if 'dFFD' in bases_repr:
                                 dal['WAVE FUNC']['CCCR']['.DCKERR'] = copy.copy(freq_card)
 
-                            if 'FDDF' in bases_repr:
+                            if 'XDDF' in bases_repr:
                                 dal['WAVE FUNC']['CCCR']['.ESHGFR'] = copy.copy(freq_card)
 
-                            if 'FDDd' in bases_repr:
+                            if 'dDDd' in bases_repr:
                                 dal['WAVE FUNC']['CCCR']['.DFWMFR'] = copy.copy(freq_card)
 
-                            if 'FDDD' in bases_repr:
+                            if 'XDDD' in bases_repr:
                                 dal['WAVE FUNC']['CCCR']['.THGFRE'] = copy.copy(freq_card)
 
                     else:
@@ -443,14 +443,14 @@ class Preparer:
                             dal.update('**PROPERTIES\n.VIBANA\n*VIBANA\n.HESPUN')
 
                         if any([x in bases_repr for x in [
-                                'FF', 'FD', 'FFF', 'FDF', 'FDD', 'FFFF', 'FDFF', 'FDDF', 'FDDD', 'FDDd']]):
+                                'FF', 'dD', 'FFF', 'dDF', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'XDDD', 'dDDd']]):
                             dal.update('**DALTON INPUT\n.RUN RESPONSE')
                             dal.update('**RESPONSE')
                             dal['RESPONSE']['.MAXRM'] = dalton.InputCard(parameters=[
                                 self.recipe['flavor_extra']['response_dim_reduced_space']])
 
                         # polarizability
-                        if any([x in bases_repr for x in ['FF', 'FD']]):
+                        if any([x in bases_repr for x in ['FF', 'dD']]):
                             dal.update('**RESPONSE\n*LINEAR\n.DIPLEN')
 
                             dal['RESPONSE']['LINEAR']['.THCLR'] = copy.copy(thclr_card)
@@ -468,7 +468,7 @@ class Preparer:
                             dal['RESPONSE']['LINEAR']['.FREQUE'] = dalton.InputCard(parameters=[num_frequencies, fx])
 
                         # first hyperpolarizability
-                        if any([x in bases_repr for x in ['FFF', 'FDF', 'FDD']]):
+                        if any([x in bases_repr for x in ['FFF', 'dDF', 'XDD']]):
                             dal.update('**RESPONSE\n*QUADRATIC\n.DIPLEN')
 
                             dal['RESPONSE']['QUADRATIC']['.THCLR'] = copy.copy(thclr_card)
@@ -483,17 +483,17 @@ class Preparer:
                                 fx = '0.0 ' + fx
                                 num_frequencies += 1
 
-                            if any([x in bases_repr for x in ['FDF', 'FDD']]):
+                            if any([x in bases_repr for x in ['dDF', 'XDD']]):
                                 dal['RESPONSE']['QUADRATIC']['.FREQUE'] = dalton.InputCard(
                                     parameters=[num_frequencies, fx])
 
-                                if 'FDF' in bases_repr:
+                                if 'dDF' in bases_repr:
                                     dal['RESPONSE']['QUADRATIC']['.POCKEL'] = dalton.InputCard()
-                                if 'FDD' in bases_repr:
+                                if 'XDD' in bases_repr:
                                     dal['RESPONSE']['QUADRATIC']['.SHG'] = dalton.InputCard()
 
                         # second hyperpolarizability
-                        if any([x in bases_repr for x in ['FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD']]):
+                        if any([x in bases_repr for x in ['FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD']]):
                             dal.update('**RESPONSE\n*CUBIC\n.DIPLEN')
 
                             dal['RESPONSE']['CUBIC']['.THCLR'] = copy.copy(thclr_card)
@@ -508,20 +508,20 @@ class Preparer:
                                 fx = '0.0 ' + fx
                                 num_frequencies += 1
 
-                            if any([x in bases_repr for x in ['FDFF', 'FDDF', 'FDDd', 'FDDD']]):
+                            if any([x in bases_repr for x in ['dFFD', 'XDDF', 'dDDd', 'XDDD']]):
                                 dal['RESPONSE']['CUBIC']['.FREQUE'] = dalton.InputCard(
                                     parameters=[num_frequencies, fx])
 
-                                if 'FDFF' in bases_repr:
+                                if 'dFFD' in bases_repr:
                                     dal.update('**RESPONSE\n*CUBIC\n.DC-KERR')
 
-                                if 'FDDF' in bases_repr:
+                                if 'XDDF' in bases_repr:
                                     dal.update('**RESPONSE\n*CUBIC\n.DC-SHG')
 
-                                if 'FDDD' in bases_repr:
+                                if 'XDDD' in bases_repr:
                                     dal.update('**RESPONSE\n*CUBIC\n.THG')
 
-                                if 'FDDd' in bases_repr:
+                                if 'dDDd' in bases_repr:
                                     dal.update('**RESPONSE\n*CUBIC\n.IDRI')
 
                     dal_path = '{}_{}.dal'.format(self.recipe['flavor_extra']['dal_name'], '_'.join(
