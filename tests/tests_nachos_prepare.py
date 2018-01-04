@@ -289,7 +289,7 @@ class PrepareTestCase(NachosTestCase):
 
         differentiation = {
             2: ['energy'],
-            1: ['G', 'F', 'FF', 'dD', 'FFF', 'dFD', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD']
+            1: ['G', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD']
         }
 
         opt_dict = dict(

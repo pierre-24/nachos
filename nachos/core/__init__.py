@@ -17,7 +17,7 @@ CONFIG = {
             ('CCSD', {'G': 1, 'F': 1}),
             ('CCSD(T)', {'G': 0, 'F': 0}),
         ],
-        'bases': ['energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dFD', 'XDD'],
+        'bases': ['energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD'],
         'default_for_extra_fields': {
             'memory': '1Gb',
             'procs': 1,
@@ -39,7 +39,7 @@ CONFIG = {
             ('DFT', {'G': 2, 'F': 3}),  # with some XC functionals only :o
             ('CC', {'G': 1, 'F': 4}),
         ],
-        'bases': ['energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dFD', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD'],
+        'bases': ['energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD'],
         'default_for_extra_fields': {
             'threshold': 1e-11,
             'cc_threshold': 1e-11,

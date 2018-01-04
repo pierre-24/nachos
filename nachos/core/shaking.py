@@ -777,7 +777,7 @@ class Shaker:
         if derivative.representation() not in derivatives_e.DERIVATIVES:
             raise BadShaking('I cannot deal with {}'.format(derivative.representation()))
 
-        input_fields = [1 if x == 'D' else 0 for x in derivative.representation()[1:]]
+        input_fields = [derivatives_e.representation_to_field[x] for x in derivative.representation()[1:]]
 
         tensors = {}
         frequencies_converted = []
@@ -793,9 +793,9 @@ class Shaker:
 
         for i in derivative.smart_iterator():
             v = getattr(self, callback)(i, input_fields, frequencies_converted, **kwargs)
-            for frequency, value in v.items():
-                initial_frequency = frequencies_mapping[frequency]
-                for j in derivative.inverse_smart_iterator(i):
+            for j in derivative.inverse_smart_iterator(i):
+                for frequency, value in v.items():
+                    initial_frequency = frequencies_mapping[frequency]
                     tensors[initial_frequency].components[j] = value
 
         return tensors

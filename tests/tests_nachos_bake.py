@@ -18,6 +18,10 @@ class BakeTestCase(NachosTestCase):
         self.zip_G_dalton = self.copy_to_temporary_directory('numdiff_G_dalton.zip')
         self.working_directory = self.setup_temporary_directory()
 
+    def tearDown(self):
+        super().tearDown()
+        pass
+
     def test_bake_gaussian_F(self):
         self.unzip_it(self.zip_F, self.working_directory)
         directory = os.path.join(self.working_directory, 'numdiff_F')
@@ -87,7 +91,7 @@ class BakeTestCase(NachosTestCase):
             baker.bake(only=[(derivatives.Derivative(), 4)])
 
         with self.assertRaises(baking.BadBaking):
-            baker.bake(only=[(derivatives.Derivative('dFD'), 0)])
+            baker.bake(only=[(derivatives.Derivative('dDF'), 0)])
 
     def test_bake_gaussian_G(self):
         self.unzip_it(self.zip_G, self.working_directory)
@@ -197,7 +201,7 @@ class BakeTestCase(NachosTestCase):
         # only test what was computed, since there is no way to test
         # (G, GG and GF are the same as with HF, but anyway)
         should_be_in = [
-            'G', 'GG', 'GF', 'GFF', 'GdD', 'GFFF', 'GdFD', 'GXDD', 'GFFFF', 'GdFFD', 'GXDDF', 'GdDDd', 'GXDDD']
+            'G', 'GG', 'GF', 'GFF', 'GdD', 'GFFF', 'GdDF', 'GXDD', 'GFFFF', 'GdFFD', 'GXDDF', 'GdDDd', 'GXDDD']
 
         for i in should_be_in:
             self.assertIn(i, cf.derivatives, msg=i)

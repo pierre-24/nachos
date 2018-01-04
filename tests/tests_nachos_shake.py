@@ -67,8 +67,8 @@ class ShakeTestCase(NachosTestCase):
 
         vcs = [
             # ZPVA
-            (('dFD',), 1, 0, ('NNdFD',)),
-            (('dFD',), 0, 1, ('NdFD', 'NNN')),
+            (('dDF',), 1, 0, ('NNdDF',)),
+            (('dDF',), 0, 1, ('NdDF', 'NNN')),
             # pv contrib to beta
             (('F', 'F', 'F'), 1, 0, ('NF', 'NNF')),
             (('F', 'F', 'F'), 0, 1, ('NF', 'NNN')),
@@ -108,8 +108,8 @@ class ShakeTestCase(NachosTestCase):
             (('F',), 0, 1),
             (('dD',), 1, 0),
             (('dD',), 0, 1),
-            (('dFD',), 1, 0),
-            (('dFD',), 0, 1),
+            (('dDF',), 1, 0),
+            (('dDF',), 0, 1),
             (('XDD',), 1, 0),
             (('XDD',), 0, 1),
             # alpha
@@ -153,7 +153,7 @@ class ShakeTestCase(NachosTestCase):
 
         self._test_contributions(
             shaker,
-            [('FFF', 1), ('dFD', 1), ('XDD', 1)],
+            [('FFF', 1), ('dDF', 1), ('XDD', 1)],
             [0.02],
             ['F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
             ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'])
@@ -210,7 +210,7 @@ class ShakeTestCase(NachosTestCase):
 
         must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
         d = ['FF', 'dD']
-        notd = ['F', 'FFF', 'dFD', 'XDD']
+        notd = ['F', 'FFF', 'dDF', 'XDD']
         freqs = [0.02, 0.04]
 
         # process

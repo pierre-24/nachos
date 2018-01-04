@@ -210,7 +210,7 @@ class CookTestCase(NachosTestCase):
                     self.assertTensorsAlmostEqual(
                         electrical_derivatives['FFF']['static'], results['FFF']['static'], skip_frequency_test=True)
                     self.assertTensorsAlmostEqual(
-                        electrical_derivatives['dFD'][fr], results['dFD']['1064nm'], skip_frequency_test=True)
+                        electrical_derivatives['dDF'][fr], results['dDF']['1064nm'], skip_frequency_test=True)
                     self.assertTensorsAlmostEqual(
                         electrical_derivatives['XDD'][fr], results['XDD']['1064nm'], skip_frequency_test=True)
                     self.assertTensorsAlmostEqual(
