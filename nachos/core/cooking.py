@@ -98,7 +98,12 @@ class Cooker:
 
         storage = files.ComputationalResults(self.recipe, directory=self.directory)
 
-        look_for = ['*.fchk'] if self.recipe['flavor'] == 'gaussian' else ['*.tar.gz', '*.out']
+        if self.recipe['flavor'] == 'gaussian':
+            look_for = ['*.fchk']
+        else:
+            look_for = ['*.tar.gz']
+            if any(a[0] == 'G' for a in self.recipe.bases()):
+                look_for.append('*.out')
 
         for l in look_for:
             for i in glob.glob('{}/{}'.format(self.directory, l)):

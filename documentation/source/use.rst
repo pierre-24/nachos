@@ -36,7 +36,7 @@ Concepts
    + ``D`` means *derivatives with respect to dynamic electric field* (with a given frequency), ``d`` means the same, but with inverse frequency (:math:`-\omega`) and ``X`` means any multiple (:math:`\pm i\omega`) ;
    + ``N`` means *derivatives with respect to normal coordinates*.
 
-   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``dDF`` for EOP  [:math:`\beta(-\omega;0,\omega)`] and ``XDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
+   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``dDF`` for EOP  [:math:`\beta(-\omega;\omega,0)`] and ``XDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
    See the list `below <#list-of-the-derivatives>`_.
 
    Geometrical derivatives of an electrical derivative are written with the geometrical derivatives **first**.
@@ -616,7 +616,7 @@ Note that if you only want to remove modes, for example using ``-m "-7;-8"`` wou
 .. autoprogram:: nachos.analyze:get_arguments_parser()
     :prog: nachos_analyze
 
-This program allows you to quickly access to a (eletrical derivative) property.
+This program allows you to quickly access to a (electrical derivative) property.
 
 The properties have the form ``tensor:property`` or ``tensor::component``, where ``tensor`` is either ``m`` (dipole, ``F``), ``a`` (polarizability, ``FF`` or ``FD``), ``b`` (first hyperpolarizability, ``FFF``, ``FDF`` or ``FDD``) or ``g`` (second hyperpolarizability).
 
@@ -628,12 +628,12 @@ The properties have the form ``tensor:property`` or ``tensor::component``, where
   * For ``b``:
 
     - For any process: ``beta_parallel``, ``beta_perpendicular``, ``beta_kerr``
-    - For SHG: ``beta_squared_zxx``, ``beta_squared_zzz``, ``beta_hrs``, ``depolarization_ratio``, ``dipolar_contribution_squared``, ``octupolar_contribution_squared``, ``nonlinear_anisotropy``
+    - For SHG: ``beta_squared_zxx``, ``beta_squared_zzz``, ``beta_hrs``, ``depolarization_ratio``, ``dipolar_contribution``, ``octupolar_contribution``, ``nonlinear_anisotropy``
 
   * For ``g``:
 
     - For any process: ``gamma_parallel``, ``gamma_perpendicular``, ``gamma_kerr``
-    - For THS: ``gamma_squared_zzzz``, ``gamma_squared_zxxx``, ``gamma_ths``, ``depolarization_ratio``, ``isotropic_contribution_squared``, ``quadrupolar_contribution_squared``, ``hexadecapolar_contribution_squared``
+    - For THS: ``gamma_squared_zzzz``, ``gamma_squared_zxxx``, ``gamma_ths``, ``depolarization_ratio``, ``isotropic_contribution``, ``quadrupolar_contribution``, ``hexadecapolar_contribution``
 
 You can restrict the number of vibrational contribution with the ``-O`` option, which takes a semicolon separated list of quantities.
 
@@ -682,7 +682,7 @@ Note that it would be better to respect the order for the different derivatives 
    * - :math:`\gamma(0;0,0,0)`
      - ``FFFF``
      - Static second hyperpolarizability
-   * - :math:`\gamma(-\omega;\omega,0,0)`
+   * - :math:`\gamma(-\omega;0,0,\omega)`
      - ``dFFD``
      - Kerr second hyperpolarizability
    * - :math:`\gamma(-2\omega;\omega,\omega,0)`
