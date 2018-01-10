@@ -345,6 +345,9 @@ class Preparer:
                     dal = dalton.Input()
 
                     if self.recipe['method'] == 'CC':
+                        if 'dDFF' in bases_repr:
+                            raise BadPreparation('dDFF is not available if CC')
+
                         # beginning
                         dal.update('**DALTON INPUT\n.RUN WAVE FUNCTIONS')
 
@@ -416,6 +419,9 @@ class Preparer:
                                 dal['WAVE FUNC']['CCCR']['.THGFRE'] = copy.copy(freq_card)
 
                     else:
+                        if 'dFFD' in bases_repr:
+                            raise BadPreparation('dFFD is not available if not CC')
+
                         dal.update('**DALTON INPUT\n.DIRECT\n.RUN WAVE FUNCTIONS')
 
                         dal.update(WAVE_FUNCTION.format_map({
@@ -493,8 +499,8 @@ class Preparer:
                                     dal['RESPONSE']['QUADRATIC']['.SHG'] = dalton.InputCard()
 
                         # second hyperpolarizability
-                        if any([x in bases_repr for x in ['FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD']]):
-                            dal.update('**RESPONSE\n*CUBIC\n.DIPLEN')
+                        if any([x in bases_repr for x in ['FFFF', 'dDFF', 'XDDF', 'dDDd', 'XDDD']]):
+                            dal.update('**RESPONSE\n*CUBIC\n.DIPLEN\n.GAMALL')
 
                             dal['RESPONSE']['CUBIC']['.THCLR'] = copy.copy(thclr_card)
                             dal['RESPONSE']['CUBIC']['.MAX IT'] = dalton.InputCard(
@@ -508,11 +514,11 @@ class Preparer:
                                 fx = '0.0 ' + fx
                                 num_frequencies += 1
 
-                            if any([x in bases_repr for x in ['dFFD', 'XDDF', 'dDDd', 'XDDD']]):
+                            if any([x in bases_repr for x in ['dDFF', 'XDDF', 'dDDd', 'XDDD']]):
                                 dal['RESPONSE']['CUBIC']['.FREQUE'] = dalton.InputCard(
                                     parameters=[num_frequencies, fx])
 
-                                if 'dFFD' in bases_repr:
+                                if 'dDFF' in bases_repr:
                                     dal.update('**RESPONSE\n*CUBIC\n.DC-KERR')
 
                                 if 'XDDF' in bases_repr:

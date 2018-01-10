@@ -228,7 +228,7 @@ Since there is default values for the rest.
 .. _nachos_make_note_1:
 
 For ``--method``: the value of this argument depends on the *flavor* you chose.
-This also determine the maximum derivative available at this level i.e. what you can request in ``--differentiation`` (:ref:`see below <nachos_make_note_2>`).
+This also determine the maximum properties available at this level i.e. what you can request in ``--differentiation`` (:ref:`see below <nachos_make_note_2>`).
 
 + For ``gaussian`` (chosen according to the `force page <http://gaussian.com/force/>`_, the `freq page <http://gaussian.com/freq/>`_ and the `polar page <http://gaussian.com/polar/>`_):
 
@@ -237,8 +237,8 @@ This also determine the maximum derivative available at this level i.e. what you
        :widths: 30 20 20 30
 
        * - Method
-         - Maximum level of electrical differentiation
-         - Maximum level of geometrical differentiation
+         - Maximum level of electrical properties
+         - Maximum level of geometrical properties
          - Available
        * - ``HF``
          - 3
@@ -274,17 +274,17 @@ This also determine the maximum derivative available at this level i.e. what you
        :widths: 30 20 20 30
 
        * - Method
-         - Maximum level of electrical differentiation
-         - Maximum level of geometrical differentiation
+         - Maximum level of electrical properties
+         - Maximum level of geometrical properties
          - Available
        * - ``HF``
-         - 3
+         - 4
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``, ``FFFF``, ``dDFF``, ``XDDF``, ``dDDd``, ``XDDD``
        * - ``DFT``
-         - 3
+         - 4
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``, ``FFFF``, ``dDFF``, ``XDDF``, ``dDDd``, ``XDDD``
        * - ``CC``
          - 4
          - 1
@@ -314,15 +314,17 @@ This also determine the maximum derivative available at this level i.e. what you
 
 .. warning::
 
-    By default, second hyperpolarizability with HF or DFT does not compute all components of the gamma tensor, but only the one that contribute to :math:`\gamma_{||}`.
-    Therefore, the ability to perform numerical differentiation of second hyperpolarizability is disabled.
+    + Due to some differences in the implementation, dc-Kerr effect is ``dDFF`` with HF and DFT (*RESPONSE* module), while it is ``dFFD`` with CC.
+      Use the correct one.
+    + By default, first and (some components of the) second hyperpolarizability with HF or DFT are printed with an lower accuracy than the other responses.
+      If you want a better accuracy, consider `patching Dalton <./install.html>`_.
 
 -------
 
 .. _nachos_make_note_2:
 
 For ``--differentiation``: this is where you request what you want to differentiate, and up to which level, with a semicolon separated list.
-Each member of the list should be of the form ``what:how many``, where ``what`` is a derivative (`see the appendix <#list-of-derivatives>`_) and ``how much`` is how many times you want to differentiate this quantity.
+Each member of the list should be of the form ``what:how many``, where ``what`` is a properties (`see the appendix <#list-of-derivatives>`_) and ``how much`` is how many times you want to differentiate this property.
 
 For example,
 
@@ -330,7 +332,7 @@ For example,
   To get the same property from the dipole moment and the static polarizability, the input is ``F:2;FF:1``.
 + If you want to get the vibrational contribution to a given property (say, the polarizability), you need to select ``G`` for the type of differentiation, then you need at least second order derivative of the dipole moment polariability with respect to that (the first one is automatically computed if the second is), and the cubic force field, so an input could look like ``FF:2;F:2;GG:1`` (and eventually ``dD:2``).
 
-:ref:`See above <nachos_make_note_1>` for the list of quantities that you can differentiate depending on the *flavor* and the method.
+:ref:`See above <nachos_make_note_1>` for the list of properties that you can differentiate depending on the *flavor* and the method.
 
 -------
 
@@ -682,8 +684,8 @@ Note that it would be better to respect the order for the different derivatives 
    * - :math:`\gamma(0;0,0,0)`
      - ``FFFF``
      - Static second hyperpolarizability
-   * - :math:`\gamma(-\omega;0,0,\omega)`
-     - ``dFFD``
+   * - :math:`\gamma(-\omega;0,0,\omega)` or :math:`\gamma(-\omega;\omega,0,0)`
+     - ``dFFD`` or ``dDFF``
      - Kerr second hyperpolarizability
    * - :math:`\gamma(-2\omega;\omega,\omega,0)`
      - ``XDDF``
