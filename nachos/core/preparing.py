@@ -268,10 +268,14 @@ class Preparer:
         inputs_matching = ''
 
         dal_files = {}
-        frequencies = ' '.join(
-            '{:.8f}'.format(derivatives_e.convert_frequency_from_string(a)) for a in self.recipe['frequencies'])
+        if 'frequencies' in self.recipe:
+            frequencies = ' '.join(
+                '{:.8f}'.format(derivatives_e.convert_frequency_from_string(a)) for a in self.recipe['frequencies'])
 
-        freq_card = dalton.InputCard(parameters=[len(self.recipe['frequencies']), frequencies])
+            freq_card = dalton.InputCard(parameters=[len(self.recipe['frequencies']), frequencies])
+        else:
+            frequencies = ''
+            freq_card = None
 
         thclr_card = dalton.InputCard(parameters=[
             '{:.1e}'.format(float(self.recipe['flavor_extra']['response_threshold'])).replace('e', 'D')])
@@ -466,7 +470,9 @@ class Preparer:
                                 parameters=[self.recipe['flavor_extra']['response_max_ito']])
 
                             fx = frequencies
-                            num_frequencies = len(self.recipe['frequencies'])
+                            num_frequencies = 0
+                            if 'frequencies' in self.recipe:
+                                num_frequencies = len(self.recipe['frequencies'])
                             if 'FF' in bases_repr:
                                 fx = '0.0 ' + fx
                                 num_frequencies += 1
@@ -484,7 +490,9 @@ class Preparer:
                                 parameters=[self.recipe['flavor_extra']['response_max_ito']])
 
                             fx = frequencies
-                            num_frequencies = len(self.recipe['frequencies'])
+                            num_frequencies = 0
+                            if 'frequencies' in self.recipe:
+                                num_frequencies = len(self.recipe['frequencies'])
                             if 'FFF' in bases_repr:
                                 fx = '0.0 ' + fx
                                 num_frequencies += 1
@@ -509,7 +517,9 @@ class Preparer:
                                 parameters=[self.recipe['flavor_extra']['response_max_ito']])
 
                             fx = frequencies
-                            num_frequencies = len(self.recipe['frequencies'])
+                            num_frequencies = 0
+                            if 'frequencies' in self.recipe:
+                                num_frequencies = len(self.recipe['frequencies'])
                             if 'FFFF' in bases_repr:
                                 fx = '0.0 ' + fx
                                 num_frequencies += 1
