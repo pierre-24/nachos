@@ -5,12 +5,12 @@ Installing nachos
 Normal install
 --------------
 
-To install nachos for a day-to-day use:
+To install the latest version of nachos:
 
 .. code-block:: bash
 
   # install qcip_tools (base library):
-  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/qcip_tools.git@release-v0.5
+  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/qcip_tools.git@release-v0.5.1.1
   # install nachos:
   pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/nachos.git
 
@@ -43,7 +43,7 @@ The following  commands allow you to `get the sources <https://gitlab.com/dalton
 
 .. code-block:: bash
 
-  git clone https://gitlab.com/dalton/dalton.git
+  git clone --recursive https://gitlab.com/dalton/dalton.git
   cd dalton/
   git checkout -b special_version origin/release/2016
   # use "origin/master" if you want the latest (maybe buggy) version
