@@ -595,6 +595,22 @@ The pure vibrational (pv) contributions depends on the quantity:
      - :math:`[\mu\alpha]^{0,2}`
      - 2
      - ``NF``, ``NFF``, ``NNN``  (part with ``NNNN`` not implemented)
+   * - Second hyperpolarizability (``FFFF``, ...)
+     - :math:`[\alpha^2]^{0,0}`
+     - 0
+     - ``NFF``
+   * -
+     - :math:`[\mu\beta]^{0,0}`
+     - 0
+     - ``NF``, ``NFFF``
+   * -
+     - :math:`[\mu^2\alpha]^{1,0}`
+     - 1
+     - ``NF``, ``NNF``, ``NFF``, ``NNFF``
+   * -
+     - :math:`[\mu^2\alpha]^{0,1}`
+     - 1
+     - ``NF``, ``NFF``, ``NNN``
 
 
 The output depends on the value of ``-V``, which can be:
@@ -606,14 +622,15 @@ The output depends on the value of ``-V``, which can be:
 
 You can change the vibrational mode included in the computation of vibrational contributions with the ``-m`` option (default is all non-trans+rot modes).
 This options takes a list of comma separated modes, positive numbers to add a mode, negative number to remove one (modes starts at 1, so modes 1-6 are trans+rot modes if molecule is nonlinear, 1-5 otherwise).
-Therefore, you could do something ``-m "+1;-7`` to add first mode and remove mode 7 (if, for example, ordering is incorrect).
+Therefore, you could do something ``-m "+1;-7"`` to add first mode and remove mode 7 (if, for example, ordering is incorrect).
 Note that if you only want to remove modes, for example using ``-m "-7;-8"`` would not work (because of the way some terminals works), so you can add a ``:`` at the beginning to avoid the ``-`` to be interpreted as another command, so ``-m ":-7;-8"`` in this case.
 
 .. note::
 
-    The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.
+  + The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.
     Even though ZPVA requires derivatives of the dynamic quantities to be available, this is not the case for the pure vibrational part, for which any frequency could be used.
     Therefore, the ZPVA part is only computed for available frequencies, and the pv part is computed for all (!) frequencies.
+  + If the corresponding static properties are available, you can even request *pure vibrational* contributions for processes that are not initially present, with the ``-O`` option.
 
 .. autoprogram:: nachos.analyze:get_arguments_parser()
     :prog: nachos_analyze
