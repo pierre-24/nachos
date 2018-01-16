@@ -450,7 +450,8 @@ class Preparer:
 
                         if 'GG' in bases_repr:
                             dal.update('**DALTON INPUT\n.RUN PROPERTIES')
-                            dal.update('**PROPERTIES\n.VIBANA\n*VIBANA\n.HESPUN')
+                            dal.update('**PROPERTIES\n.VIBANA\n*VIBANA\n.HESPUN\n*RESPON')
+                            dal['PROPERTIES']['RESPON']['.THRESH'] = copy.copy(thclr_card)
 
                         if any([x in bases_repr for x in [
                                 'FF', 'dD', 'FFF', 'dDF', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'XDDD', 'dDDd']]):
