@@ -193,8 +193,10 @@ class Preparer:
 
             # input card
             input_card = [
-                '#P {} {} nosym{}'.format(
+                '#P {}{} {} nosym{}'.format(
                     self.recipe['method'] if self.recipe['method'] != 'DFT' else self.recipe['flavor_extra']['XC'],
+                    '=Full' if self.recipe['method'] not in ['DFT', 'HF'] and
+                    int(self.recipe['flavor_extra']['use_full']) != 0 else '',
                     self.recipe['basis_set'],
                     ' field=read' if self.recipe['type'] == 'F' else ''),
                 'scf=(Conver={c},NoVarAcc,MaxCyc={m},vshift={v}) IOP(9/6={m},9/9={cc})'.format_map(

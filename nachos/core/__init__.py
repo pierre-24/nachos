@@ -29,7 +29,8 @@ CONFIG = {
             'extra_sections': '',
             'gen_basis': '',
             'vshift': 1000,
-            'XC': ''
+            'XC': '',
+            'use_full': True,
         }
     },
     'dalton': {

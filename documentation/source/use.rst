@@ -386,6 +386,9 @@ Note that you don't have to redefine every variable, since they have a default v
        * - ``vshift``
          - ``1000``
          - Apply a *vshift* (helps for the electric field differentiation)
+       * - ``use_full``
+         - ``1``
+         - For post-HF methods (not HF and DFT), use ``=Full`` to include core orbitals.
 
   Note that the value of ``extra_section`` is not tested here.
   Also, ``XC`` and ``gen_basis`` are available, but that would modify their previous values.
