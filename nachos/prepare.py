@@ -77,7 +77,7 @@ def main():
             recipe.write(f)
 
     if args.verbose >= 1:
-        print('prepared {} files'.format(n))
+        print('prepared {} calculation(s) to run'.format(n))
 
 
 if __name__ == '__main__':

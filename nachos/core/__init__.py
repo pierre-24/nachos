@@ -17,7 +17,7 @@ CONFIG = {
             ('CCSD', {'G': 1, 'F': 1}),
             ('CCSD(T)', {'G': 0, 'F': 0}),
         ],
-        'bases': ['energy', 'G', 'GG', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD'],
+        'bases': ['energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD'],
         'default_for_extra_fields': {
             'memory': '1Gb',
             'procs': 1,
@@ -29,23 +29,33 @@ CONFIG = {
             'extra_sections': '',
             'gen_basis': '',
             'vshift': 1000,
-            'XC': ''
+            'XC': '',
+            'use_full': True,
         }
     },
     'dalton': {
         'types': ['G'],
         'methods': [
-            ('CCS', {'G': 1, 'F': 4}),
-            ('CC2', {'G': 1, 'F': 4}),
-            ('CCSD', {'G': 1, 'F': 4}),
-            ('CC3', {'G': 1, 'F': 4}),
+            ('HF', {'G': 2, 'F': 4}),
+            ('DFT', {'G': 2, 'F': 4}),  # with some XC functionals only :o
+            ('CC', {'G': 1, 'F': 4}),
         ],
-        'bases': ['energy', 'G', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD', 'FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD'],
+        'bases': [
+            'energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD', 'FFFF', 'dFFD', 'dDFF', 'XDDF', 'dDDd', 'XDDD'],
         'default_for_extra_fields': {
-            'max_iteration': 2500,
-            'threshold': 1e-6,
+            'threshold': 1e-11,
             'cc_threshold': 1e-11,
+            'response_threshold': 1e-10,
+            'response_max_it': 2500,
+            'response_max_ito': 10,
+            'response_dim_reduced_space': 2500,
             'dal_name': 'ND',
+            'CC': '',
+            'XC': '',
+            'split_level_3': 1,
+            'split_level_4': 1,
+            'merge_level_3': 0,
+            'merge_level_4': 0
         }
     }
 }

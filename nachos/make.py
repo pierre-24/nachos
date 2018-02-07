@@ -38,6 +38,7 @@ def get_arguments_parser():
     arguments_parser.add_argument('--flavor-extra', help='Update the values of flavor extra')
 
     arguments_parser.add_argument('--XC', help='XC functional (if DFT)')
+    arguments_parser.add_argument('--CC', help='CC level (if CC)')
     arguments_parser.add_argument('--gen-basis', help='gaussian basis function file (if gen)')
 
     arguments_parser.add_argument(

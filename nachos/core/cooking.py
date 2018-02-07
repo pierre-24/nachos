@@ -34,23 +34,45 @@ def gaussian__FCHK__get_input_electric_field(obj, *args, **kwargs):
 def dalton__output__get_gradient(obj, *args, **kwargs):
     """Get the cartesian gradient out of a dalton calculation output
 
+    (redefined so that it only fetch the gradient)
+
     :param obj: object
     :type obj: qcip_tools.chemistry_files.dalton.Output
     :rtype: dict
     """
 
+    geometrical_derivatives = {}
+
+    dof = 3 * len(obj.molecule)
+    trans_plus_rot = 5 if obj.molecule.linear() else 6
+
+    # CC
     x = obj.search('Molecular gradient', into='CC')
     if x != -1:
-        gradient = numpy.zeros((len(obj.molecule), 3))
+        gradient = derivatives_g.BaseGeometricalDerivativeTensor(
+            representation='G', spacial_dof=dof, trans_plus_rot=trans_plus_rot)
 
         for i in range(len(obj.molecule)):
             line = obj.lines[x + 3 + i].split()
-            gradient[i] = [float(a) for a in line[1:]]
-        return {'G': derivatives_g.BaseGeometricalDerivativeTensor(
-            representation='G', components=gradient, spacial_dof=3 * len(obj.molecule))}
+            gradient.components[i * 3:(i + 1) * 3] = [float(a) for a in line[1:]]
+        geometrical_derivatives['G'] = gradient
 
-    else:
+    # general !
+    if obj.chunk_exists('ABACUS'):
+        x = obj.search('Molecular gradient', into='ABACUS')
+        if x != -1:
+            gradient = derivatives_g.BaseGeometricalDerivativeTensor(
+                representation='G', spacial_dof=dof, trans_plus_rot=trans_plus_rot)
+
+            for i in range(len(obj.molecule)):
+                line = obj.lines[x + 3 + i].split()
+                gradient.components[i * 3:(i + 1) * 3] = [float(a) for a in line[1:]]
+            geometrical_derivatives['G'] = gradient
+
+    if not geometrical_derivatives:
         raise PropertyNotPresent('geometrical_derivatives')
+
+    return geometrical_derivatives
 
 
 class Cooker:
@@ -76,7 +98,12 @@ class Cooker:
 
         storage = files.ComputationalResults(self.recipe, directory=self.directory)
 
-        look_for = ['*.fchk'] if self.recipe['flavor'] == 'gaussian' else ['*.tar.gz', '*.out']
+        if self.recipe['flavor'] == 'gaussian':
+            look_for = ['*.fchk']
+        else:
+            look_for = ['*.tar.gz']
+            if any(a[0] == 'G' for a in self.recipe.bases()):
+                look_for.append('*.out')
 
         for l in look_for:
             for i in glob.glob('{}/{}'.format(self.directory, l)):

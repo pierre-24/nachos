@@ -33,10 +33,10 @@ Concepts
    Accordingly,
 
    + ``F`` means *derivatives with respect to static electric field* ;
-   + ``D`` means *derivatives with respect to dynamic electric field* (with a given frequency), and ``d`` means the same, but with inverse frequency (:math:`-\omega`) ;
+   + ``D`` means *derivatives with respect to dynamic electric field* (with a given frequency), ``d`` means the same, but with inverse frequency (:math:`-\omega`) and ``X`` means any multiple (:math:`\pm i\omega`) ;
    + ``N`` means *derivatives with respect to normal coordinates*.
 
-   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``FDF`` for EOP  [:math:`\beta(-\omega;\omega,0)`] and ``FDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
+   Therefore, the static hyperpolarizability, :math:`\beta(0;0,0)`, is written ``FFF``, while the dynamic hyperpolarizability depends on the process involved: ``dDF`` for EOP  [:math:`\beta(-\omega;\omega,0)`] and ``XDD`` for SHG [:math:`\beta(-2\omega;\omega,\omega)`].
    See the list `below <#list-of-the-derivatives>`_.
 
    Geometrical derivatives of an electrical derivative are written with the geometrical derivatives **first**.
@@ -132,6 +132,10 @@ The program prompts for different information in order to create a *recipe file*
      - "Which XC functionnal?"
      - *XC functional*
      - Only if ``DFT``
+   * - ``--CC``
+     - "Which Coupled Cluster method?"
+     - ``CCS`` | ``CC2`` | ``CCSD`` | ``CC3``
+     - Only if ``CC`` (and dalton)
    * - ``--geometry``
      - "Where is the geometry? "
      - *path to a .com/.xyz/.fchk/.mol* file
@@ -195,7 +199,7 @@ For example, this is an input to compute vibrational contribution to the polaria
       2:
         - F
         - FF
-        - FD
+        - dD
       1:
         - GG
     type: G
@@ -224,7 +228,7 @@ Since there is default values for the rest.
 .. _nachos_make_note_1:
 
 For ``--method``: the value of this argument depends on the *flavor* you chose.
-This also determine the maximum derivative available at this level i.e. what you can request in ``--differentiation`` (:ref:`see below <nachos_make_note_2>`).
+This also determine the maximum properties available at this level i.e. what you can request in ``--differentiation`` (:ref:`see below <nachos_make_note_2>`).
 
 + For ``gaussian`` (chosen according to the `force page <http://gaussian.com/force/>`_, the `freq page <http://gaussian.com/freq/>`_ and the `polar page <http://gaussian.com/polar/>`_):
 
@@ -233,17 +237,17 @@ This also determine the maximum derivative available at this level i.e. what you
        :widths: 30 20 20 30
 
        * - Method
-         - Maximum level of electrical differentiation
-         - Maximum level of geometrical differentiation
+         - Maximum level of electrical properties
+         - Maximum level of geometrical properties
          - Available
        * - ``HF``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
        * - ``DFT``
          - 3
          - 2
-         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``FD``, ``FDF``, ``FDD``
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``
        * - ``MP2``
          - 2
          - 2
@@ -263,22 +267,72 @@ This also determine the maximum derivative available at this level i.e. what you
 
   Some method are not available, but may be added in the future if needed (CI methods, for example).
 
-+ For ``dalton`` you can request ``CCS``, ``CC2``, ``CCSD`` and ``CC3``, for which you can request derivatives up to second hyperpolarizability, and the gradient.
++ For ``dalton``:
+
+  .. list-table::
+       :header-rows: 1
+       :widths: 30 20 20 30
+
+       * - Method
+         - Maximum level of electrical properties
+         - Maximum level of geometrical properties
+         - Available
+       * - ``HF``
+         - 4
+         - 2
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``, ``FFFF``, ``dDFF``, ``XDDF``, ``dDDd``, ``XDDD``
+       * - ``DFT``
+         - 4
+         - 2
+         - ``energy``, ``G``, ``GG``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``, ``FFFF``, ``dDFF``, ``XDDF``, ``dDDd``, ``XDDD``
+       * - ``CC``
+         - 4
+         - 1
+         - ``energy``, ``G``, ``F``, ``FF``, ``dD``, ``dDF``, ``XDD``, ``FFFF``, ``dFFD``, ``XDDF``, ``dDDd``, ``XDDD``
+
+  Note that for the ``DFT`` method, only a few XC functional allow to compute more than the polarizability (this list may not be accurate, and it is not checked by the program):
+
+  + B1LYP
+  + B2PLYP
+  + B3LYP
+  + B86x
+  + Becke
+  + BHandH
+  + BHandHLYP
+  + BLYP
+  + BVWN
+  + Camb3lyp
+  + KMLYP
+  + LDA
+  + LYP
+  + pbex
+  + Slater
+  + SVWN5
+  + WL90c
+  + XAlpha
+
+
+.. warning::
+
+    + Due to some differences in the implementation, dc-Kerr effect is ``dDFF`` with HF and DFT (*RESPONSE* module), while it is ``dFFD`` with CC.
+      Use the correct one.
+    + By default, first and (some components of the) second hyperpolarizability with HF or DFT are printed with an lower accuracy than the other responses.
+      If you want a better accuracy, consider `patching Dalton <./install.html>`_.
 
 -------
 
 .. _nachos_make_note_2:
 
 For ``--differentiation``: this is where you request what you want to differentiate, and up to which level, with a semicolon separated list.
-Each member of the list should be of the form ``what:how many``, where ``what`` is a derivative (`see the appendix <#list-of-derivatives>`_) and ``how much`` is how many times you want to differentiate this quantity.
+Each member of the list should be of the form ``what:how many``, where ``what`` is a properties (`see the appendix <#list-of-derivatives>`_) and ``how much`` is how many times you want to differentiate this property.
 
 For example,
 
 + If you want to do an electric field differentiation (``F``) to obtain the static first hyperpolarizability (``FFF``) from the energy, input should be ``energy:3``, because you want to differentiate energy 3 times.
   To get the same property from the dipole moment and the static polarizability, the input is ``F:2;FF:1``.
-+ If you want to get the vibrational contribution to a given property (say, the polarizability), you need to select ``G`` for the type of differentiation, then you need at least second order derivative of the dipole moment polariability with respect to that (the first one is automatically computed if the second is), and the cubic force field, so an input could look like ``FF:2;F:2;GG:1`` (and eventually ``FD:2``).
++ If you want to get the vibrational contribution to a given property (say, the polarizability), you need to select ``G`` for the type of differentiation, then you need at least second order derivative of the dipole moment polariability with respect to that (the first one is automatically computed if the second is), and the cubic force field, so an input could look like ``FF:2;F:2;GG:1`` (and eventually ``dD:2``).
 
-:ref:`See above <nachos_make_note_1>` for the list of quantities that you can differentiate depending on the *flavor* and the method.
+:ref:`See above <nachos_make_note_1>` for the list of properties that you can differentiate depending on the *flavor* and the method.
 
 -------
 
@@ -332,9 +386,12 @@ Note that you don't have to redefine every variable, since they have a default v
        * - ``vshift``
          - ``1000``
          - Apply a *vshift* (helps for the electric field differentiation)
+       * - ``use_full``
+         - ``1``
+         - For post-HF methods (not HF and DFT), use ``=Full`` to include core orbitals.
 
   Note that the value of ``extra_section`` is not tested here.
-  Also, ``XC`` and ``gen_basis`` are available, but that would increase their previous values.
+  Also, ``XC`` and ``gen_basis`` are available, but that would modify their previous values.
 
 + For ``dalton``, the options are
 
@@ -345,18 +402,44 @@ Note that you don't have to redefine every variable, since they have a default v
        * - Option
          - Default value
          - Note
-       * - ``max_iteration``
-         - ``2500``
-         - Maximum number of iteration for the response function computation
        * - ``threshold``
-         - ``1e-6``
-         - Convergence criterion for the SCF
+         - ``1e-11``
+         - Convergence criterion for the SCF gradient
        * - ``cc_threshold``
          - ``1e-11``
-         - Convergence criterion for CC energy and response functions
+         - Convergence criterion for the CC energy gradient
        * - ``dal_name``
          - ``ND``
          - Prefix for the different ``.dal`` files
+       * - ``response_threshold``
+         - ``1e-10``
+         - Convergence criterion for response functions
+       * - ``response_max_it``
+         - ``2500``
+         - Maximum number of iteration to solve linear equations for response functions
+       * - ``response_max_ito``
+         - ``10``
+         - Maximum number of trial vector microiterations (not relevant for CC)
+       * - ``response_dim_reduced_space``
+         - ``2500``
+         - Maximum dimension of the reduced space (should be increased if large number of frequency or sharp convergence criterion).
+       * - ``split_level_3``
+         - ``1``
+         - Split first hyperpolarizability calculations over separate dal files
+       * - ``split_level_4``
+         - ``1``
+         - Split second hyperpolarizability calculations over separate dal files
+       * - ``merge_level_3``
+         - ``0``
+         - Merge first hyperpolarizability calculations with lower order calculations (only for ``CC``). Priority over splitting.
+       * - ``merge_level_4``
+         - ``0``
+         - Merge second hyperpolarizability calculations with lower order calculations (only for ``CC``). Priority over splitting.
+
+  Note that the value of ``extra_section`` is not tested here.
+  Also, ``XC`` and ``CC`` are available, but that would modify their previous values.
+
+  Splitting and merging modify the number of calculation, but also the times it takes (because Dalton tries to solve all response functions at the same time, therefore you may need to increase ``response_max_it``).
 
 
 .. autoprogram:: nachos.prepare:get_arguments_parser()
@@ -436,7 +519,7 @@ The output depends on the value of ``-V``, which can be:
       There is no way to change this behavior.
     + By default, the program also include the base tensors calculated in the process.
       The ``-S`` option prevents this (that may be useful in the case of electric field differentiation)
-    + Projection over normal mode of all the geometrical derivatives is requested via the ``-p`` option, but you can also request that the cartesian hessian used to do so is different, with the ``-H`` option (which only accepts FCHK with cartesian hessian in it as argument, for the moment).
+    + Projection over normal mode of all the geometrical derivatives is requested via the ``-p`` option, but you can also request that the cartesian hessian used to do so is different, with the ``-H`` option (which accepts FCHK and dalton archives with cartesian hessian in it as argument).
 
 
 .. autoprogram:: nachos.shake:get_arguments_parser()
@@ -475,7 +558,7 @@ The pure vibrational (pv) contributions depends on the quantity:
      - Vibrational contribution
      - Level
      - Derivatives needed
-   * - Polarizability (``FF``, ``FD``)
+   * - Polarizability (``FF``, ``dD``)
      - :math:`[\mu^2]^{0,0}`
      - 0
      - ``NF``
@@ -491,7 +574,7 @@ The pure vibrational (pv) contributions depends on the quantity:
      - :math:`[\mu^2]^{0,2}`
      - 2
      - ``NF``, ``NNN`` (part with ``NNNN`` not implemented)
-   * - First hyperpolarizability (``FFF``, ``FDF``, ``FDD``)
+   * - First hyperpolarizability (``FFF``, ``dDF``, ``XDD``)
      - :math:`[\mu\alpha]^{0,0}`
      - 0
      - ``NF``, ``NFF``
@@ -515,6 +598,22 @@ The pure vibrational (pv) contributions depends on the quantity:
      - :math:`[\mu\alpha]^{0,2}`
      - 2
      - ``NF``, ``NFF``, ``NNN``  (part with ``NNNN`` not implemented)
+   * - Second hyperpolarizability (``FFFF``, ...)
+     - :math:`[\alpha^2]^{0,0}`
+     - 0
+     - ``NFF``
+   * -
+     - :math:`[\mu\beta]^{0,0}`
+     - 0
+     - ``NF``, ``NFFF``
+   * -
+     - :math:`[\mu^2\alpha]^{1,0}`
+     - 1
+     - ``NF``, ``NNF``, ``NFF``, ``NNFF``
+   * -
+     - :math:`[\mu^2\alpha]^{0,1}`
+     - 1
+     - ``NF``, ``NFF``, ``NNN``
 
 
 The output depends on the value of ``-V``, which can be:
@@ -526,19 +625,20 @@ The output depends on the value of ``-V``, which can be:
 
 You can change the vibrational mode included in the computation of vibrational contributions with the ``-m`` option (default is all non-trans+rot modes).
 This options takes a list of comma separated modes, positive numbers to add a mode, negative number to remove one (modes starts at 1, so modes 1-6 are trans+rot modes if molecule is nonlinear, 1-5 otherwise).
-Therefore, you could do something ``-m "+1;-7`` to add first mode and remove mode 7 (if, for example, ordering is incorrect).
+Therefore, you could do something ``-m "+1;-7"`` to add first mode and remove mode 7 (if, for example, ordering is incorrect).
 Note that if you only want to remove modes, for example using ``-m "-7;-8"`` would not work (because of the way some terminals works), so you can add a ``:`` at the beginning to avoid the ``-`` to be interpreted as another command, so ``-m ":-7;-8"`` in this case.
 
 .. note::
 
-    The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.
+  + The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.
     Even though ZPVA requires derivatives of the dynamic quantities to be available, this is not the case for the pure vibrational part, for which any frequency could be used.
     Therefore, the ZPVA part is only computed for available frequencies, and the pv part is computed for all (!) frequencies.
+  + If the corresponding static properties are available, you can even request *pure vibrational* contributions for processes that are not initially present, with the ``-O`` option.
 
 .. autoprogram:: nachos.analyze:get_arguments_parser()
     :prog: nachos_analyze
 
-This program allows you to quickly access to a (eletrical derivative) property.
+This program allows you to quickly access to a (electrical derivative) property.
 
 The properties have the form ``tensor:property`` or ``tensor::component``, where ``tensor`` is either ``m`` (dipole, ``F``), ``a`` (polarizability, ``FF`` or ``FD``), ``b`` (first hyperpolarizability, ``FFF``, ``FDF`` or ``FDD``) or ``g`` (second hyperpolarizability).
 
@@ -550,12 +650,12 @@ The properties have the form ``tensor:property`` or ``tensor::component``, where
   * For ``b``:
 
     - For any process: ``beta_parallel``, ``beta_perpendicular``, ``beta_kerr``
-    - For SHG: ``beta_squared_zxx``, ``beta_squared_zzz``, ``beta_hrs``, ``depolarization_ratio``, ``dipolar_contribution_squared``, ``octupolar_contribution_squared``, ``nonlinear_anisotropy``
+    - For SHG: ``beta_squared_zxx``, ``beta_squared_zzz``, ``beta_hrs``, ``depolarization_ratio``, ``dipolar_contribution``, ``octupolar_contribution``, ``nonlinear_anisotropy``
 
   * For ``g``:
 
     - For any process: ``gamma_parallel``, ``gamma_perpendicular``, ``gamma_kerr``
-    - For THS: ``gamma_squared_zzzz``, ``gamma_squared_zxxx``, ``gamma_ths``, ``depolarization_ratio``, ``isotropic_contribution_squared``, ``quadrupolar_contribution_squared``, ``hexadecapolar_contribution_squared``
+    - For THS: ``gamma_squared_zzzz``, ``gamma_squared_zxxx``, ``gamma_ths``, ``depolarization_ratio``, ``isotropic_contribution``, ``quadrupolar_contribution``, ``hexadecapolar_contribution``
 
 You can restrict the number of vibrational contribution with the ``-O`` option, which takes a semicolon separated list of quantities.
 
@@ -571,7 +671,7 @@ Appendix
 List of the derivatives
 ***********************
 
-Note that it would be better to respect the order for the different derivatives (``FDF``, not ``FFD``, for example).
+Note that it would be better to respect the order for the different derivatives (``dDF``, not ``FdD``, for example).
 
 .. list-table::
    :header-rows: 1
@@ -590,31 +690,31 @@ Note that it would be better to respect the order for the different derivatives 
      - ``FF``
      - Static polarizability
    * - :math:`\alpha(-\omega;\omega)`
-     - ``FD``
+     - ``dD``
      - Dynamic polarizability
    * - :math:`\beta(0;0,0)`
      - ``FFF``
      - Static first hyperpolarizability
    * - :math:`\beta(-\omega;\omega,0)`
-     - ``FDF``
+     - ``dDF``
      - EOP first hyperpolarizability
    * - :math:`\beta(-2\omega;\omega,\omega)`
-     - ``FDD``
+     - ``XDD``
      - SHG/SHS first hyperpolarizability
    * - :math:`\gamma(0;0,0,0)`
      - ``FFFF``
      - Static second hyperpolarizability
-   * - :math:`\gamma(-\omega;\omega,0,0)`
-     - ``FDFF``
+   * - :math:`\gamma(-\omega;0,0,\omega)` or :math:`\gamma(-\omega;\omega,0,0)`
+     - ``dFFD`` or ``dDFF``
      - Kerr second hyperpolarizability
    * - :math:`\gamma(-2\omega;\omega,\omega,0)`
-     - ``FDDF``
+     - ``XDDF``
      - ESHG second hyperpolarizability
    * - :math:`\gamma(-\omega;\omega,\omega,-\omega)`
-     - ``FDDd``
+     - ``dDDd``
      - DFWM second hyperpolarizability
    * - :math:`\gamma(-3\omega;\omega,\omega,\omega)`
-     - ``FDDD``
+     - ``XDDD``
      - THG/THS second hyperpolarizability
    * - :math:`\frac{\partial V(x)}{\partial x}`
      - ``G``

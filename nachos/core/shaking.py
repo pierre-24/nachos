@@ -98,18 +98,20 @@ class VibrationalContributionsData:
         zpva_contribs.extend([p.to_string() for p in self.per_type['zpva'] if p.to_string() not in zpva_contribs])
         pv_contribs.extend([p.to_string() for p in self.per_type['pv'] if p.to_string() not in pv_contribs])
 
-        group.attrs['zpva_contributions'] = ','.join(zpva_contribs)
-        group.attrs['pv_contributions'] = ','.join(pv_contribs)
+        if zpva_contribs:
+            group.attrs['zpva_contributions'] = ','.join(zpva_contribs)
+        if pv_contribs:
+            group.attrs['pv_contributions'] = ','.join(pv_contribs)
 
     def read_from_group(self, group):
+        zpva_contribs = []
+        pv_contribs = []
 
-        if 'zpva_contributions' not in group.attrs:
-            raise ValueError('no zpva_contributions in {} attrs'.format(self.derivative))
-        if 'pv_contributions' not in group.attrs:
-            raise ValueError('no zpva_contributions in {} attrs'.format(self.derivative))
+        if 'zpva_contributions' in group.attrs:
+            zpva_contribs = group.attrs['zpva_contributions'].split(',')
+        if 'pv_contributions' in group.attrs:
+            pv_contribs = group.attrs['pv_contributions'].split(',')
 
-        zpva_contribs = group.attrs['zpva_contributions'].split(',')
-        pv_contribs = group.attrs['pv_contributions'].split(',')
         contributions = zpva_contribs + pv_contribs
 
         for c in contributions:
@@ -391,6 +393,13 @@ class Shaker:
                 VibrationalContribution(('F', 'F', 'F'), 1, 0, self.dof),
                 VibrationalContribution(('F', 'F', 'F'), 0, 1, self.dof)
             ],
+            # second hyperpolarizability
+            4: [
+                VibrationalContribution(('FF', 'FF'), 0, 0, self.dof),
+                VibrationalContribution(('F', 'FFF'), 0, 0, self.dof),
+                VibrationalContribution(('F', 'F', 'FF'), 1, 0, self.dof),
+                VibrationalContribution(('F', 'F', 'FF'), 0, 1, self.dof),
+            ]
         }
 
         self.__make_availability()
@@ -611,7 +620,9 @@ class Shaker:
             bases = []
             for i, max_level in only:
                 if i not in self.available_electrical_derivatives:
-                    raise BadShaking('{} is not available'.format(i))
+                    full_F = 'F' * (i.order() - 1)
+                    if full_F not in self.available_electrical_derivatives:
+                        raise BadShaking('it is impossible to compute ZPVA or pv contribution to {}'.format(i))
 
                 bases.append((i, max_level))
 
@@ -635,6 +646,7 @@ class Shaker:
         for base, max_level in bases:
             b_repr = base.representation()
             is_dynamic = 'D' in b_repr
+            computed_pv, computed_ZPVA = False, False
 
             if verbosity_level >= 1:
                 out.write('\n**** Computing vibrational contributions of {}:\n'.format(fancy_output_derivative(base)))
@@ -666,9 +678,11 @@ class Shaker:
 
                     if vc.zpva:
                         t = self.compute_zpva(vc, base, freqs_zpva)
+                        computed_ZPVA = True
                         Shaker.output_tensors(base, vc, t, freqs_zpva, out, verbosity_level)
                     else:
                         t = self.compute_pv(vc, base, freqs_pv, limit_anharmonicity_usage)
+                        computed_pv = True
                         Shaker.output_tensors(base, vc, t, freqs_pv, out, verbosity_level)
 
                     c.add_contribution(vc, t)
@@ -677,13 +691,14 @@ class Shaker:
 
             # total stuffs
             if verbosity_level >= 2:
-                out.write('\n*** Total ZPVA contribution to {}:\n'.format(fancy_output_derivative(base)))
-                Shaker.output_tensors(base, None, c.total_zpva, freqs_zpva, out, verbosity_level, 'ZPVA')
+                if computed_ZPVA:
+                    out.write('\n*** Total ZPVA contribution to {}:\n'.format(fancy_output_derivative(base)))
+                    Shaker.output_tensors(base, None, c.total_zpva, freqs_zpva, out, verbosity_level, 'ZPVA')
+                if computed_pv:
+                    out.write('\n*** Total pv contribution to {}:\n'.format(fancy_output_derivative(base)))
+                    Shaker.output_tensors(base, None, c.total_pv, freqs_pv, out, verbosity_level, 'pv')
 
-                out.write('\n*** Total pv contribution to {}:\n'.format(fancy_output_derivative(base)))
-                Shaker.output_tensors(base, None, c.total_pv, freqs_pv, out, verbosity_level, 'pv')
-
-            if verbosity_level >= 1:
+            if verbosity_level >= 1 and computed_ZPVA and computed_pv:
                 out.write(
                     '\n*** Total vibrational contribution (ZPVA+pv) to {}:\n'.format(fancy_output_derivative(base)))
                 Shaker.output_tensors(
@@ -777,7 +792,7 @@ class Shaker:
         if derivative.representation() not in derivatives_e.DERIVATIVES:
             raise BadShaking('I cannot deal with {}'.format(derivative.representation()))
 
-        input_fields = [1 if x == 'D' else 0 for x in derivative.representation()[1:]]
+        input_fields = [derivatives_e.representation_to_field[x] for x in derivative.representation()[1:]]
 
         tensors = {}
         frequencies_converted = []
@@ -791,29 +806,11 @@ class Shaker:
 
         frequencies_converted.sort()
 
-        coordinates = []
-
-        if 'D' in derivative.representation():
-            dp = derivatives.Derivative(derivative.representation()[1:])
-            for a in derivatives.COORDINATES_LIST:
-                for i in dp.smart_iterator():
-                    full_coo_s = tuple([a] + list(i))
-                    inverse_smart_iterator = []
-                    for j in dp.inverse_smart_iterator(i):
-                        inverse_smart_iterator.append(tuple([a] + list(j)))
-                    coordinates.append((full_coo_s, inverse_smart_iterator))
-        else:
-            for i in derivative.smart_iterator():
-                inverse_smart_iterator = []
-                for j in derivative.inverse_smart_iterator(i):
-                    inverse_smart_iterator.append(j)
-                coordinates.append((i, inverse_smart_iterator))
-
-        for i, inverse_smart_iterator in coordinates:
+        for i in derivative.smart_iterator():
             v = getattr(self, callback)(i, input_fields, frequencies_converted, **kwargs)
-            for frequency, value in v.items():
-                initial_frequency = frequencies_mapping[frequency]
-                for j in inverse_smart_iterator:
+            for j in derivative.inverse_smart_iterator(i):
+                for frequency, value in v.items():
+                    initial_frequency = frequencies_mapping[frequency]
                     tensors[initial_frequency].components[j] = value
 
         return tensors
@@ -1396,5 +1393,181 @@ class Shaker:
 
         for f in frequencies:
             values[f] *= -1 / 6 * multiplier
+
+        return values
+
+    def _compute_FF_FF__0_0_component(self, coo, input_fields, frequencies, t_nff):
+        """Compute a component of the :math:`[\\alpha^2]^{0,0}` contribution
+
+        .. math::
+
+            [\\alpha^2]^{0,0} = \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_a
+            \\tdiff{\\alpha_{ij}}{Q_a}\\,\\tdiff{\\alpha_{kl}}{Q_a}\\,\\lb{23}{a}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :rtype: list of float
+        """
+
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                tmp = t_nff[a, p[0][0], p[1][0]] * t_nff[a, p[2][0], p[3][0]]
+                for f in frequencies:
+                    values[f] += Shaker.lambda_((p[2][1] * f, p[3][1] * f), self.mwh.frequencies[a]) * tmp
+
+        for f in frequencies:
+            values[f] *= 1 / 8 * multiplier
+
+        return values
+
+    def _compute_F_FFF__0_0_component(self, coo, input_fields, frequencies, t_nf, t_nfff):
+        """Compute a component of the :math:`[\\mu\\beta]^{0,0}` contribution
+
+        .. math::
+
+            [\\mu\\beta]^{0,0} = \\frac{1}{6}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_a
+            \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\beta_{jkl}}{Q_a}\\,\\lb{\\sigma}{a}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nfff: ``NFFF`` components
+        :type t_nfff: numpy.ndarray
+        :rtype: list of float
+        """
+
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                tmp = t_nf[a, p[0][0]] * t_nfff[a, p[1][0], p[2][0], p[3][0]]
+                for f in frequencies:
+                    values[f] += Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * tmp
+
+        for f in frequencies:
+            values[f] *= 1 / 6 * multiplier
+
+        return values
+
+    def _compute_F_F_FF__1_0_component(self, coo, input_fields, frequencies, t_nf, t_nff, t_nnf, t_nnff):
+        """Compute a component of the :math:`[\\mu^2\\alpha]^{1,0}` contribution
+
+        .. math::
+
+            [\\mu^2\\alpha]^{1,0} = \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijkl}} \\ldots
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :param t_nfff: ``NFFF`` components
+        :type t_nfff: numpy.ndarray
+        :param t_nnf: ``NNF`` components
+        :type t_nnf: numpy.ndarray
+        :param t_nnff: ``NNFF`` components
+        :type t_nnff: numpy.ndarray
+        :rtype: list of float
+        """
+
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                tmp_a = t_nf[a, p[0][0]]
+                for b in self.mwh.included_modes:
+                    tmp_ab_1 = tmp_a * t_nnff[a, b, p[1][0], p[2][0]] * t_nf[b, p[3][0]]
+                    tmp_ab_2 = tmp_a * t_nnf[a, b, p[1][0]] * t_nff[b, p[2][0], p[3][0]]
+                    for f in frequencies:
+                        values[f] += \
+                            Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                            Shaker.lambda_(p[3][1] * f, self.mwh.frequencies[b]) * \
+                            tmp_ab_1
+                        values[f] += 2 * \
+                            Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                            Shaker.lambda_((p[2][1] * f, p[3][1] * f), self.mwh.frequencies[b]) * \
+                            tmp_ab_2
+
+        for f in frequencies:
+            values[f] *= 1 / 4 * multiplier
+
+        return values
+
+    def _compute_F_F_FF__0_1_component(self, coo, input_fields, frequencies, t_nf, t_nff, t_nnn):
+        """Compute a component of the :math:`[\\mu^2\\alpha]^{0,1}` contribution
+
+        .. math::
+
+            [\\mu^2\\alpha]^{0,1} = -\\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijkl}} \\ldots
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :param t_nfff: ``NFFF`` components
+        :type t_nfff: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                tmp_a = t_nf[a, p[0][0]]
+                for b in self.mwh.included_modes:
+                    tmp_ab = tmp_a * t_nf[b, p[1][0]]
+                    for c in self.mwh.included_modes:
+                        tmp_abc = tmp_ab * t_nff[c, p[2][0], p[3][0]] * t_nnn[a, b, c]
+                        for f in frequencies:
+                            values[f] += \
+                                Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                                Shaker.lambda_(p[1][1] * f, self.mwh.frequencies[b]) * \
+                                Shaker.lambda_((p[2][1] * f, p[3][1] * f), self.mwh.frequencies[c]) * \
+                                tmp_abc
+
+        for f in frequencies:
+            values[f] *= -1 / 4 * multiplier
 
         return values

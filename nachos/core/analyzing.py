@@ -111,6 +111,10 @@ class Analyzer:
                 derivatives.Derivative(a, spacial_dof=self.datafile.spacial_dof)
                 for a in self.datafile.derivatives.keys())
 
+            bases.extend(
+                derivatives.Derivative(a, spacial_dof=self.datafile.spacial_dof)
+                for a in self.vibrational_contributions.keys() if a not in bases)
+
         bases = [b for b in bases if not derivatives.is_geometrical(b)]
         bases.sort(key=lambda x: (x.order(), x.raw_representation().count('D')))
 
@@ -120,7 +124,7 @@ class Analyzer:
 
             b_repr = base.representation()
 
-            if b_repr not in self.datafile.derivatives:
+            if b_repr not in self.datafile.derivatives and b_repr not in self.vibrational_contributions:
                 raise BadAnalysis('{} not in datafile'.format(base))
 
             if base.order() not in properties:
@@ -130,7 +134,9 @@ class Analyzer:
             to_show = properties[base.order()]
 
             frequencies = []
-            frequencies.extend(self.datafile.derivatives[b_repr].keys())
+
+            if b_repr in self.datafile.derivatives:
+                frequencies.extend(self.datafile.derivatives[b_repr].keys())
 
             vibrational_contribution_available = None
             how_much = 2
@@ -171,7 +177,7 @@ class Analyzer:
 
                     sum_tensor = derivatives.Tensor(base, frequency=frequency)
 
-                    if frequency in self.datafile.derivatives[b_repr]:
+                    if b_repr in self.datafile.derivatives and frequency in self.datafile.derivatives[b_repr]:
                         out.write('{: .8e} '.format(g.execute(self.datafile.derivatives[b_repr][frequency])))
                         sum_tensor.components += self.datafile.derivatives[b_repr][frequency].components
                     else:

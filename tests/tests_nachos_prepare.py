@@ -29,7 +29,7 @@ class PrepareTestCase(NachosTestCase):
             method='HF',
             basis_set='STO-3G',
             geometry=self.geometry,
-            differentiation={3: ['energy', 'FD']},
+            differentiation={3: ['energy', 'dD']},
             frequencies=['1064nm'],
             accuracy_level=1,
             k_max=5,
@@ -125,7 +125,7 @@ class PrepareTestCase(NachosTestCase):
         differentiation = {
             3: ['energy'],
             2: ['F'],
-            1: ['FF', 'FD']
+            1: ['FF', 'dD']
         }
 
         opt_dict = dict(
@@ -194,7 +194,7 @@ class PrepareTestCase(NachosTestCase):
 
         differentiation = {
             2: ['energy'],
-            1: ['G', 'F', 'FF', 'FD']
+            1: ['G', 'F', 'FF', 'dD']
         }
 
         opt_dict = dict(
@@ -289,20 +289,21 @@ class PrepareTestCase(NachosTestCase):
 
         differentiation = {
             2: ['energy'],
-            1: ['G', 'F', 'FF', 'FD', 'FFF', 'FDF', 'FDD', 'FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD']
+            1: ['G', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD']
         }
 
         opt_dict = dict(
             flavor='dalton',
             type='G',
-            method='CCS',
+            method='CC',
             basis_set='STO-3G',
             geometry=self.geometry,
             differentiation=differentiation,
             frequencies=['1064nm'],
             name=name,
             min_field=min_field,
-            k_max=3
+            k_max=3,
+            flavor_extra={'CC': 'CCS'}
         )
 
         r = files.Recipe(**opt_dict)

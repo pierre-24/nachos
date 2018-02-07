@@ -18,6 +18,10 @@ class BakeTestCase(NachosTestCase):
         self.zip_G_dalton = self.copy_to_temporary_directory('numdiff_G_dalton.zip')
         self.working_directory = self.setup_temporary_directory()
 
+    def tearDown(self):
+        super().tearDown()
+        pass
+
     def test_bake_gaussian_F(self):
         self.unzip_it(self.zip_F, self.working_directory)
         directory = os.path.join(self.working_directory, 'numdiff_F')
@@ -87,7 +91,7 @@ class BakeTestCase(NachosTestCase):
             baker.bake(only=[(derivatives.Derivative(), 4)])
 
         with self.assertRaises(baking.BadBaking):
-            baker.bake(only=[(derivatives.Derivative('FDF'), 0)])
+            baker.bake(only=[(derivatives.Derivative('dDF'), 0)])
 
     def test_bake_gaussian_G(self):
         self.unzip_it(self.zip_G, self.working_directory)
@@ -132,7 +136,7 @@ class BakeTestCase(NachosTestCase):
         self.assertIn('GG', cf.derivatives)
         self.assertIn('GF', cf.derivatives)
         self.assertIn('GFF', cf.derivatives)
-        self.assertIn('GFD', cf.derivatives)
+        self.assertIn('GdD', cf.derivatives)
 
         self.assertEqual(len(cf.derivatives), 5)
 
@@ -144,7 +148,7 @@ class BakeTestCase(NachosTestCase):
 
         dalphadq = fchk.get('Derivative Alpha(-w,w)')
         self.assertArraysAlmostEqual(cf.derivatives['GFF']['static'].components.flatten(), dalphadq[:81])
-        self.assertArraysAlmostEqual(cf.derivatives['GFD']['1064nm'].components.flatten(), dalphadq[81:])
+        self.assertArraysAlmostEqual(cf.derivatives['GdD']['1064nm'].components.flatten(), dalphadq[81:])
 
         # try projection
         mwh = derivatives_g.MassWeightedHessian(fchk.molecule, geometrical_derivatives['GG'].components)
@@ -154,7 +158,7 @@ class BakeTestCase(NachosTestCase):
         self.assertIn('NN', cf.derivatives)
         self.assertIn('NF', cf.derivatives)
         self.assertIn('NFF', cf.derivatives)
-        self.assertIn('NFD', cf.derivatives)
+        self.assertIn('NdD', cf.derivatives)
 
         ph = cf.derivatives['NN'].components
         for i in range(r.dof):
@@ -173,7 +177,7 @@ class BakeTestCase(NachosTestCase):
         self.assertIn('', cf_with_copy.derivatives)
         self.assertIn('F', cf_with_copy.derivatives)
         self.assertIn('FF', cf_with_copy.derivatives)
-        self.assertIn('FD', cf_with_copy.derivatives)
+        self.assertIn('dD', cf_with_copy.derivatives)
 
         self.assertEqual(len(cf_with_copy.derivatives), 6)
 
@@ -197,7 +201,7 @@ class BakeTestCase(NachosTestCase):
         # only test what was computed, since there is no way to test
         # (G, GG and GF are the same as with HF, but anyway)
         should_be_in = [
-            'G', 'GG', 'GF', 'GFF', 'GFD', 'GFFF', 'GFDF', 'GFDD', 'GFFFF', 'GFDFF', 'GFDDF', 'GFDDd', 'GFFF']
+            'G', 'GG', 'GF', 'GFF', 'GdD', 'GFFF', 'GdDF', 'GXDD', 'GFFFF', 'GdFFD', 'GXDDF', 'GdDDd', 'GXDDD']
 
         for i in should_be_in:
             self.assertIn(i, cf.derivatives, msg=i)
@@ -233,7 +237,7 @@ class BakeTestCase(NachosTestCase):
         with open(h5_path) as f:
             cf.read(f)
 
-        must_be_in = ['G', 'GG', '', 'F', 'FF', 'FD', 'G', 'GG', 'GF', 'GFF', 'GFD']
+        must_be_in = ['G', 'GG', '', 'F', 'FF', 'dD', 'G', 'GG', 'GF', 'GFF', 'GdD']
         for m in must_be_in:
             self.assertIn(m, cf.derivatives)
 
@@ -255,7 +259,7 @@ class BakeTestCase(NachosTestCase):
         with open(h5_path) as f:
             cf.read(f)
 
-        must_also_be_in = ['N', 'NN', 'NF', 'NFF', 'NFD']
+        must_also_be_in = ['N', 'NN', 'NF', 'NFF', 'NdD']
         for m in must_be_in:
             self.assertIn(m, cf.derivatives)
         for m in must_also_be_in:
