@@ -30,6 +30,9 @@ def treat_only_arg(recipe, t):
 
     only = []
     for x in t.split(';'):
+        if not x:
+            continue
+
         info = x.split(':')
         level = 0
 

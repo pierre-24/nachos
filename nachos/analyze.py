@@ -21,6 +21,8 @@ __status__ = 'Development'
 def treat_only_arg(only_arg):
     only = []
     for x in only_arg.split(';'):
+        if not x:
+            continue
 
         try:
             d = derivatives.Derivative(x)
