@@ -620,7 +620,7 @@ class Shaker:
             bases = []
             for i, max_level in only:
                 if i not in self.available_electrical_derivatives:
-                    full_F = 'F' * i.order()
+                    full_F = 'F' * (i.order() - 1)
                     if full_F not in self.available_electrical_derivatives:
                         raise BadShaking('it is impossible to compute ZPVA or pv contribution to {}'.format(i))
 

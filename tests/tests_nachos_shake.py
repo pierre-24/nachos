@@ -17,7 +17,7 @@ class ShakeTestCase(NachosTestCase):
         super().tearDown()
         pass
 
-    def _test_contributions(self, shaker, test_on, frequencies, are_in, are_not_in=None):
+    def _test_contributions(self, shaker, test_on, frequencies, are_in, are_not_in=None, is_zpva=True):
         vibs = shaker.shake(
             frequencies=frequencies,
             only=[(derivatives.Derivative(d[0]), d[1]) for d in test_on])
@@ -28,7 +28,7 @@ class ShakeTestCase(NachosTestCase):
             self.assertIn(i, vibs)
 
             c = vibs[i]
-            self.assertEqual(len(c.vibrational_contributions), len(are_in) + 2)
+            self.assertEqual(len(c.vibrational_contributions), len(are_in) + (2 if is_zpva else 0))
             # the "+2" comes from the two ZPVA contributions
 
             for j in are_in:
@@ -157,6 +157,12 @@ class ShakeTestCase(NachosTestCase):
             [0.02],
             ['F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
             ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'])
+
+        self._test_contributions(
+            shaker,
+            [('FFFF', 1), ('dDFF', 1), ('XDDF', 1)],
+            [0.02],
+            ['FF_FF__0_0', 'F_FFF__0_0', 'F_F_FF__1_0', 'F_F_FF__0_1'], is_zpva=False)
 
     def test_shaking_save_and_load(self):
         """Test that we are able to save and load vibrational contributions"""
