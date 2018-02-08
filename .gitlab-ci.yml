@@ -6,9 +6,21 @@ before_script:
   - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
   - pip3 install --upgrade -r requirements.txt -r requirements-dev.txt
 
+stages:
+  - test_nachos
+  - make-doc
+
 test_nachos:
   tags:
     - python-numpy
   script:
     - python3 setup.py test
     - make lint
+
+make-doc:
+  tags:
+    - python
+  script:
+    - ssh-add <(echo "$SSH_PRIVATE_KEY_HAL")
+    - make doc
+    - scp -R ./documentation/build/html pbeaujea@hal.unamur.be :~/www/nachos
