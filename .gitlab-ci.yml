@@ -15,7 +15,7 @@ test_nachos:
 
 make-doc:
   tags:
-    - python
+    - python-basic
   script:
     - ssh-add <(echo "$SSH_PRIVATE_KEY_HAL")
     - make doc
