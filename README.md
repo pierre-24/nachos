@@ -3,7 +3,7 @@
 Code for numerical differentiation of energy (oriented toward computation of vibrational contributions).
 Maintained by [Pierre Beaujean](pierre.beaujean@unamur.be) and created in the frame of my PhD thesis in the [University of Namur](https://www.unamur.be).
 
-Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) version [0.5.1.1](https://gitlab.unamur.be/pierre.beaujean/qcip_tools/tree/release-v0.5.1.1).
+Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) version [0.5.1.2](https://gitlab.unamur.be/pierre.beaujean/qcip_tools/tree/release-v0.5.1.2).
 
 <!-- STABLE: -->
 Current version: [release-v0.1.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1.1) (December 22, 2017)
@@ -18,8 +18,6 @@ Previous releases (see [the changelog](./CHANGELOG.md)):
 See [the instalation page](./documentation/source/install.rst) for the procedure.
 
 ## Documentation
-
-A (maybe outdated) PDF file explaining how to use nachos is available [here](./documentation/source/nachos-howto.pdf).
 
 You can build the full documentation with `make doc`.
 
