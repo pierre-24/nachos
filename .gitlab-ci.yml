@@ -6,10 +6,6 @@ before_script:
   - '[[ -f /.dockerenv ]] && echo "$SSH_SERVER_HOSTKEYS" > ~/.ssh/known_hosts'
   - pip3 install --upgrade -r requirements.txt -r requirements-dev.txt
 
-stages:
-  - test_nachos
-  - make-doc
-
 test_nachos:
   tags:
     - python-numpy
