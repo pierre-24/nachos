@@ -18,5 +18,6 @@ make-doc:
     - python-numpy
   script:
     - ssh-add <(echo "$SSH_PRIVATE_KEY_HAL")
+    - python setup.py install
     - make doc
     - scp -R ./documentation/build/html pbeaujea@hal.unamur.be :~/www/nachos
