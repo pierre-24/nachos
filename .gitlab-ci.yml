@@ -14,6 +14,8 @@ test_nachos:
     - make lint
 
 make-doc:
+  only:
+    - master
   tags:
     - python-numpy
   script:
