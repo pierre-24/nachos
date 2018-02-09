@@ -1,7 +1,8 @@
 # Changelog
 
-## Next version
+## Version 0.2
 
++ In arguments, lists accepts empty elements (#3)
 + Separate dalton *dal* inputs (#5) 
 + Allow to perform HF and DFT calculation with dalton (#6)
 + Allow to contribute pv contributions if only the static properties are available

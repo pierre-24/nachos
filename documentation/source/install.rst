@@ -10,11 +10,11 @@ To install the latest version of nachos:
 .. code-block:: bash
 
   # install qcip_tools (base library):
-  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/qcip_tools.git@release-v0.5.1.1
+  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.5.2
   # install nachos:
-  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/pierre.beaujean/nachos.git
+  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/chimie/lct/nachos.git
 
-Add ``@release-vXX`` at the end of the last line to fetch a given version (listed `in the README <https://gitlab.unamur.be/pierre.beaujean/nachos/blob/master/README.md>`_).
+Add ``@release-vXX`` at the end of the last line to fetch a given version (listed `in the README <https://gitlab.unamur.be/chimie/lct/nachos/blob/master/README.md>`_).
 
 
 Note that ``--user`` allow you to install the package without being superuser (see `here <https://pip.pypa.io/en/stable/user_guide/#user-installs>`_).
