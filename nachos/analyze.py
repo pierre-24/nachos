@@ -21,6 +21,8 @@ __status__ = 'Development'
 def treat_only_arg(only_arg):
     only = []
     for x in only_arg.split(';'):
+        if not x:
+            continue
 
         try:
             d = derivatives.Derivative(x)
@@ -157,7 +159,11 @@ def main():
     if not properties:
         return exit_failure('no property to analyze')
 
-    vibrational_contributions = shaking.load_vibrational_contributions(args.data, df.spacial_dof)
+    try:
+        vibrational_contributions = shaking.load_vibrational_contributions(args.data, df.spacial_dof)
+    except shaking.BadShaking as e:
+        return exit_failure('error while getting vibrational contributions: {}'.format(str(e)))
+
     analyzer = analyzing.Analyzer(df, vibrational_contributions)
 
     analyzer.analyze(properties, only=only)

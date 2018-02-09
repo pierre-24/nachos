@@ -3,24 +3,24 @@
 Code for numerical differentiation of energy (oriented toward computation of vibrational contributions).
 Maintained by [Pierre Beaujean](pierre.beaujean@unamur.be) and created in the frame of my PhD thesis in the [University of Namur](https://www.unamur.be).
 
-Based on [qcip_tools](https://gitlab.unamur.be/pierre.beaujean/qcip_tools) version [0.4.2](https://gitlab.unamur.be/pierre.beaujean/qcip_tools/tree/release-v0.4.2).
+This tool is based on [qcip_tools](https://gitlab.unamur.be/chimie/lct/qcip_tools).
 
 <!-- STABLE: -->
-Current version: [release-v0.1.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1.1) (December 22, 2017)
+Current release: [release-v0.2](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.2) (February 09, 2018)
 
+Previous releases (see [the changelog](./CHANGELOG.md)):
 <!-- PREVIOUS: -->
-+  [release-v0.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1) (December 18, 2017)
++  [release-v0.1.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1.1) (December 22, 2017)
++  [release-v0.1](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.1) (December 18, 2017)
 
 
 ## Installation
 
-See [the instalation page](./documentation/source/install.rst) for the procedure.
+See [the instalation page](http://perso.unamur.be/~pbeaujea/nachos/html/install.html) for the procedure.
 
 ## Documentation
 
-A (maybe outdated) PDF file explaining how to use nachos is available [here](./documentation/source/nachos-howto.pdf).
-
-You can build the full documentation with `make doc`.
+The documentation of the latest version is available online at [this address](http://perso.unamur.be/~pbeaujea/nachos/html/)  (login is `doc` and password is `doc`).
 
 ## Contributing
 

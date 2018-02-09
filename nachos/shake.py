@@ -21,6 +21,9 @@ __status__ = 'Development'
 def treat_only_arg(only_arg):
     only = []
     for x in only_arg.split(';'):
+        if not x:
+            continue
+
         info = x.split(':')
         level = 2
 
@@ -55,6 +58,9 @@ def treat_only_arg(only_arg):
 def treat_frequencies_arg(frequencies_arg):
     frequencies = []
     for x in frequencies_arg.split(';'):
+        if not x:
+            continue
+
         allowed_units = ['nm', 'ev', 'cm-1']
 
         value = None

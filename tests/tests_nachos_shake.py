@@ -17,7 +17,7 @@ class ShakeTestCase(NachosTestCase):
         super().tearDown()
         pass
 
-    def _test_contributions(self, shaker, test_on, frequencies, are_in, are_not_in=None):
+    def _test_contributions(self, shaker, test_on, frequencies, are_in, are_not_in=None, is_zpva=True):
         vibs = shaker.shake(
             frequencies=frequencies,
             only=[(derivatives.Derivative(d[0]), d[1]) for d in test_on])
@@ -28,7 +28,7 @@ class ShakeTestCase(NachosTestCase):
             self.assertIn(i, vibs)
 
             c = vibs[i]
-            self.assertEqual(len(c.vibrational_contributions), len(are_in) + 2)
+            self.assertEqual(len(c.vibrational_contributions), len(are_in) + (2 if is_zpva else 0))
             # the "+2" comes from the two ZPVA contributions
 
             for j in are_in:
@@ -67,8 +67,8 @@ class ShakeTestCase(NachosTestCase):
 
         vcs = [
             # ZPVA
-            (('FDF',), 1, 0, ('NNFDF',)),
-            (('FDF',), 0, 1, ('NFDF', 'NNN')),
+            (('dDF',), 1, 0, ('NNdDF',)),
+            (('dDF',), 0, 1, ('NdDF', 'NNN')),
             # pv contrib to beta
             (('F', 'F', 'F'), 1, 0, ('NF', 'NNF')),
             (('F', 'F', 'F'), 0, 1, ('NF', 'NNN')),
@@ -106,12 +106,12 @@ class ShakeTestCase(NachosTestCase):
             # ZPVA
             (('F',), 1, 0),
             (('F',), 0, 1),
-            (('FD',), 1, 0),
-            (('FD',), 0, 1),
-            (('FDF',), 1, 0),
-            (('FDF',), 0, 1),
-            (('FDD',), 1, 0),
-            (('FDD',), 0, 1),
+            (('dD',), 1, 0),
+            (('dD',), 0, 1),
+            (('dDF',), 1, 0),
+            (('dDF',), 0, 1),
+            (('XDD',), 1, 0),
+            (('XDD',), 0, 1),
             # alpha
             (('F', 'F'), 0, 0),
             (('F', 'F'), 1, 1),
@@ -133,13 +133,13 @@ class ShakeTestCase(NachosTestCase):
         # test contributions:
         self._test_contributions(
             shaker,
-            [('FF', 2), ('FD', 2)],
+            [('FF', 2), ('dD', 2)],
             [0.02, 0.04],
             ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
 
         self._test_contributions(
             shaker,
-            [('FF', 1), ('FD', 1)],
+            [('FF', 1), ('dD', 1)],
             [0.02],
             ['F_F__0_0'],
             ['F_F__1_1', 'F_F__2_0', 'F_F__0_2'])
@@ -153,10 +153,16 @@ class ShakeTestCase(NachosTestCase):
 
         self._test_contributions(
             shaker,
-            [('FFF', 1), ('FDF', 1), ('FDD', 1)],
+            [('FFF', 1), ('dDF', 1), ('XDD', 1)],
             [0.02],
             ['F_FF__0_0', 'F_F_F__1_0', 'F_F_F__0_1'],
             ['F_FF__1_1', 'F_FF__2_0', 'F_FF__0_2'])
+
+        self._test_contributions(
+            shaker,
+            [('FFFF', 1), ('dDFF', 1), ('XDDF', 1)],
+            [0.02],
+            ['FF_FF__0_0', 'F_FFF__0_0', 'F_F_FF__1_0', 'F_F_FF__0_1'], is_zpva=False)
 
     def test_shaking_save_and_load(self):
         """Test that we are able to save and load vibrational contributions"""
@@ -171,7 +177,7 @@ class ShakeTestCase(NachosTestCase):
         must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
         vibs = self._test_contributions(
             shaker,
-            [('FF', 2), ('FD', 2)],
+            [('FF', 2), ('dD', 2)],
             [0.02, 0.04],
             must_be_in)
 
@@ -182,9 +188,9 @@ class ShakeTestCase(NachosTestCase):
         nvibs = shaking.load_vibrational_contributions(self.datafile, df.spacial_dof)
 
         self.assertIn('FF', nvibs)
-        self.assertIn('FD', nvibs)
+        self.assertIn('dD', nvibs)
 
-        for i in ['FF', 'FD']:
+        for i in ['FF', 'dD']:
             c = vibs[i]
             cx = nvibs[i]
             for j in c.vibrational_contributions:
@@ -209,8 +215,8 @@ class ShakeTestCase(NachosTestCase):
         """Test the shake command"""
 
         must_be_in = ['F_F__0_0', 'F_F__1_1', 'F_F__2_0', 'F_F__0_2']
-        d = ['FF', 'FD']
-        notd = ['F', 'FFF', 'FDF', 'FDD']
+        d = ['FF', 'dD']
+        notd = ['F', 'FFF', 'dDF', 'XDD']
         freqs = [0.02, 0.04]
 
         # process

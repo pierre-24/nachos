@@ -58,13 +58,20 @@ CC_WAVE_FUNCTION = """
 .MAX IT
 {max_it}
 .MAXRED
-{max_it}
+{rm}
 .MXLRV
 {max_it}
 .THRENR
 {cc_conv}
 .THRLEQ
-{conv}"""
+{resp_thr}"""
+
+WAVE_FUNCTION = """
+**WAVE FUNCTIONS
+*SCF INPUT
+.THRESH
+{conv}
+"""
 
 
 class Preparer:
@@ -160,7 +167,7 @@ class Preparer:
                 if not compute_polar_with_freq and 'D' in basis:
                     compute_polar = True
                     compute_polar_with_freq = True
-                if not compute_FDx and (basis in ['FDD', 'FDF']):
+                if not compute_FDx and (basis in ['XDD', 'dDF']):
                     compute_FDx = True
 
             compute_polar_and_G = compute_polar and (compute_G or compute_GG)
@@ -186,8 +193,10 @@ class Preparer:
 
             # input card
             input_card = [
-                '#P {} {} nosym{}'.format(
+                '#P {}{} {} nosym{}'.format(
                     self.recipe['method'] if self.recipe['method'] != 'DFT' else self.recipe['flavor_extra']['XC'],
+                    '=Full' if self.recipe['method'] not in ['DFT', 'HF'] and
+                    int(self.recipe['flavor_extra']['use_full']) != 0 else '',
                     self.recipe['basis_set'],
                     ' field=read' if self.recipe['type'] == 'F' else ''),
                 'scf=(Conver={c},NoVarAcc,MaxCyc={m},vshift={v}) IOP(9/6={m},9/9={cc})'.format_map(
@@ -257,91 +266,289 @@ class Preparer:
 
         base_m = False
         counter = 0
-        dal_counter = 0
         files_created = 0
         inputs_matching = ''
 
         dal_files = {}
-        frequencies = ' '.join(
-            '{:.8f}'.format(derivatives_e.convert_frequency_from_string(a)) for a in self.recipe['frequencies'])
+        if 'frequencies' in self.recipe:
+            frequencies = ' '.join(
+                '{:.8f}'.format(derivatives_e.convert_frequency_from_string(a)) for a in self.recipe['frequencies'])
 
-        freq_card = dalton.InputCard(parameters=[len(self.recipe['frequencies']), frequencies])
+            freq_card = dalton.InputCard(parameters=[len(self.recipe['frequencies']), frequencies])
+        else:
+            frequencies = ''
+            freq_card = None
+
+        thclr_card = dalton.InputCard(parameters=[
+            '{:.1e}'.format(float(self.recipe['flavor_extra']['response_threshold'])).replace('e', 'D')])
 
         for fields, level in self.fields_needed_by_recipe:
             counter += 1
 
             bases = self.recipe.bases(level_min=level)
-            bases_repr = tuple([b[0].representation() for b in bases])
+
+            # separate in group
+            groups = {}
+            for b in (b[0] for b in bases):
+                if b.order() not in groups:
+                    groups[b.order()] = []
+                groups[b.order()].append(b)
+
+            # merge energy, eventual order 1 and 2
+            m_group = []
+            x_merge = [0, 1]
+            x_split = []
+
+            if int(self.recipe['flavor_extra']['split_level_3']) != 0:
+                x_split.append(3)
+
+            if int(self.recipe['flavor_extra']['split_level_4']) != 0:
+                x_split.append(4)
+
+            if self.recipe['method'] == 'CC':
+                x_merge = [0, 1, 2]
+
+                if int(self.recipe['flavor_extra']['merge_level_3']) != 0:
+                    x_merge.append(3)
+
+                if int(self.recipe['flavor_extra']['merge_level_4']) != 0:
+                    x_merge.append(4)
+
+            for i in x_merge:
+                if i in groups:
+                    m_group.extend(groups[i])
+                    del groups[i]
+
+            if m_group:
+                groups[0] = m_group
+
+            # split groups
+            for i in x_split:
+                if i in groups:
+                    for j, d in enumerate(groups[i]):
+                        groups[i * 100 + j] = [d]
+                    del groups[i]
+
+            if 2 in groups and self.recipe['method'] != 'CC':
+                if 'GG' in groups[2] and len(groups[2]) > 1:
+                    i = groups[2].index('GG')
+                    groups[201] = [groups[2][i]]
+                    del groups[2][i]
+
+                    if 'G' in groups[0]:  # since hessian compute also gradient, no need to do it here
+                        i = groups[0].index('G')
+                        del groups[0][i]
+
+            bases_reprs = []
+            for _, bases in groups.items():
+                bases_reprs.append(tuple([b.representation() for b in bases]))
+
+            bases_reprs.sort(key=lambda x: (len(x[0]), x[0].count('D')))  # sort by complexity
 
             # dal file, if needed
-            if bases_repr not in dal_files:
-                dal_counter += 1
-                dal = dalton.Input()
+            for bases_repr in bases_reprs:
+                if bases_repr not in dal_files:
+                    dal = dalton.Input()
 
-                # begining
-                dal.update('**DALTON INPUT\n.RUN WAVE FUNCTIONS')
+                    if self.recipe['method'] == 'CC':
+                        if 'dDFF' in bases_repr:
+                            raise BadPreparation('dDFF is not available if CC')
 
-                # coupled cluster
-                if self.recipe['method'] != 'CC3':
-                    dal['DALTON']['.DIRECT'] = dalton.InputCard()
+                        # beginning
+                        dal.update('**DALTON INPUT\n.RUN WAVE FUNCTIONS')
 
-                dal.update(CC_WAVE_FUNCTION.format_map({
-                    'method': self.recipe['method'],
-                    'max_it': self.recipe['flavor_extra']['max_iteration'],
-                    'conv': '{:.1e}'.format(self.recipe['flavor_extra']['threshold']).replace('e', 'D'),
-                    'cc_conv': '{:.1e}'.format(self.recipe['flavor_extra']['cc_threshold']).replace('e', 'D')}))
+                        # coupled cluster
+                        if self.recipe['method'] != 'CC3':
+                            dal['DALTON']['.DIRECT'] = dalton.InputCard()
 
-                # dipole moment
-                if 'F' in bases_repr:
-                    dal.update('**INTEGRAL\n.DIPLEN\n')
-                    dal.update('**WAVE FUNCTION\n*CCFOP\n.DIPMOM')
+                        dal.update(CC_WAVE_FUNCTION.format_map({
+                            'method': self.recipe['flavor_extra']['CC'],
+                            'max_it': self.recipe['flavor_extra']['response_max_it'],
+                            'rm': self.recipe['flavor_extra']['response_dim_reduced_space'],
+                            'conv': '{:.1e}'.format(float(self.recipe['flavor_extra']['threshold'])).replace('e', 'D'),
+                            'cc_conv': '{:.1e}'.format(
+                                float(self.recipe['flavor_extra']['cc_threshold'])).replace('e', 'D'),
+                            'resp_thr': '{:.1e}'.format(
+                                float(self.recipe['flavor_extra']['response_threshold'])).replace('e', 'D')
+                        }))
 
-                    if self.recipe['method'] == 'CC3':
-                        dal['WAVE FUNC']['CCFOP']['.NONREL'] = dalton.InputCard()
+                        # dipole moment
+                        if 'F' in bases_repr:
+                            dal.update('**INTEGRAL\n.DIPLEN\n')
+                            dal.update('**WAVE FUNCTION\n*CCFOP\n.DIPMOM')
 
-                # gradient
-                if 'G' in bases_repr:
-                    dal.update('**INTEGRAL\n.DEROVL\n.DERHAM\n')
-                    dal.update('**WAVE FUNCTION\n*DERIVATIVES')
+                            if self.recipe['method'] == 'CC3':
+                                dal['WAVE FUNC']['CCFOP']['.NONREL'] = dalton.InputCard()
 
-                # polarizability
-                if any([x in bases_repr for x in ['FF', 'FD']]):
-                    dal.update('**WAVE FUNC\n*CCLR\n.DIPOLE\n.STATIC')
+                        # gradient
+                        if 'G' in bases_repr:
+                            dal.update('**INTEGRAL\n.DEROVL\n.DERHAM\n')
+                            dal.update('**WAVE FUNCTION\n*DERIVATIVES')
 
-                    if 'FD' in bases_repr:
-                        dal['WAVE FUNC']['CCLR']['.FREQUE'] = copy.copy(freq_card)
+                        # polarizability
+                        if any([x in bases_repr for x in ['FF', 'dD']]):
+                            dal.update('**WAVE FUNC\n*CCLR\n.DIPOLE\n.STATIC')
 
-                # first hyperpolarizability
-                if any([x in bases_repr for x in ['FFF', 'FDF', 'FDD']]):
-                    dal.update('**WAVE FUNC\n*CCQR\n.DIPOLE\n.STATIC')
+                            if 'dD' in bases_repr:
+                                dal['WAVE FUNC']['CCLR']['.FREQUE'] = copy.copy(freq_card)
 
-                    if 'FDF' in bases_repr:
-                        dal['WAVE FUNC']['CCQR']['.EOPEFR'] = copy.copy(freq_card)
+                        # first hyperpolarizability
+                        if any([x in bases_repr for x in ['FFF', 'dDF', 'XDD']]):
+                            dal.update('**WAVE FUNC\n*CCQR\n.DIPOLE')
 
-                    if 'FDD' in bases_repr:
-                        dal['WAVE FUNC']['CCQR']['.SHGFRE'] = copy.copy(freq_card)
+                            if 'FFF' in bases_repr:
+                                dal['WAVE FUNC']['CCQR']['.STATIC'] = dalton.InputCard()
 
-                # second hyperpolarizability
-                if any([x in bases_repr for x in ['FFFF', 'FDFF', 'FDDF', 'FDDd', 'FDDD']]):
-                    dal.update('**WAVE FUNC\n*CCCR\n.DIPOLE\n.STATIC')
+                            if 'dDF' in bases_repr:
+                                dal['WAVE FUNC']['CCQR']['.EOPEFR'] = copy.copy(freq_card)
 
-                    if 'FDFF' in bases_repr:
-                        dal['WAVE FUNC']['CCCR']['.DCKERR'] = copy.copy(freq_card)
+                            if 'XDD' in bases_repr:
+                                dal['WAVE FUNC']['CCQR']['.SHGFRE'] = copy.copy(freq_card)
 
-                    if 'FDDF' in bases_repr:
-                        dal['WAVE FUNC']['CCCR']['.ESHGFR'] = copy.copy(freq_card)
+                        # second hyperpolarizability
+                        if any([x in bases_repr for x in ['FFFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD']]):
+                            dal.update('**WAVE FUNC\n*CCCR\n.DIPOLE')
 
-                    if 'FDDd' in bases_repr:
-                        dal['WAVE FUNC']['CCCR']['.DFWMFR'] = copy.copy(freq_card)
+                            if 'FFFF' in bases_repr:
+                                dal['WAVE FUNC']['CCCR']['.STATIC'] = dalton.InputCard()
 
-                    if 'FDDD' in bases_repr:
-                        dal['WAVE FUNC']['CCCR']['.THGFRE'] = copy.copy(freq_card)
+                            if 'dFFD' in bases_repr:
+                                dal['WAVE FUNC']['CCCR']['.DCKERR'] = copy.copy(freq_card)
 
-                dal_path = '{}_{:04d}.dal'.format(self.recipe['flavor_extra']['dal_name'], dal_counter)
-                with open('{}/{}'.format(self.directory, dal_path), 'w') as f:
-                    dal.write(f)
+                            if 'XDDF' in bases_repr:
+                                dal['WAVE FUNC']['CCCR']['.ESHGFR'] = copy.copy(freq_card)
 
-                dal_files[bases_repr] = dal_path
+                            if 'dDDd' in bases_repr:
+                                dal['WAVE FUNC']['CCCR']['.DFWMFR'] = copy.copy(freq_card)
+
+                            if 'XDDD' in bases_repr:
+                                dal['WAVE FUNC']['CCCR']['.THGFRE'] = copy.copy(freq_card)
+
+                    else:
+                        if 'dFFD' in bases_repr:
+                            raise BadPreparation('dFFD is not available if not CC')
+
+                        dal.update('**DALTON INPUT\n.DIRECT\n.RUN WAVE FUNCTIONS')
+
+                        dal.update(WAVE_FUNCTION.format_map({
+                            'conv': '{:.1e}'.format(float(self.recipe['flavor_extra']['threshold'])).replace('e', 'D')
+                        }))
+
+                        if self.recipe['method'] == 'HF':
+                            dal.update('**WAVE FUNCTIONS\n.HF')
+                        else:
+                            dal.update('**WAVE FUNCTIONS\n.DFT\n{}'.format(self.recipe['flavor_extra']['XC']))
+                            # ???
+
+                        # dipole moment
+                        if 'F' in bases_repr:
+                            dal.update('**DALTON INPUT\n.RUN PROPERTIES')
+                            dal.update('**INTEGRAL\n.DIPLEN\n')
+
+                        # gradient and hessian
+                        if 'G' in bases_repr and 'GG' not in bases_repr:
+                            dal.update('**DALTON INPUT\n.RUN PROPERTIES')
+                            dal.update('**PROPERTIES\n.MOLGRA')
+
+                        if 'GG' in bases_repr:
+                            dal.update('**DALTON INPUT\n.RUN PROPERTIES')
+                            dal.update('**PROPERTIES\n.VIBANA\n*VIBANA\n.HESPUN\n*RESPON')
+                            dal['PROPERTIES']['RESPON']['.THRESH'] = copy.copy(thclr_card)
+
+                        if any([x in bases_repr for x in [
+                                'FF', 'dD', 'FFF', 'dDF', 'XDD', 'FFFF', 'dFFD', 'XDDF', 'XDDD', 'dDDd']]):
+                            dal.update('**DALTON INPUT\n.RUN RESPONSE')
+                            dal.update('**RESPONSE')
+                            dal['RESPONSE']['.MAXRM'] = dalton.InputCard(parameters=[
+                                self.recipe['flavor_extra']['response_dim_reduced_space']])
+
+                        # polarizability
+                        if any([x in bases_repr for x in ['FF', 'dD']]):
+                            dal.update('**RESPONSE\n*LINEAR\n.DIPLEN')
+
+                            dal['RESPONSE']['LINEAR']['.THCLR'] = copy.copy(thclr_card)
+                            dal['RESPONSE']['LINEAR']['.MAX IT'] = dalton.InputCard(
+                                parameters=[self.recipe['flavor_extra']['response_max_it']])
+                            dal['RESPONSE']['LINEAR']['.MAXITO'] = dalton.InputCard(
+                                parameters=[self.recipe['flavor_extra']['response_max_ito']])
+
+                            fx = frequencies
+                            num_frequencies = 0
+                            if 'frequencies' in self.recipe:
+                                num_frequencies = len(self.recipe['frequencies'])
+                            if 'FF' in bases_repr:
+                                fx = '0.0 ' + fx
+                                num_frequencies += 1
+
+                            dal['RESPONSE']['LINEAR']['.FREQUE'] = dalton.InputCard(parameters=[num_frequencies, fx])
+
+                        # first hyperpolarizability
+                        if any([x in bases_repr for x in ['FFF', 'dDF', 'XDD']]):
+                            dal.update('**RESPONSE\n*QUADRATIC\n.DIPLEN')
+
+                            dal['RESPONSE']['QUADRATIC']['.THCLR'] = copy.copy(thclr_card)
+                            dal['RESPONSE']['QUADRATIC']['.MAX IT'] = dalton.InputCard(
+                                parameters=[self.recipe['flavor_extra']['response_max_it']])
+                            dal['RESPONSE']['QUADRATIC']['.MAXITO'] = dalton.InputCard(
+                                parameters=[self.recipe['flavor_extra']['response_max_ito']])
+
+                            fx = frequencies
+                            num_frequencies = 0
+                            if 'frequencies' in self.recipe:
+                                num_frequencies = len(self.recipe['frequencies'])
+                            if 'FFF' in bases_repr:
+                                fx = '0.0 ' + fx
+                                num_frequencies += 1
+
+                            if any([x in bases_repr for x in ['dDF', 'XDD']]):
+                                dal['RESPONSE']['QUADRATIC']['.FREQUE'] = dalton.InputCard(
+                                    parameters=[num_frequencies, fx])
+
+                                if 'dDF' in bases_repr:
+                                    dal['RESPONSE']['QUADRATIC']['.POCKEL'] = dalton.InputCard()
+                                if 'XDD' in bases_repr:
+                                    dal['RESPONSE']['QUADRATIC']['.SHG'] = dalton.InputCard()
+
+                        # second hyperpolarizability
+                        if any([x in bases_repr for x in ['FFFF', 'dDFF', 'XDDF', 'dDDd', 'XDDD']]):
+                            dal.update('**RESPONSE\n*CUBIC\n.DIPLEN\n.GAMALL')
+
+                            dal['RESPONSE']['CUBIC']['.THCLR'] = copy.copy(thclr_card)
+                            dal['RESPONSE']['CUBIC']['.MAX IT'] = dalton.InputCard(
+                                parameters=[self.recipe['flavor_extra']['response_max_it']])
+                            dal['RESPONSE']['CUBIC']['.MAXITO'] = dalton.InputCard(
+                                parameters=[self.recipe['flavor_extra']['response_max_ito']])
+
+                            fx = frequencies
+                            num_frequencies = 0
+                            if 'frequencies' in self.recipe:
+                                num_frequencies = len(self.recipe['frequencies'])
+                            if 'FFFF' in bases_repr:
+                                fx = '0.0 ' + fx
+                                num_frequencies += 1
+
+                            if any([x in bases_repr for x in ['dDFF', 'XDDF', 'dDDd', 'XDDD']]):
+                                dal['RESPONSE']['CUBIC']['.FREQUE'] = dalton.InputCard(
+                                    parameters=[num_frequencies, fx])
+
+                                if 'dDFF' in bases_repr:
+                                    dal.update('**RESPONSE\n*CUBIC\n.DC-KERR')
+
+                                if 'XDDF' in bases_repr:
+                                    dal.update('**RESPONSE\n*CUBIC\n.DC-SHG')
+
+                                if 'XDDD' in bases_repr:
+                                    dal.update('**RESPONSE\n*CUBIC\n.THG')
+
+                                if 'dDDd' in bases_repr:
+                                    dal.update('**RESPONSE\n*CUBIC\n.IDRI')
+
+                    dal_path = '{}_{}.dal'.format(self.recipe['flavor_extra']['dal_name'], '_'.join(
+                        a if a != '' else 'energy' for a in bases_repr))
+                    with open('{}/{}'.format(self.directory, dal_path), 'w') as f:
+                        dal.write(f)
+
+                    dal_files[bases_repr] = dal_path
 
             # molecule file
             fi = dalton.MoleculeInput()
@@ -360,8 +567,10 @@ class Preparer:
             mol_path = '{}_{:04d}.mol'.format(self.recipe['name'], counter)
             with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
                 fi.write(f, nosym=True)
-                inputs_matching += '{} {}\n'.format(dal_files[bases_repr], mol_path)
-                files_created += 1
+
+                for bases_repr in bases_reprs:
+                    inputs_matching += '{} {}\n'.format(dal_files[bases_repr], mol_path)
+                    files_created += 1
 
         with open('{}/inputs_matching.txt'.format(self.directory), 'w') as f:
             f.write(inputs_matching)
