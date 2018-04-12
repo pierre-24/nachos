@@ -7,6 +7,7 @@
 + Allow to perform HF and DFT calculation with dalton (#6)
 + Allow to contribute pv contributions if only the static properties are available
 + Add some vibrational contribution to second hyperpolarizability (`[α²]⁰⁰`, `[µβ]⁰⁰`, `[µ²α]¹⁰`, `[µ²α]⁰¹`, partially #4)
++ Upgrade to latest version of qcip_tools (0.5.3).
 
 ## Version 0.1.1
 
