@@ -5,7 +5,7 @@ Out of the results of calculation, create a h5 file to store them
 import os
 import argparse
 
-from nachos.core import files, cooking
+from nachos.core import files, cooking, preparing
 from nachos import exit_failure
 
 __version__ = '0.1'
@@ -53,10 +53,12 @@ def main():
         num_missing_fields, num_missing_derivs = 0, 0
         errors = ''
         for f in missing_fields:
-            errors += '- Missing field ({})\n'.format(','.join(str(a) for a in f))
+            errors += '- Missing field: {}\n'.format(','.join(
+                preparing.Preparer.nonzero_fields(f, recipe.geometry, recipe['type'])))
             num_missing_fields += 1
         for f, d in missing_derivatives:
-            errors += '- Missing derivative {} for ({})\n'.format(d, ','.join(str(a) for a in f))
+            errors += '- Missing derivative {} for {}\n'.format(d, ','.join(
+                preparing.Preparer.nonzero_fields(f, recipe.geometry, recipe['type'])))
             num_missing_derivs += 1
         errors += '-' * 32 + '\n'
         errors += 'Total: {} missing field(s) and {} missing derivative(s)'.format(
