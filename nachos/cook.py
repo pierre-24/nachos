@@ -15,6 +15,15 @@ __email__ = 'pierre.beaujean@unamur.be'
 __status__ = 'Development'
 
 
+def is_dir(dirname):
+    """Checks if a path is an actual directory"""
+    if not os.path.isdir(dirname):
+        msg = '{0} is not a directory'.format(dirname)
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return dirname
+
+
 # program options
 def get_arguments_parser():
     arguments_parser = argparse.ArgumentParser(description=__doc__)
@@ -24,6 +33,8 @@ def get_arguments_parser():
         '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='./nachos_recipe.yml')
     arguments_parser.add_argument(
         '-o', '--output', type=str, help='Output h5 file', default='nachos_data.h5')
+
+    arguments_parser.add_argument('directories', nargs='*', type=is_dir, help='directory where to look for QM results')
 
     return arguments_parser
 
@@ -40,10 +51,14 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
-    cooker = cooking.Cooker(recipe, directory=recipe_directory)
+    cooker = cooking.Cooker(recipe)
+    directories = [recipe_directory]
+
+    if len(args.directories) != 0:
+        directories = args.directories
 
     try:
-        storage = cooker.cook(verbosity_level=args.verbose)
+        storage = cooker.cook(directories, verbosity_level=args.verbose)
     except cooking.BadCooking as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 

@@ -63,7 +63,7 @@ class CookTestCase(NachosTestCase):
         fields = preparing.fields_needed_by_recipe(r)
 
         c = cooking.Cooker(r, directory)
-        storage = c.cook()
+        storage = c.cook([directory])
 
         # write and read
         self.assertEqual(storage.check(), ([], []))
@@ -113,7 +113,7 @@ class CookTestCase(NachosTestCase):
         fields = preparing.fields_needed_by_recipe(r)
 
         c = cooking.Cooker(r, directory)
-        storage = c.cook()
+        storage = c.cook([directory])
 
         # write and read
         self.assertEqual(storage.check(), ([], []))
@@ -173,7 +173,7 @@ class CookTestCase(NachosTestCase):
         fields = preparing.fields_needed_by_recipe(r)
 
         c = cooking.Cooker(r, directory)
-        storage = c.cook()
+        storage = c.cook([directory])
 
         # write and read
         self.assertEqual(storage.check(), ([], []))

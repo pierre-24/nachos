@@ -1,5 +1,10 @@
 # Changelog
 
+## Next version
+
++ Upgrade to lastest version of qcip_tools (0.5.3.1)
++ Multiple inputs for cooking (!13)
+
 ## Version 0.2
 
 + In arguments, lists accepts empty elements (#3)

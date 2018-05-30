@@ -80,7 +80,7 @@ class Cooker:
 
     :param recipe: a recipe
     :type recipe: nachos.core.files.Recipe
-    :param directory: working directory
+    :param directory: working directory, where storage will be written
     :type directory: str
     """
 
@@ -94,7 +94,17 @@ class Cooker:
         self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
-    def cook(self, out=sys.stdout, verbosity_level=0):
+    def cook(self, directories, out=sys.stdout, verbosity_level=0):
+        """Cook files in directories, all together in a storage file
+
+        :param directories: directories where QM results should be looked for
+        :type directories: list of str
+        :param out: outpout of eventual information
+        :type out: file
+        :param verbosity_level: wheter to write information or not
+        :type verbosity_level: bool
+        :rtype: nachos.core.files.ComputationalResults
+        """
 
         storage = files.ComputationalResults(self.recipe, directory=self.directory)
 
@@ -105,21 +115,25 @@ class Cooker:
             if any(a[0] == 'G' for a in self.recipe.bases()):
                 look_for.append('*.out')
 
-        for l in look_for:
-            for i in glob.glob('{}/{}'.format(self.directory, l)):
-                if verbosity_level >= 1:
-                    out.write('* cooking with {} ... '.format(i))
+        for directory in directories:
+            if not os.path.isdir(directory):
+                raise BadCooking('{} is no directory!'.format(directory))
 
-                with open(i) as f:
-                    try:
-                        fx = helpers.open_chemistry_file(f)
-                        self.cook_from_file(fx, i, storage)
-                        if verbosity_level >= 1:
-                            out.write('ok\n')
-                    except helpers.ProbablyNotAChemistryFile:
-                        if verbosity_level >= 1:
-                            out.write('skipped\n')
-                        continue
+            for l in look_for:
+                for i in glob.glob('{}/{}'.format(directory, l)):
+                    if verbosity_level >= 1:
+                        out.write('* cooking with {} ... '.format(i))
+
+                    with open(i) as f:
+                        try:
+                            fx = helpers.open_chemistry_file(f)
+                            self.cook_from_file(fx, i, storage)
+                            if verbosity_level >= 1:
+                                out.write('ok\n')
+                        except helpers.ProbablyNotAChemistryFile:
+                            if verbosity_level >= 1:
+                                out.write('skipped\n')
+                            continue
 
         return storage
 
