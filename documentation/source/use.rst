@@ -476,12 +476,11 @@ The ``-V 1`` option allows you to know how much files where generated.
 
 The program fetch the different computational results from each files that it can fin (it looks for FCHK files with gaussian, TAR archive and OUT files for dalton), and mix them together in a single *data file*.
 
+By default, the program looks for output files **in the same directory as the recipe**. You can supply directories as argument, but in this case, the program does not look in the recipe directory (so don't forget to add it to the list).
+
 The ``-V 1`` option allows you to know which files the program actually discovered and used.
 
 
-.. warning::
-
-    The program looks for output files **in the same directory as the recipe**, and there is no way to change this behavior.
 
 .. autoprogram:: nachos.bake:get_arguments_parser()
     :prog: nachos_bake
