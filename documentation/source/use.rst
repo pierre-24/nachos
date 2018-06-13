@@ -380,7 +380,7 @@ Note that you don't have to redefine every variable, since they have a default v
        * - ``extra_keywords``
          -
          - Any extra input (for example, the solvent, ...)
-       * - ``extra_section``
+       * - ``extra_sections``
          -
          - Path to a file where extra section of the input files are given (for example, solvent definition, ...)
        * - ``vshift``
