@@ -1477,7 +1477,13 @@ class Shaker:
 
         .. math::
 
-            [\\mu^2\\alpha]^{1,0} = \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijkl}} \\ldots
+            \\begin{align}
+            [\\mu^2\\alpha]^{1,0} &= \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{ab}
+            \\left\\{\\tdiff{\\mu_i}{Q_a}\\,\\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\tdiff{\\mu_l}{Q_b}
+            \\lb{\\sigma}{a}\\,\\lb{3}{b}\\right.\\nonumber\\\\
+            &+\\left.2\\,\\tdiff{\\mu_i}{Q_a}\\,\\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{kl}}{Q_b}
+            \\lb{\\sigma}{a}\\,\\lb{23}{b}\\right\\}
+            \\end{align}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1529,7 +1535,9 @@ class Shaker:
 
         .. math::
 
-            [\\mu^2\\alpha]^{0,1} = -\\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijkl}} \\ldots
+            [\\mu^2\\alpha]^{0,1} = -\\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abc} F_{abc}\\,
+            \\tdiff{\\mu_j}{Q_b}\\,\\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\alpha_{jk}}{Q_c}\\,\\lb{\\sigma}{a}\\,
+            \\lb{1}{b}\\,\\lb{23}{c}
 
         :param coo: coordinates
         :type coo: tuple|list
