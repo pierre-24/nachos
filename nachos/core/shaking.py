@@ -396,9 +396,12 @@ class Shaker:
             # second hyperpolarizability
             4: [
                 VibrationalContribution(('FF', 'FF'), 0, 0, self.dof),
+                VibrationalContribution(('FF', 'FF'), 1, 1, self.dof),
                 VibrationalContribution(('F', 'FFF'), 0, 0, self.dof),
+                VibrationalContribution(('F', 'FFF'), 1, 1, self.dof),
                 VibrationalContribution(('F', 'F', 'FF'), 1, 0, self.dof),
                 VibrationalContribution(('F', 'F', 'FF'), 0, 1, self.dof),
+                VibrationalContribution(('F', 'F', 'F', 'F'), 1, 1, self.dof),
             ]
         }
 
@@ -1577,5 +1580,190 @@ class Shaker:
 
         for f in frequencies:
             values[f] *= -1 / 4 * multiplier
+
+        return values
+
+    def _compute_F_F_F_F__1_1_component(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nnn):
+        """Compute a component of the :math:`[\\mu^4]^{1,1}` contribution
+
+        .. math::
+
+            [\\mu^4]^{1,1} = -\\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abcd}\\,F_{abc}
+            \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\mu_j}{Q_b}\\,\\tdiff{^2\\mu_k}{Q_c\\partial Q_d}\\,\\tdiff{\\mu_l}{Q_d}
+            \\times\\\\\\lb{\\sigma}{a}\\,\\lb{1}{b}\\,\\lb{23}{c}\\,\\lb{3}{d}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nnf: ``NNF`` components
+        :type t_nnf: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                tmp_a = t_nf[a, p[0][0]]
+
+                for b in self.mwh.included_modes:
+                    tmp_ab = tmp_a * t_nf[b, p[1][0]]
+
+                    for c in self.mwh.included_modes:
+                        for d in self.mwh.included_modes:
+                            tmp_abcd = tmp_ab * t_nnn[a, b, c] * t_nf[d, p[3][0]] * t_nnf[c, d, p[2][0]]
+
+                            for f in frequencies:
+                                values[f] += \
+                                    Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                                    Shaker.lambda_(p[1][1] * f, self.mwh.frequencies[b]) * \
+                                    Shaker.lambda_((p[2][1] * f, p[3][1] * f), self.mwh.frequencies[c]) * \
+                                    Shaker.lambda_(p[3][1] * f, self.mwh.frequencies[d]) * tmp_abcd
+
+        for f in frequencies:
+            values[f] *= -1 / 2 * multiplier
+
+        return values
+
+    def _compute_FF_FF__1_1_component(self, coo, input_fields, frequencies, t_nff, t_nnff, t_nnn):
+        """Compute a component of the :math:`[\\alpha^2]^{1,1}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\alpha^2]^{1,1} &= -\\frac{1}{16}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abc} F_{abc}\\,
+            \\tdiff{^2\\alpha_{ij}}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{kl}}{Q_c}\\,
+            \\lb{23}{ab}\\,\\lb{23}{c}\\,(\\omega_a^{-1}+\\omega_b^{-1})\\\\
+            &+ F_{bcc}\\,\\tdiff{^2\\alpha_{ij}}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{kl}}{Q_a}\\,
+            \\lb{23}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :param t_nnff: ``NNFF`` components
+        :type t_nnff: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
+
+                    tmp_ab1 = (1 / self.mwh.frequencies[a] + 1 / self.mwh.frequencies[b]) * \
+                        t_nnff[a, b, p[0][0], p[1][0]]
+                    tmp_ab2 = self.mwh.frequencies[b] ** -2 * \
+                        t_nnff[a, b, p[0][0], p[1][0]] * t_nff[a, p[2][0], p[3][0]]
+
+                    for c in self.mwh.included_modes:
+                        tmp1 = tmp_ab1 * t_nff[c, p[2][0], p[3][0]] * t_nnn[a, b, c]
+                        tmp2 = tmp_ab2 * t_nnn[b, c, c] * self.mwh.frequencies[c] ** -1
+
+                        for f in frequencies:
+                            w23 = (p[2][1] * f, p[3][1] * f)
+                            fr_1 = Shaker.lambda_(w23, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * \
+                                Shaker.lambda_(w23, self.mwh.frequencies[c])
+
+                            values[f] += (fr_1 * tmp1 + Shaker.lambda_(w23, self.mwh.frequencies[a]) * tmp2)
+
+        for f in frequencies:
+            values[f] *= - 1 / 16 * multiplier
+
+        return values
+
+    def _compute_F_FFF__1_1_component(self, coo, input_fields, frequencies, t_nf, t_nnf, t_nfff, t_nnfff, t_nnn):
+        """Compute a component of the :math:`[\\mu\\beta]^{1,1}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu\\beta]^{1,1} &= -\\frac{1}{24}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abc}
+            \\left\\{ F_{abc}\\,\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\beta_{jkl}}{Q_c}
+            +\\tdiff{^2\\beta_{jkl}}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_i}{Q_c}\\right]
+            \\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,(\\omega_a^{-1}+\\omega_b^{-1})\\right.\\\\
+            &\\left.+ F_{bcc}\\,\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\beta_{jkl}}{Q_a}
+            +\\tdiff{^2\\beta_{jkl}}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_i}{Q_a}\\right]
+            \\,\\lb{\\sigma}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}\\right\\}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nnf: ``NNF`` components
+        :type t_nnf: numpy.ndarray
+        :param t_nnfff: ``NNFFF`` components
+        :type t_nnfff: numpy.ndarray
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nfff: ``NFFF`` components
+        :type t_nfff: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
+
+                    f_ab1 = (1 / self.mwh.frequencies[a] + 1 / self.mwh.frequencies[b])
+                    f_ab2 = self.mwh.frequencies[b] ** -2
+
+                    tmp_ab1 = f_ab1 * t_nnf[a, b, p[0][0]]
+                    tmp_ab3 = f_ab1 * t_nnfff[a, b, p[1][0], p[2][0], p[3][0]]
+
+                    tmp_ab2 = f_ab2 * \
+                        (t_nnf[a, b, p[0][0]] * t_nfff[a, p[1][0], p[2][0], p[3][0]] +
+                         t_nnfff[a, b, p[1][0], p[2][0], p[3][0]] * t_nf[a, p[0][0]])
+
+                    for c in self.mwh.included_modes:
+                        tmp1 = (tmp_ab1 * t_nfff[c, p[1][0], p[2][0], p[3][0]] + tmp_ab3 * t_nf[c, p[0][0]]) * \
+                            t_nnn[a, b, c]
+                        tmp2 = tmp_ab2 * t_nnn[b, c, c] * self.mwh.frequencies[c] ** -1
+
+                        for f in frequencies:
+                            ws = p[0][1] * f
+                            fr_1 = Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * \
+                                Shaker.lambda_(ws, self.mwh.frequencies[c])
+
+                            values[f] += (fr_1 * tmp1 + Shaker.lambda_(ws, self.mwh.frequencies[a]) * tmp2)
+
+        for f in frequencies:
+            values[f] *= - 1 / 24 * multiplier
 
         return values
