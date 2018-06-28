@@ -288,6 +288,10 @@ class VibrationalContribution:
 
                 needed.append(derivatives.Derivative('NN' + 'N' * i, spacial_dof=dof))
 
+        # special case of [µ⁴]²⁰:
+        if (self.m, self.n) == (2, 0) and len(self.derivatives) == 4 and all(str(i) == 'F' for i in self.derivatives):
+            needed.append(derivatives.Derivative('NF', spacial_dof=dof))
+
         return needed
 
     def to_string(self, fancy=False):
@@ -397,11 +401,17 @@ class Shaker:
             4: [
                 VibrationalContribution(('FF', 'FF'), 0, 0, self.dof),
                 VibrationalContribution(('FF', 'FF'), 1, 1, self.dof),
+                VibrationalContribution(('FF', 'FF'), 2, 0, self.dof),
+                VibrationalContribution(('FF', 'FF'), 0, 2, self.dof),
                 VibrationalContribution(('F', 'FFF'), 0, 0, self.dof),
                 VibrationalContribution(('F', 'FFF'), 1, 1, self.dof),
+                VibrationalContribution(('F', 'FFF'), 2, 0, self.dof),
+                VibrationalContribution(('F', 'FFF'), 0, 2, self.dof),
                 VibrationalContribution(('F', 'F', 'FF'), 1, 0, self.dof),
                 VibrationalContribution(('F', 'F', 'FF'), 0, 1, self.dof),
                 VibrationalContribution(('F', 'F', 'F', 'F'), 1, 1, self.dof),
+                VibrationalContribution(('F', 'F', 'F', 'F'), 2, 0, self.dof),
+                VibrationalContribution(('F', 'F', 'F', 'F'), 0, 2, self.dof),
             ]
         }
 
@@ -981,9 +991,9 @@ class Shaker:
          .. math::
 
             \\begin{align}
-            [\\mu^2]^{2,0} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{ab}
+            [\\mu^2]^{2,0} &= \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{ab}
             \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,
-            \\lb{\\sigma}{ab}\\,(\\omega_a^{-1}+\\omega_b^{-1})
+            \\lb{\\sigma}{ab}\\,\\omega_a^{-1}
             \\end{align}
 
          :param coo: coordinates
@@ -1024,7 +1034,7 @@ class Shaker:
         .. math::
 
             \\begin{align}
-            [\\mu^2]^{0,2} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abcd}
+            [\\mu^2]^{0,2} &= -\\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abcd}
             \\tdiff{\\mu_i}{Q_c}\\tdiff{\\mu_j}{Q_d}\\times\\\\
             &\\left[F_{aab}\\,F_{bcd}\\,\\lb{\\sigma}{c}\\lb{\\sigma}{d}\\,\\omega_b^{-2}
             +2\\,F_{abc}\\,F_{abd}\\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\right]
@@ -1126,9 +1136,9 @@ class Shaker:
         .. math::
 
             \\begin{align}
-            [\\mu\\alpha]^{2,0} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{ab}
+            [\\mu\\alpha]^{2,0} &= \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{ab}
             \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\,
-            \\lb{\\sigma}{ab}\\,(\\omega_a^{-1}+\\omega_b^{-1})\\\\
+            \\lb{\\sigma}{ab}\\,\\omega_a^{-1}
             \\end{align}
 
         :param coo: coordinates
@@ -1637,6 +1647,115 @@ class Shaker:
 
         return values
 
+    def _compute_F_F_F_F__2_0_component(self, coo, input_fields, frequencies, t_nf, t_nnf):
+        """Compute a component of the :math:`[\\mu^4]^{2,0}` contribution
+
+         .. math::
+
+            \\begin{align}
+            [\\mu^4]^{2,0} &= \\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abc}
+            \\,F_{abc}\\,\\tdiff{\\mu_i}{Q_a}\\, \\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,
+            \\tdiff{^2\\mu_k}{Q_b\\partial Q_c}\\,\\tdiff{\\mu_l}{Q_c}
+            \\,\\lb{\\sigma}{a}\\,\\lb{23}{b}\\,\\lb{\\sigma}{3}
+            \\end{align}
+
+         :param coo: coordinates
+         :type coo: tuple|list
+         :param input_fields: input fields
+         :type input_fields: tuple|list
+         :param frequencies: the frequencies
+         :type frequencies: list of float|str
+         :param t_nf: ``NNF`` components
+         :type t_nf: numpy.ndarray
+         :param t_nnf: ``NNF`` components
+         :type t_nnf: numpy.ndarray
+         :rtype: list of float
+         """
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                tmp_a = t_nf[a, p[0][0]]
+                for b in self.mwh.included_modes:
+                    tmp_ab = tmp_a * t_nnf[a, b, p[1][0]]
+                    for c in self.mwh.included_modes:
+                        tmp_abc = tmp_ab * t_nnf[b, c, p[2][0]] * t_nf[c, p[3][0]]
+
+                        for f in frequencies:
+                            values[f] += \
+                                Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                                Shaker.lambda_((p[2][1] * f, p[3][1] * f), self.mwh.frequencies[b]) * \
+                                Shaker.lambda_(p[3][1] * f, self.mwh.frequencies[c]) * tmp_abc
+
+        for f in frequencies:
+            values[f] *= 1 / 2 * multiplier
+
+        return values
+
+    def _compute_F_F_F_F__0_2_component(self, coo, input_fields, frequencies, t_nf, t_nnn):
+        """Compute a component of the :math:`[\\mu^4]^{0,2}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu^4]^{0,2} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abcde}
+            \\,F_{abc}\\,F_{cde}\\,\\tdiff{\\mu_i}{Q_a}\\, \\tdiff{\\mu_j}{Q_b}\\,
+            \\tdiff{\\mu_k}{Q_d}\\,\\tdiff{\\mu_l}{Q_e}
+            \\,\\lb{\\sigma}{a}\\,\\lb{1}{b}\\,\\lb{23}{c}\\,\\lb{2}{d}\\,\\lb{3}{e}
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                tmp_a = t_nf[a, p[0][0]]
+                for b in self.mwh.included_modes:
+                    tmp_ab = tmp_a * t_nf[b, p[1][0]]
+
+                    for c in self.mwh.included_modes:
+                        tmp_abc = tmp_ab * t_nnn[a, b, c]
+
+                        for d in self.mwh.included_modes:
+                            tmp_abcd = tmp_abc * t_nf[d, p[2][0]]
+
+                            for e in self.mwh.included_modes:
+                                tmp_abcde = tmp_abcd * t_nf[e, p[3][0]] * t_nnn[c, d, e]
+
+                                for f in frequencies:
+                                    values[f] += tmp_abcde * \
+                                        Shaker.lambda_(p[0][1] * f, self.mwh.frequencies[a]) * \
+                                        Shaker.lambda_(p[1][1] * f, self.mwh.frequencies[b]) * \
+                                        Shaker.lambda_((p[2][1] * f, p[3][1] * f), self.mwh.frequencies[c]) * \
+                                        Shaker.lambda_(p[2][1] * f, self.mwh.frequencies[d]) * \
+                                        Shaker.lambda_(p[3][1] * f, self.mwh.frequencies[e])
+
+        for f in frequencies:
+            values[f] *= 1 / 8 * multiplier
+
+        return values
+
     def _compute_FF_FF__1_1_component(self, coo, input_fields, frequencies, t_nff, t_nnff, t_nnn):
         """Compute a component of the :math:`[\\alpha^2]^{1,1}` contribution
 
@@ -1694,6 +1813,113 @@ class Shaker:
 
         for f in frequencies:
             values[f] *= - 1 / 16 * multiplier
+
+        return values
+
+    def _compute_FF_FF__2_0_component(self, coo, input_fields, frequencies, t_nnff):
+        """Compute a component of the :math:`[\\alpha^2]^{2,0}` contribution
+
+         .. math::
+
+            \\begin{align}
+            [\\alpha^2]^{2,0} &= \\frac{1}{16}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{ab}
+            \\tdiff{^2\\alpha_{ij}}{Q_a\\partial Q_b}\\tdiff{^2\\alpha_{kl}}{Q_a\\partial Q_b}
+            \\,\\lb{23}{ab}\\,\\omega_a^{-1}
+            \\end{align}
+
+         :param coo: coordinates
+         :type coo: tuple|list
+         :param input_fields: input fields
+         :type input_fields: tuple|list
+         :param frequencies: the frequencies
+         :type frequencies: list of float|str
+         :param t_nnff: ``NNFF`` components
+         :type t_nnff: numpy.ndarray
+         :rtype: list of float
+         """
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
+
+                    tmp = 1 / self.mwh.frequencies[a] * t_nnff[a, b, p[0][0], p[1][0]] * t_nnff[a, b, p[2][0], p[3][0]]
+
+                    for f in frequencies:
+                        values[f] += \
+                            Shaker.lambda_(
+                                (p[2][1] * f, p[3][1] * f), (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp
+
+        for f in frequencies:
+            values[f] *= 1 / 16 * multiplier
+
+        return values
+
+    def _compute_FF_FF__0_2_component(self, coo, input_fields, frequencies, t_nff, t_nnn):
+        """Compute a component of the :math:`[\\alpha^2]^{0,2}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\alpha^2]^{0,2} &= \\frac{1}{32}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abcd}
+            \\tdiff{\\alpha_{ij}}{Q_c}\\tdiff{\\alpha_{kl}}{Q_d}\\,
+            \\left[F_{aab}\\,F_{bcd}\\,\\lb{23}{c}\\lb{\\sigma}{d}\\,\\omega_b^{-2}
+            +2\\,F_{abc}\\,F_{abd}\\,\\lb{23}{ab}\\,\\lb{23}{c}\\,\\lb{\\sigma}{d}\\right]
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nff: ``NFF`` components
+        :type t_nff: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                mult_a = 1 / self.mwh.frequencies[a]
+                for b in self.mwh.included_modes:
+                    mult_ab = self.mwh.frequencies[b] ** -2
+
+                    for c in self.mwh.included_modes:
+
+                        mult_abc = mult_a * t_nff[c, p[0][0], p[1][0]]
+                        mult_abc_1 = mult_abc * t_nnn[a, a, b] * mult_ab
+                        mult_abc_2 = mult_abc * t_nnn[a, b, c]
+
+                        for d in self.mwh.included_modes:
+                            mult_abcd = t_nff[d, p[2][0], p[3][0]]
+
+                            tmp1 = mult_abcd * mult_abc_1 * t_nnn[b, c, d]
+                            tmp2 = mult_abcd * mult_abc_2 * t_nnn[a, b, d] * 2
+
+                            for f in frequencies:
+                                ws = p[0][1] * f
+                                w23 = (p[2][1] * f, p[3][1] * f)
+                                values[f] -= \
+                                    (tmp1 +
+                                     Shaker.lambda_(w23, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
+                                    self.lambda_(w23, self.mwh.frequencies[c]) * \
+                                    self.lambda_(ws, self.mwh.frequencies[d])
+
+        for f in frequencies:
+            values[f] *= -1 / 32 * multiplier
 
         return values
 
@@ -1765,5 +1991,115 @@ class Shaker:
 
         for f in frequencies:
             values[f] *= - 1 / 24 * multiplier
+
+        return values
+
+    def _compute_F_FFF__2_0_component(self, coo, input_fields, frequencies, t_nnf, t_nnfff):
+        """Compute a component of the :math:`[\\mu\\beta]^{2,0}` contribution
+
+         .. math::
+
+            \\begin{align}
+            [\\mu\\beta]^{2,0} &= \\frac{1}{12}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{ab}
+            \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\beta_{jkl}}{Q_a\\partial Q_b}\\,
+            \\lb{\\sigma}{ab}\\,\\omega_a^{-1}
+            \\end{align}
+
+         :param coo: coordinates
+         :type coo: tuple|list
+         :param input_fields: input fields
+         :type input_fields: tuple|list
+         :param frequencies: the frequencies
+         :type frequencies: list of float|str
+         :param t_nnf: ``NNF`` components
+         :type t_nnf: numpy.ndarray
+         :param t_nnfff: ``NNFFF`` components
+         :type t_nnfff: numpy.ndarray
+         :rtype: list of float
+         """
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                for b in self.mwh.included_modes:
+
+                    tmp = 1 / self.mwh.frequencies[a] * t_nnf[a, b, p[0][0]] * \
+                        t_nnfff[a, b, p[1][0], p[2][0], p[3][0]]
+
+                    for f in frequencies:
+                        values[f] += \
+                            Shaker.lambda_(p[0][1] * f, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp
+
+        for f in frequencies:
+            values[f] *= 1 / 12 * multiplier
+
+        return values
+
+    def _compute_F_FFF__0_2_component(self, coo, input_fields, frequencies, t_nf, t_nfff, t_nnn):
+        """Compute a component of the :math:`[\\mu\\beta]^{0,2}` contribution
+
+        .. math::
+
+            \\begin{align}
+            [\\mu\\beta]^{0,2} &= \\frac{1}{24}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abcd}
+            \\tdiff{\\mu_i}{Q_c}\\tdiff{\\beta_{jkl}}{Q_d}\\times\\\\
+            &\\left[F_{aab}\\,F_{bcd}\\,\\lb{\\sigma}{c}\\lb{\\sigma}{d}\\,\\omega_b^{-2}
+            +2\\,F_{abc}\\,F_{abd}\\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\right]
+            \\end{align}
+
+        :param coo: coordinates
+        :type coo: tuple|list
+        :param input_fields: input fields
+        :type input_fields: tuple|list
+        :param frequencies: the frequencies
+        :type frequencies: list of float|str
+        :param t_nf: ``NF`` components
+        :type t_nf: numpy.ndarray
+        :param t_nfff: ``NFFF`` components
+        :type t_nfff: numpy.ndarray
+        :param t_nnn: ``NNN`` components
+        :type t_nnn: numpy.ndarray
+        :rtype: list of float
+        """
+        values = {}
+
+        for f in frequencies:
+            values[f] = .0
+
+        multiplier, unique_elemts = self.get_iterator(coo, input_fields)
+
+        for p in unique_elemts:
+            for a in self.mwh.included_modes:
+                mult_a = 1 / self.mwh.frequencies[a]
+                for b in self.mwh.included_modes:
+                    mult_ab = self.mwh.frequencies[b] ** -2
+
+                    for c in self.mwh.included_modes:
+
+                        mult_abc = mult_a * t_nf[c, p[0][0]]
+                        mult_abc_1 = mult_abc * t_nnn[a, a, b] * mult_ab
+                        mult_abc_2 = mult_abc * t_nnn[a, b, c]
+
+                        for d in self.mwh.included_modes:
+                            mult_abcd = t_nfff[d, p[1][0], p[2][0], p[3][0]]
+
+                            tmp1 = mult_abcd * mult_abc_1 * t_nnn[b, c, d]
+                            tmp2 = mult_abcd * mult_abc_2 * t_nnn[a, b, d] * 2
+
+                            for f in frequencies:
+                                ws = p[0][1] * f
+                                values[f] -= \
+                                    (tmp1 +
+                                     Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
+                                    self.lambda_(ws, self.mwh.frequencies[c]) * \
+                                    self.lambda_(ws, self.mwh.frequencies[d])
+
+        for f in frequencies:
+            values[f] *= -1 / 24 * multiplier
 
         return values

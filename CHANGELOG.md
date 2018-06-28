@@ -3,8 +3,8 @@
 ## Next version
 
 + Upgrade to lastest version of qcip_tools (0.5.3.1)
-+ Multiple inputs for cooking (!13)
-+ Add order II pv contributions to second hyperpolarizability (`[α²]¹¹`, `[µβ]¹¹`, `[µ⁴]¹¹`, finish #4)
++ Multiple input directories for cooking (!13)
++ Add order II pv contributions to second hyperpolarizability (`[α²]¹¹`, `[µβ]¹¹`, `[µ⁴]¹¹`, `[α²]²⁰`, `[α²]⁰²`, `[µβ]²⁰`, `[µβ]⁰²`, `[µ⁴]²⁰`, `[µ⁴]⁰²`, finish #4)
 
 ## Version 0.2
 
