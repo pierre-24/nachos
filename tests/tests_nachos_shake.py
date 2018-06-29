@@ -1,6 +1,6 @@
 import subprocess
 
-from qcip_tools import derivatives
+from qcip_tools import derivatives, derivatives_e
 from qcip_tools.chemistry_files import chemistry_datafile
 
 from nachos.core import shaking
@@ -12,6 +12,7 @@ class ShakeTestCase(NachosTestCase):
 
     def setUp(self):
         self.datafile = self.copy_to_temporary_directory('molecule_with_derivs.h5')
+        self.datafile_g = self.copy_to_temporary_directory('molecule_with_derivs_gamma.h5')
 
     def tearDown(self):
         super().tearDown()
@@ -112,12 +113,12 @@ class ShakeTestCase(NachosTestCase):
             (('dDF',), 0, 1),
             (('XDD',), 1, 0),
             (('XDD',), 0, 1),
-            # alpha
+            # alpha pv
             (('F', 'F'), 0, 0),
             (('F', 'F'), 1, 1),
             (('F', 'F'), 2, 0),
             (('F', 'F'), 0, 2),
-            # beta:
+            # beta pv
             (('F', 'F', 'F'), 1, 0),
             (('F', 'F', 'F'), 0, 1),
             (('F', 'FF'), 0, 0),
@@ -163,6 +164,66 @@ class ShakeTestCase(NachosTestCase):
             [('FFFF', 1), ('dDFF', 1), ('XDDF', 1)],
             [0.02],
             ['FF_FF__0_0', 'F_FFF__0_0', 'F_F_FF__1_0', 'F_F_FF__0_1'], is_zpva=False)
+
+    def test_shaking_gamma(self):
+        """Test the shaking class on data from a dalton that contains gamma"""
+
+        df = chemistry_datafile.ChemistryDataFile()
+
+        with open(self.datafile_g) as f:
+            df.read(f)
+
+        shaker = shaking.Shaker(datafile=df)
+
+        # Check everything is there:
+        to_check = [
+            # ZPVA
+            (('FFFF',), 1, 0),
+            (('FFFF',), 0, 1),
+            (('XDDD',), 1, 0),
+            (('XDDD',), 0, 1),
+            # gamma pv
+            (('F', 'F', 'FF'), 1, 0),
+            (('F', 'F', 'FF'), 0, 1),
+            (('FF', 'FF'), 0, 0),
+            (('FF', 'FF'), 1, 1),
+            (('FF', 'FF'), 2, 0),
+            (('FF', 'FF'), 0, 2),
+            (('F', 'FFF'), 0, 0),
+            (('F', 'FFF'), 1, 1),
+            (('F', 'FFF'), 2, 0),
+            (('F', 'FFF'), 0, 2),
+            (('F', 'F', 'F', 'F'), 1, 1),
+            (('F', 'F', 'F', 'F'), 2, 0),
+            (('F', 'F', 'F', 'F'), 0, 2),
+        ]
+
+        for derivs, m, n in to_check:
+            vc = shaking.VibrationalContribution(derivs, m, n)
+            self.assertTrue(shaker.check_availability(vc), msg=vc.to_string(fancy=True))
+
+        self._test_contributions(
+            shaker,
+            [('FFFF', 1), ('XDDD', 1)],
+            [derivatives_e.convert_frequency_from_string('1500nm')],
+            ['FF_FF__0_0', 'F_FFF__0_0', 'F_F_FF__1_0', 'F_F_FF__0_1'],
+            [
+                'FF_FF__1_1', 'FF_FF__2_0', 'FF_FF__0_2',
+                'F_FFF__1_1', 'F_FFF__2_0', 'F_FFF__0_2',
+                'F_F_F_F__1_1', 'F_F_F_F__2_0', 'F_F_F_F__0_2'
+            ],
+            is_zpva=True)
+
+        self._test_contributions(
+            shaker,
+            [('XDDD', 2)],
+            [derivatives_e.convert_frequency_from_string('1500nm')],
+            [
+                'FF_FF__0_0', 'FF_FF__1_1', 'FF_FF__2_0', 'FF_FF__0_2',
+                'F_FFF__0_0', 'F_FFF__1_1', 'F_FFF__2_0', 'F_FFF__0_2',
+                'F_F_FF__1_0', 'F_F_FF__0_1',
+                'F_F_F_F__1_1', 'F_F_F_F__2_0', 'F_F_F_F__0_2'
+            ], is_zpva=True)
 
     def test_shaking_save_and_load(self):
         """Test that we are able to save and load vibrational contributions"""
