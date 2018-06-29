@@ -95,7 +95,7 @@ class Analyzer:
         self.datafile = datafile
         self.vibrational_contributions = vibrational_contributions if vibrational_contributions else {}
 
-    def analyze(self, properties, out=sys.stdout, only=None):
+    def analyze(self, properties, out=sys.stdout, only=None, frequencies_to_show=None):
         """Display the different values, as requested
 
         :param properties: different properties
@@ -129,8 +129,6 @@ class Analyzer:
 
             if base.order() not in properties:
                 continue
-
-            out.write('\n*** {}:\n'.format(fancy_output_derivative(base)))
             to_show = properties[base.order()]
 
             frequencies = []
@@ -147,7 +145,17 @@ class Analyzer:
                 how_much += len(vibrational_contribution_available.vibrational_contributions) + 4
 
             frequencies = list(set(frequencies))
+            if frequencies_to_show:
+                frequencies_to_show = [derivatives_e.convert_frequency_from_string(i) for i in frequencies_to_show]
+                frequencies = list(
+                    i for i in frequencies if derivatives_e.convert_frequency_from_string(i) in frequencies_to_show)
+
+            if len(frequencies) == 0:
+                continue
+
             frequencies.sort(key=lambda x: derivatives_e.convert_frequency_from_string(x))
+
+            out.write('\n*** {}:\n'.format(fancy_output_derivative(base)))
 
             for g in to_show:
                 out.write('\n{}:\n'.format(g.explain))

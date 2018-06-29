@@ -8,7 +8,7 @@ import os
 from qcip_tools import derivatives, derivatives_e
 from qcip_tools.chemistry_files import chemistry_datafile
 
-from nachos import exit_failure
+from nachos import exit_failure, shake
 from nachos.core import analyzing, shaking
 
 __version__ = '0.1'
@@ -119,6 +119,9 @@ def get_arguments_parser():
         '-O', '--only', help='only fetch the properties of given derivatives')
 
     arguments_parser.add_argument(
+        '-f', '--frequencies', help='only show for a given set of frequencies')
+
+    arguments_parser.add_argument(
         '-p', '--properties', help='which properties to carry out', required=True)
 
     return arguments_parser
@@ -159,6 +162,13 @@ def main():
     if not properties:
         return exit_failure('no property to analyze')
 
+    frequencies = None
+    if args.frequencies:
+        try:
+            frequencies = shake.treat_frequencies_arg(args.frequencies)
+        except ValueError as e:
+            return exit_failure('error while treating frequencies: {}'.format(str(e)))
+
     try:
         vibrational_contributions = shaking.load_vibrational_contributions(args.data, df.spacial_dof)
     except shaking.BadShaking as e:
@@ -166,7 +176,7 @@ def main():
 
     analyzer = analyzing.Analyzer(df, vibrational_contributions)
 
-    analyzer.analyze(properties, only=only)
+    analyzer.analyze(properties, only=only, frequencies_to_show=frequencies)
 
 
 if __name__ == '__main__':
