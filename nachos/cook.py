@@ -5,7 +5,7 @@ Out of the results of calculation, create a h5 file to store them
 import os
 import argparse
 
-from nachos.core import files, cooking
+from nachos.core import files, cooking, preparing
 from nachos import exit_failure
 
 __version__ = '0.1'
@@ -13,6 +13,15 @@ __author__ = 'Pierre Beaujean'
 __maintainer__ = 'Pierre Beaujean'
 __email__ = 'pierre.beaujean@unamur.be'
 __status__ = 'Development'
+
+
+def is_dir(dirname):
+    """Checks if a path is an actual directory"""
+    if not os.path.isdir(dirname):
+        msg = '{0} is not a directory'.format(dirname)
+        raise argparse.ArgumentTypeError(msg)
+    else:
+        return dirname
 
 
 # program options
@@ -24,6 +33,8 @@ def get_arguments_parser():
         '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='./nachos_recipe.yml')
     arguments_parser.add_argument(
         '-o', '--output', type=str, help='Output h5 file', default='nachos_data.h5')
+
+    arguments_parser.add_argument('directories', nargs='*', type=is_dir, help='directory where to look for QM results')
 
     return arguments_parser
 
@@ -40,10 +51,14 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
-    cooker = cooking.Cooker(recipe, directory=recipe_directory)
+    cooker = cooking.Cooker(recipe)
+    directories = [recipe_directory]
+
+    if len(args.directories) != 0:
+        directories = args.directories
 
     try:
-        storage = cooker.cook(verbosity_level=args.verbose)
+        storage = cooker.cook(directories, verbosity_level=args.verbose)
     except cooking.BadCooking as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 
@@ -53,10 +68,12 @@ def main():
         num_missing_fields, num_missing_derivs = 0, 0
         errors = ''
         for f in missing_fields:
-            errors += '- Missing field ({})\n'.format(','.join(str(a) for a in f))
+            errors += '- Missing field: {}\n'.format(','.join(
+                preparing.Preparer.nonzero_fields(f, recipe.geometry, recipe['type'])))
             num_missing_fields += 1
         for f, d in missing_derivatives:
-            errors += '- Missing derivative {} for ({})\n'.format(d, ','.join(str(a) for a in f))
+            errors += '- Missing derivative {} for {}\n'.format(d, ','.join(
+                preparing.Preparer.nonzero_fields(f, recipe.geometry, recipe['type'])))
             num_missing_derivs += 1
         errors += '-' * 32 + '\n'
         errors += 'Total: {} missing field(s) and {} missing derivative(s)'.format(

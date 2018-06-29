@@ -1,5 +1,5 @@
-git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.5.3.1#egg=qcip_tools>=0.5.1.2,<0.6
+git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.5.3.2#egg=qcip_tools>=0.5.1.2,<0.6
 setuptools>=39.0,<40.0
 pyyaml==3.12
-h5py==2.7.1
+h5py==2.8.0
 prompt_toolkit==1.0.15

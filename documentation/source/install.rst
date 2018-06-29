@@ -36,7 +36,11 @@ By default, it is possible to perform numerical differentiation with Dalton, but
 + Outputs responses functions in a better place (``DALTON.PROP`` in the archive), with more digits (important for the accuracy) ;
 + Allow to compute numerical differentiation of gamma (because it is otherwise not possible, since only the components that participate to :math:`\gamma_{||}` are computed).
 
-You can download the patch here: :download:`dalton.patch`.
+You can download the patch here: :download:`dalton.patch` :
+
+.. code-block:: bash
+
+  wget --http-user=doc --http-passwd=doc http://perso.unamur.be/~pbeaujea/nachos/html/_downloads/dalton.patch
 
 To apply this patch you need to recompile Dalton (so you need git, a fortran compiler, and eventual BLAS/LAPACK/MKL).
 The following  commands allow you to `get the sources <https://gitlab.com/dalton/dalton>`_, and check if everything is ok:

@@ -380,7 +380,7 @@ Note that you don't have to redefine every variable, since they have a default v
        * - ``extra_keywords``
          -
          - Any extra input (for example, the solvent, ...)
-       * - ``extra_section``
+       * - ``extra_sections``
          -
          - Path to a file where extra section of the input files are given (for example, solvent definition, ...)
        * - ``vshift``
@@ -476,12 +476,11 @@ The ``-V 1`` option allows you to know how much files where generated.
 
 The program fetch the different computational results from each files that it can fin (it looks for FCHK files with gaussian, TAR archive and OUT files for dalton), and mix them together in a single *data file*.
 
+By default, the program looks for output files **in the same directory as the recipe**. You can supply directories as argument, but in this case, the program does not look in the recipe directory (so don't forget to add it to the list).
+
 The ``-V 1`` option allows you to know which files the program actually discovered and used.
 
 
-.. warning::
-
-    The program looks for output files **in the same directory as the recipe**, and there is no way to change this behavior.
 
 .. autoprogram:: nachos.bake:get_arguments_parser()
     :prog: nachos_bake
@@ -569,11 +568,11 @@ The pure vibrational (pv) contributions depends on the quantity:
    * -
      - :math:`[\mu^2]^{2,0}`
      - 2
-     - ``NNF`` (part with ``NNNF`` not implemented)
+     - ``NNF``
    * -
      - :math:`[\mu^2]^{0,2}`
      - 2
-     - ``NF``, ``NNN`` (part with ``NNNN`` not implemented)
+     - ``NF``, ``NNN``
    * - First hyperpolarizability (``FFF``, ``dDF``, ``XDD``)
      - :math:`[\mu\alpha]^{0,0}`
      - 0
@@ -593,11 +592,11 @@ The pure vibrational (pv) contributions depends on the quantity:
    * -
      - :math:`[\mu\alpha]^{2,0}`
      - 2
-     - ``NNF``, ``NNFF`` (part with ``NNNF`` and ``NNNFF`` not implemented)
+     - ``NNF``, ``NNFF``
    * -
      - :math:`[\mu\alpha]^{0,2}`
      - 2
-     - ``NF``, ``NFF``, ``NNN``  (part with ``NNNN`` not implemented)
+     - ``NF``, ``NFF``, ``NNN``
    * - Second hyperpolarizability (``FFFF``, ...)
      - :math:`[\alpha^2]^{0,0}`
      - 0
@@ -614,7 +613,45 @@ The pure vibrational (pv) contributions depends on the quantity:
      - :math:`[\mu^2\alpha]^{0,1}`
      - 1
      - ``NF``, ``NFF``, ``NNN``
+   * -
+     - :math:`[\alpha^2]^{1,1}`
+     - 2
+     - ``NFF``, ``NNFF``, ``NNN``
+   * -
+     - :math:`[\alpha^2]^{2,0}`
+     - 2
+     - ``NNFF``
+   * -
+     - :math:`[\alpha^2]^{0,2}`
+     - 2
+     - ``NFF``, ``NNN``
+   * -
+     - :math:`[\mu\beta]^{1,1}`
+     - 2
+     - ``NF``, ``NFFF``, ``NNF``, ``NNFFF``, ``NNN``
+   * -
+     - :math:`[\mu\beta]^{2,0}`
+     - 2
+     - ``NNF``, ``NNFFF``
+   * -
+     - :math:`[\mu\beta]^{0,2}`
+     - 2
+     - ``NF``, ``NFFF``, ``NNN``
+   * -
+     - :math:`[\mu^4]^{1,1}`
+     - 2
+     - ``NF``, ``NNF``, ``NNN``
+   * -
+     - :math:`[\mu^4]^{2,0}`
+     - 2
+     - ``NF``, ``NNF``
+   * -
+     - :math:`[\mu^4]^{0,2}`
+     - 2
+     - ``NF``, ``NNN``
 
+The formulas for each contribution are detailed :download:`in this document <./formulas_tex/contribs.pdf>`.
+Note that the formulas are truncated so that the quartic force constant (``NNNN``) and third order (``NNNF``, ...) derivatives are not used.
 
 The output depends on the value of ``-V``, which can be:
 
@@ -633,7 +670,7 @@ Note that if you only want to remove modes, for example using ``-m "-7;-8"`` wou
   + The ``-f`` option (semicolon separated list of frequencies, :ref:`same as above <nachos_make_note_3>`), allows to change the set of frequency for which the contributions are computed, if dynamic.
     Even though ZPVA requires derivatives of the dynamic quantities to be available, this is not the case for the pure vibrational part, for which any frequency could be used.
     Therefore, the ZPVA part is only computed for available frequencies, and the pv part is computed for all (!) frequencies.
-  + If the corresponding static properties are available, you can even request *pure vibrational* contributions for processes that are not initially present, with the ``-O`` option.
+  + **If the corresponding static properties are available**, you can even request *pure vibrational* contributions for processes that are not initially present, with the ``-O`` option.
 
 .. autoprogram:: nachos.analyze:get_arguments_parser()
     :prog: nachos_analyze
@@ -662,7 +699,7 @@ You can restrict the number of vibrational contribution with the ``-O`` option, 
 .. note::
 
     + The different properties are actually function of the corresponding tensors in `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_, so this list may not be exhaustive (but at your own risks).
-    + Please use the ``-O`` option to restrict the effect when fetching SHG or THS properties.
+    + Please use the ``-O`` option to restrict the effect when fetching SHG or THS properties, and use ``-f`` to restrict the amount of frequencies printed.
     + If vibrational contribution have been added via ``nachos_shake`` to the program, the different values for each contribution will be printed.
 
 Appendix

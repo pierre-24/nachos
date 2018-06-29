@@ -6,10 +6,11 @@ Maintained by [Pierre Beaujean](pierre.beaujean@unamur.be) and created in the fr
 This tool is based on [qcip_tools](https://gitlab.unamur.be/chimie/lct/qcip_tools).
 
 <!-- STABLE: -->
-Current release: [release-v0.2.2](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.2.2) (April 12, 2018)
+Current release: [release-v0.3](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.3) (June 29, 2018)
 
 Previous releases (see [the changelog](./CHANGELOG.md)):
 <!-- PREVIOUS: -->
++  [release-v0.2.2](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.2.2) (April 12, 2018)
 +  [release-v0.2.1](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.2.1) (February 13, 2018)
 +  [release-v0.2](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.2) (February 09, 2018)
 +  [release-v0.1.1](https://gitlab.unamur.be/pierre.beaujean/nachos/tree/release-v0.1.1) (December 22, 2017)
