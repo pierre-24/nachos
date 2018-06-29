@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## Current version
 
 + Upgrade to lastest version of qcip_tools (0.5.3.1)
 + Multiple input directories for cooking (!13)
