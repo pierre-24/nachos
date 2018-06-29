@@ -65,6 +65,10 @@ def treat_frequencies_arg(frequencies_arg):
 
         value = None
 
+        if x == 'static':
+            frequencies.append(x)
+            continue
+
         try:
             value = float(x)
         except ValueError:
