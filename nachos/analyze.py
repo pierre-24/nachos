@@ -124,6 +124,12 @@ def get_arguments_parser():
     arguments_parser.add_argument(
         '-p', '--properties', help='which properties to carry out', required=True)
 
+    arguments_parser.add_argument(
+        '-I',
+        '--inverse',
+        action='store_true',
+        help='for vibrational contribution, show `value(total - current)` rather than `value(current)`')
+
     return arguments_parser
 
 
@@ -176,7 +182,7 @@ def main():
 
     analyzer = analyzing.Analyzer(df, vibrational_contributions)
 
-    analyzer.analyze(properties, only=only, frequencies_to_show=frequencies)
+    analyzer.analyze(properties, only=only, frequencies_to_show=frequencies, inverse=args.inverse)
 
 
 if __name__ == '__main__':
