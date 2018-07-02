@@ -128,7 +128,7 @@ def get_arguments_parser():
         '-I',
         '--inverse',
         action='store_true',
-        help='for vibrational contribution, show `value(total - current)` rather than `value(current)`')
+        help='for vibrational contribution, show `property(total - current)` rather than `property(current)`')
 
     return arguments_parser
 

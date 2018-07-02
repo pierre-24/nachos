@@ -701,6 +701,7 @@ You can restrict the number of vibrational contribution with the ``-O`` option, 
     + The different properties are actually function of the corresponding tensors in `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_, so this list may not be exhaustive (but at your own risks).
     + Please use the ``-O`` option to restrict the effect when fetching SHG or THS properties, and use ``-f`` to restrict the amount of frequencies printed.
     + If vibrational contribution have been added via ``nachos_shake`` to the program, the different values for each contribution will be printed.
+      The ``-I`` option may be used to get ``property(total-current)`` rather than ``property(current)``, which is usefull to assess the impact of a given vibrationnal contribution on the total value (since some properties, like HRS and THS properties are not additive).
 
 Appendix
 --------
