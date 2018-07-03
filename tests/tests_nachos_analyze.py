@@ -26,6 +26,9 @@ class AnalyzeTestCase(NachosTestCase):
 
         self.assertEqual(e.execute(tx), t.isotropic_value())
 
+        # test inverse
+        self.assertEqual(e.execute(tx, total=tx), 0.0)
+
         # test component access
         component = (1, 1)
         e = analyzing.GetPropertyOfTensor(
@@ -34,6 +37,9 @@ class AnalyzeTestCase(NachosTestCase):
             component=component)
 
         self.assertEqual(e.execute(t), t.components[component])
+
+        # test inverse
+        self.assertEqual(e.execute(tx, total=tx), 0.0)
 
         # dipole does not behave like others!
         t = factories.FakeElectricDipole()
