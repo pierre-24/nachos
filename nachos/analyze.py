@@ -130,6 +130,12 @@ def get_arguments_parser():
         action='store_true',
         help='for vibrational contribution, show `property(total - current)` rather than `property(current)`')
 
+    arguments_parser.add_argument(
+        '-g',
+        '--group-vibs',
+        action='store_true',
+        help='Group vibrational contribution per perturbation order`')
+
     return arguments_parser
 
 
@@ -182,7 +188,8 @@ def main():
 
     analyzer = analyzing.Analyzer(df, vibrational_contributions)
 
-    analyzer.analyze(properties, only=only, frequencies_to_show=frequencies, inverse=args.inverse)
+    analyzer.analyze(
+        properties, only=only, frequencies_to_show=frequencies, inverse_vibs=args.inverse, group_vibs=args.group_vibs)
 
 
 if __name__ == '__main__':

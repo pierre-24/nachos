@@ -2,7 +2,7 @@ import sys
 
 from qcip_tools import derivatives, derivatives_e
 
-from nachos.core import fancy_output_derivative
+from nachos.core import fancy_output_derivative, shaking
 
 
 def get_tensor_converter(type_):
@@ -94,6 +94,34 @@ class BadAnalysis(Exception):
     pass
 
 
+def _fancy_gather(g, order):
+    """Print a partial vibrational contribution (like ``F_F_F``) as fancy one.
+
+    :param g: contributions
+    :type g: str
+    :param order: perturbation order
+    :type order: int
+    :rtype: str
+    """
+    x = g.split('_')
+    s = ''
+    orders = []
+    orders_and_numbers = {}
+    for d in x:
+        o = len(d)
+        if o not in orders:
+            orders.append(o)
+            orders_and_numbers[o] = 1
+        else:
+            orders_and_numbers[o] += 1
+
+    orders.sort()
+    for i in orders:
+        s += shaking.ORDER_TO_REPR[i] + \
+            ('' if orders_and_numbers[i] == 1 else shaking.FANCY_EXPONENTS[orders_and_numbers[i]])
+    return '[{}]{}'.format(s, shaking.FANCY_EXPONENTS[order])
+
+
 class Analyzer:
     """Analyzer class that outputs property for different tensors contained in data file
 
@@ -107,7 +135,14 @@ class Analyzer:
         self.datafile = datafile
         self.vibrational_contributions = vibrational_contributions if vibrational_contributions else {}
 
-    def analyze(self, properties, out=sys.stdout, only=None, frequencies_to_show=None, inverse=None):
+    def analyze(
+            self,
+            properties,
+            out=sys.stdout,
+            only=None,
+            frequencies_to_show=None,
+            inverse_vibs=None,
+            group_vibs=False):
         """Display the different values, as requested
 
         :param properties: different properties
@@ -118,8 +153,10 @@ class Analyzer:
         :type only: list of qcip_tools.derivatives.Derivative
         :param frequencies_to_show: only show given frequencies
         :type frequencies_to_show: list
-        :param inverse: for vibrational contributions, show ``value(total - current)`` rather than ``value(current)``
-        :type inverse: bool
+        :param inverse_vibs: for vibrational, show ``value(total - current)`` rather than ``value(current)``
+        :type inverse_vibs: bool
+        :param group_vibs: for vibrational, group by perturbation order rather than detailed
+        :type group_vibs: bool
         """
 
         if only:
@@ -156,11 +193,16 @@ class Analyzer:
 
             vibrational_contribution_available = None
             how_much = 2
+            gathers = []
 
             if b_repr in self.vibrational_contributions:
                 vibrational_contribution_available = self.vibrational_contributions[b_repr]
                 frequencies.extend(vibrational_contribution_available.frequencies_pv)
-                how_much += len(vibrational_contribution_available.vibrational_contributions) + 4
+                if group_vibs:
+                    gathers = vibrational_contribution_available.sort_per_type_and_order()
+                    how_much += sum(sum(len(gathers[u][e]) for e in gathers[u]) for u in gathers) + 3
+                else:
+                    how_much += len(vibrational_contribution_available.vibrational_contributions) + 4
 
             frequencies = list(set(frequencies))
             if frequencies_to_show:
@@ -183,14 +225,26 @@ class Analyzer:
                 out.write('{:<15} '.format('electronic'))
 
                 if vibrational_contribution_available:
-                    inv_mark = ' !!' if inverse else ''
-                    for c in vibrational_contribution_available.per_type['zpva']:
-                        out.write('{:<15} '.format(c.to_string(fancy=True) + inv_mark))
+                    inv_mark = ' !!' if inverse_vibs else ''
 
-                    out.write('{:<15} '.format('= ZPVA' + inv_mark))
+                    if not group_vibs:
+                        for c in vibrational_contribution_available.per_type['zpva']:
+                            out.write('{:<15} '.format(c.to_string(fancy=True) + inv_mark))
 
-                    for c in vibrational_contribution_available.per_type['pv']:
-                        out.write('{:<15} '.format(c.to_string(fancy=True) + inv_mark))
+                        out.write('{:<15} '.format('= ZPVA' + inv_mark))
+                    else:
+                        if 'zpva' in gathers:
+                            out.write('{:<15} '.format('= ZPVA' + inv_mark))
+
+                    if not group_vibs:
+                        for c in vibrational_contribution_available.per_type['pv']:
+                            out.write('{:<15} '.format(c.to_string(fancy=True) + inv_mark))
+                    else:
+                        for k in gathers['pv'].keys():
+                            for i in range(3):
+                                if i not in gathers['pv'][k]:
+                                    continue
+                                out.write('{:<15} '.format(_fancy_gather(k, i) + inv_mark))
 
                     out.write('{:<15} '.format('= pv' + inv_mark))
                     out.write('{:<15} '.format('= vib'))
@@ -224,27 +278,44 @@ class Analyzer:
 
                         # show property values:
                         if frequency in vibrational_contribution_available.frequencies_zpva:
-                            for c in vibrational_contribution_available.per_type['zpva']:
-                                out.write('{: .8e} '.format(
-                                    g.execute(v[c.to_string()][frequency], total=sum_tensor if inverse else None)))
+                            if not group_vibs:
+                                for c in vibrational_contribution_available.per_type['zpva']:
+                                    out.write('{: .8e} '.format(
+                                        g.execute(
+                                            v[c.to_string()][frequency], total=sum_tensor if inverse_vibs else None)))
 
                             out.write('{: .8e} '.format(
                                 g.execute(
                                     vibrational_contribution_available.total_zpva[frequency],
-                                    total=sum_tensor if inverse else None)))
+                                    total=sum_tensor if inverse_vibs else None)))
                         else:
                             for i in range(len(vibrational_contribution_available.per_type['zpva']) + 1):
                                 out.write(no_val)
 
                         if frequency in vibrational_contribution_available.frequencies_pv:
-                            for c in vibrational_contribution_available.per_type['pv']:
-                                out.write('{: .8e} '.format(
-                                    g.execute(v[c.to_string()][frequency], total=sum_tensor if inverse else None)))
+                            if not group_vibs:
+                                for c in vibrational_contribution_available.per_type['pv']:
+                                    out.write('{: .8e} '.format(
+                                        g.execute(
+                                            v[c.to_string()][frequency],
+                                            total=sum_tensor if inverse_vibs else None)))
+                            else:
+                                for k in gathers['pv'].keys():
+                                    for i in range(3):
+                                        if i not in gathers['pv'][k]:
+                                            continue
+                                        sum_tensor_x = derivatives.Tensor(base, frequency=frequency)
+                                        for c in gathers['pv'][k][i]:
+                                            sum_tensor_x.components += v[c.to_string()][frequency].components
+                                        out.write('{: .8e} '.format(
+                                            g.execute(
+                                                sum_tensor_x,
+                                                total=sum_tensor if inverse_vibs else None)))
 
                             out.write('{: .8e} '.format(
                                 g.execute(
                                     vibrational_contribution_available.total_pv[frequency],
-                                    total=sum_tensor if inverse else None)))
+                                    total=sum_tensor if inverse_vibs else None)))
                         else:
                             for i in range(len(vibrational_contribution_available.per_type['pv']) + 1):
                                 out.write(no_val)
