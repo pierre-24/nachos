@@ -365,7 +365,7 @@ class PrepareTestCase(NachosTestCase):
 
         stdout_t, stderr_t = process.communicate()
 
-        # self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
         self.assertEqual(len(stdout_t), 0, msg=stdout_t.decode())
 
         self.assertEqual(len([a for a in glob.glob(self.working_directory + '/*.com')]), 542)
@@ -383,7 +383,7 @@ class PrepareTestCase(NachosTestCase):
 
         stdout_t, stderr_t = process.communicate()
 
-        # self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
+        self.assertEqual(len(stderr_t), 0, msg=stderr_t.decode())
         self.assertEqual(len(stdout_t), 0, msg=stdout_t.decode())
 
         self.assertEqual(len([a for a in glob.glob(other_dir + '/*.com')]), 542)
