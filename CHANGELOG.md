@@ -3,6 +3,7 @@
 ## Current version
 
 + Add inversion in analyze (!16)
++ Group vibrational contributions (!17)
 
 ## Version 0.3
 
