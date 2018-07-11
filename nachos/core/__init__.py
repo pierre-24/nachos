@@ -14,7 +14,7 @@ CONFIG = {
             ('MP4DQ', {'G': 1, 'F': 1}),
             ('MP4SDQ', {'G': 1, 'F': 1}),
             ('MP4', {'G': 1, 'F': 1}),
-            ('CCSD', {'G': 1, 'F': 1}),
+            ('CCSD', {'G': 1, 'F': 0}),
             ('CCSD(T)', {'G': 0, 'F': 0}),
         ],
         'bases': ['energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD'],

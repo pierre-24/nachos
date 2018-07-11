@@ -134,7 +134,7 @@ def get_arguments_parser():
         '-g',
         '--group-vibs',
         action='store_true',
-        help='Group vibrational contribution per perturbation order`')
+        help='Group vibrational contribution per perturbation order')
 
     return arguments_parser
 

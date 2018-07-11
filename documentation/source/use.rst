@@ -259,7 +259,7 @@ This also determine the maximum properties available at this level i.e. what you
        * - ``CCSD``
          - 1
          - 1
-         - ``energy``, ``G``, ``F``
+         - ``energy``, ``G``
        * - ``CCSD(T)``
          - 0
          - 0
@@ -702,6 +702,7 @@ You can restrict the number of vibrational contribution with the ``-O`` option, 
     + Please use the ``-O`` option to restrict the effect when fetching SHG or THS properties, and use ``-f`` to restrict the amount of frequencies printed.
     + If vibrational contribution have been added via ``nachos_shake`` to the program, the different values for each contribution will be printed.
       The ``-I`` option may be used to get ``property(total-current)`` rather than ``property(current)``, which is usefull to assess the impact of a given vibrationnal contribution on the total value (since some properties, like HRS and THS properties are not additive).
+      The ``-g`` option can be used to group vibrational contribution by perturbation order (for example, :math:`[\mu\alpha]^{1,1} + [\mu\alpha]^{2,0} + [\mu\alpha]^{0,2}` as :math:`[\mu\alpha]^\text{II}`)
 
 Appendix
 --------
