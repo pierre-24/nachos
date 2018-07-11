@@ -3,8 +3,6 @@ import math
 import sys
 import h5py
 
-from collections import OrderedDict
-
 from nachos.core import fancy_output_derivative
 
 from qcip_tools import derivatives_g, derivatives_e, derivatives
@@ -12,7 +10,7 @@ from qcip_tools.chemistry_files import chemistry_datafile
 
 
 def _merge_dict_of_tensors(b, a):
-    """Merge two dicts of tensors. Please kept that function internal."""
+    """Merge two dicts of tensors. Please keep that function internal."""
     for k in b:
         if k not in a:
             continue
@@ -129,7 +127,7 @@ class VibrationalContributionsData:
 
         :type: dict
         """
-        sorted_ = {'zpva': OrderedDict(), 'pv': OrderedDict()}
+        sorted_ = {'zpva': {}, 'pv': {}}
         for t in self.per_type:
             for c in self.per_type[t]:
                 base = '_'.join(d.representation() for d in c.derivatives)

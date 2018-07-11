@@ -1,4 +1,5 @@
 import sys
+import math
 
 from qcip_tools import derivatives, derivatives_e
 
@@ -94,8 +95,11 @@ class BadAnalysis(Exception):
     pass
 
 
+FANCY_EXPONENTS_ORDER = {0: '⁰', 1: 'ᴵ', 2: 'ᴵᴵ'}
+
+
 def _fancy_gather(g, order):
-    """Print a partial vibrational contribution (like ``F_F_F``) as fancy one.
+    """Print a partial vibrational contribution (like ``F_F_F``) as a fancy one (like ``[µ³]`` in this case).
 
     :param g: contributions
     :type g: str
@@ -119,7 +123,29 @@ def _fancy_gather(g, order):
     for i in orders:
         s += shaking.ORDER_TO_REPR[i] + \
             ('' if orders_and_numbers[i] == 1 else shaking.FANCY_EXPONENTS[orders_and_numbers[i]])
-    return '[{}]{}'.format(s, shaking.FANCY_EXPONENTS[order])
+    return '[{}]{}'.format(s, FANCY_EXPONENTS_ORDER[order])
+
+
+def get_vibrational_contributions(order):
+    """Get the different vibrational contribution to a given order
+
+    :param order: order (1=dipole, 2=polarizability, ...)
+    :type order: int
+    :rtype: list
+    """
+    c = []
+    for i in range(1, order):
+        for j in reversed(range(1, min((math.floor(order / 2 + 1), order - i + 1)))):
+            if order - i * j < 1:
+                continue
+
+            curr = []
+            for k in range(i):
+                curr.append('F' * j)
+            curr.append('F' * (order - i * j))
+            c.append('_'.join(curr))
+
+    return c
 
 
 class Analyzer:
@@ -193,7 +219,7 @@ class Analyzer:
 
             vibrational_contribution_available = None
             how_much = 2
-            gathers = []
+            gathers = {}
 
             if b_repr in self.vibrational_contributions:
                 vibrational_contribution_available = self.vibrational_contributions[b_repr]
@@ -240,7 +266,7 @@ class Analyzer:
                         for c in vibrational_contribution_available.per_type['pv']:
                             out.write('{:<15} '.format(c.to_string(fancy=True) + inv_mark))
                     else:
-                        for k in gathers['pv'].keys():
+                        for k in get_vibrational_contributions(base.order()):
                             for i in range(3):
                                 if i not in gathers['pv'][k]:
                                     continue
@@ -300,7 +326,7 @@ class Analyzer:
                                             v[c.to_string()][frequency],
                                             total=sum_tensor if inverse_vibs else None)))
                             else:
-                                for k in gathers['pv'].keys():
+                                for k in get_vibrational_contributions(base.order()):
                                     for i in range(3):
                                         if i not in gathers['pv'][k]:
                                             continue
