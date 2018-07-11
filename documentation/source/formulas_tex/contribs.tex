@@ -5,7 +5,7 @@
 \usepackage{amssymb}
 \usepackage{graphicx}
 \usepackage[left=2.00cm, right=2.00cm, top=2.00cm, bottom=2.00cm]{geometry}
-\title{Vibrational contributions to electronic properties \\ Formulas implemented in NACHOS}
+\title{Vibrational contributions to electric properties \\ Formulas implemented in NACHOS}
 \author{Pierre Beaujean}
 \date{Version of \today}
 \begin{document}
@@ -29,10 +29,10 @@ with $\omega_i$, $\omega_j$ \ldots the optical frequencies and $\omega_{x}$, $\o
 \newcommand{\lb}[2]{\lambda^{\pm #1}_{#2}}
 
 \section{Zero-point vibrationnal average (ZPVA)}
-For any electronic property $p$, $\Delta{p}^{ZPVA} = [p]^{1,0} + [p]^{0,1}$, with
+For any electric property $P$, $\Delta{P}^{ZPVA} = [P]^{1,0} + [P]^{0,1}$, with
 \begin{align}
-[p]^{1,0} &= \frac{1}{4}\,\sum_a \tdiff{^2p}{Q_a^2}\,\omega_a^{-1} \\
-[p]^{0,1} &= -\frac{1}{4}\,\sum_{ab} F_{abb}\,\tdiff{p}{Q_a}\,\omega_a^{-2}\,\omega_b^{-1} 
+[P]^{1,0} &= \frac{1}{4}\,\sum_a \tdiff{^2P}{Q_a^2}\,\omega_a^{-1} \\
+[P]^{0,1} &= -\frac{1}{4}\,\sum_{ab} F_{abb}\,\tdiff{P}{Q_a}\,\omega_a^{-2}\,\omega_b^{-1} 
 \end{align}
 
 \section{Pure vibrational (pv) contribution to polarizability}

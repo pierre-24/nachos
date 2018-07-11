@@ -10,7 +10,7 @@ from qcip_tools.chemistry_files import chemistry_datafile
 
 
 def _merge_dict_of_tensors(b, a):
-    """Merge two dicts of tensors. Please kept that function internal."""
+    """Merge two dicts of tensors. Please keep that function internal."""
     for k in b:
         if k not in a:
             continue
@@ -121,6 +121,23 @@ class VibrationalContributionsData:
             vc = VibrationalContribution.from_representation(c)
             values = chemistry_datafile.ChemistryDataFile.read_derivative_from_dataset(group[c], self.derivative)
             self.add_contribution(vc, values)
+
+    def sort_per_type_and_order(self):
+        """Group vibrational contributions together.
+
+        :type: dict
+        """
+        sorted_ = {'zpva': {}, 'pv': {}}
+        for t in self.per_type:
+            for c in self.per_type[t]:
+                base = '_'.join(d.representation() for d in c.derivatives)
+                if base not in sorted_[t]:
+                    sorted_[t][base] = {}
+                if c.perturbation_order not in sorted_[t][base]:
+                    sorted_[t][base][c.perturbation_order] = []
+                sorted_[t][base][c.perturbation_order].append(c)
+
+        return sorted_
 
 
 def save_vibrational_contributions(path, contributions):

@@ -2,6 +2,11 @@
 
 ## Current version
 
++ Add inversion in analyze (!16)
++ Group vibrational contributions (!17)
+
+## Version 0.3
+
 + Upgrade to latest version of qcip_tools (0.5.3.2)
 + Multiple input directories for cooking (!13)
 + Add order II pv contributions to second hyperpolarizability (`[α²]¹¹`, `[µβ]¹¹`, `[µ⁴]¹¹`, `[α²]²⁰`, `[α²]⁰²`, `[µβ]²⁰`, `[µβ]⁰²`, `[µ⁴]²⁰`, `[µ⁴]⁰²`, finish #4)
