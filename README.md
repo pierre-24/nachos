@@ -17,13 +17,13 @@ Previous releases (see [the changelog](./CHANGELOG.md)):
 +  [release-v0.1](https://gitlab.unamur.be/chimie/lct/nachos/tree/release-v0.1) (December 18, 2017)
 
 
-## Installation
-
-See [the instalation page](http://perso.unamur.be/~pbeaujea/nachos/html/install.html) for the procedure.
-
 ## Documentation
 
-The documentation of the latest version is available online at [this address](http://perso.unamur.be/~pbeaujea/nachos/html/)  (login is `doc` and password is `doc`).
+To access the online documentation of the latest release, login is `doc` and password is `doc`.
+
+**For the installation procedure, see [this page](http://perso.unamur.be/~pbeaujea/nachos/html/install.html).**
+Then, the documentation on how to use the different programs is available [there](http://perso.unamur.be/~pbeaujea/nachos/html/use.html).
+
 
 ## Contributing
 
