@@ -1,17 +1,16 @@
-from setuptools import setup
-from pip.download import PipSession
-from pip.req import parse_requirements
-
 import nachos
+
+from setuptools import setup
+try: # for pip >= 10
+    from pip._internal.req import parse_requirements
+except ImportError: # for pip <= 9.0.3
+    from pip.req import parse_requirements
 
 pkgs = []
 dependency_links = []
-session = PipSession()
-for pkg in parse_requirements('requirements.txt', session=session):
+for pkg in parse_requirements('requirements.txt', session=False):
     if pkg.req:
         pkgs.append(str(pkg.req))
-        if pkg.link and pkg.link.url:
-            dependency_links.append(str(pkg.link.url))
 
 setup(
     name='nachos',

@@ -79,7 +79,7 @@ To contribute to the project, you need to clone the repository:
   source venv/bin/activate
 
 + Install (dev) dependencies : ``make install-dependencies-dev``.
-+ Finally, "install" the pakage: ``pip install --editable .``
++ Finally, "install" the pakage: ``pip install develop``
 + Don't forget to create a separate branch to implement your changes (see `the contribution part <contributing.html>`_)
 
 You can launch the tests series with ``python3 setup.py test``

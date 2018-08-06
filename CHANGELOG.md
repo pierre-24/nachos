@@ -4,6 +4,7 @@
 
 + Add inversion in analyze (!16)
 + Group vibrational contributions (!17)
++ Update for pip 10 (!18)
 
 ## Version 0.3
 
