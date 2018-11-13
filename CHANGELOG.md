@@ -5,6 +5,7 @@
 + Add inversion in analyze (!16)
 + Group vibrational contributions (!17)
 + Update for pip 10 (!18)
++ Switch to pipenv (!19) (and upgrade to the latest version of qcip_tools)
 
 ## Version 0.3
 
