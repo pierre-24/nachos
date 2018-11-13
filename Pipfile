@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+qcip-tools = {ref = "release-v0.5.4", git = "ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git"}
+"h5py" = "*"
+PyYAML = "*"
+prompt_toolkit = "==1.0.15"
+
+[dev-packages]
+"nachos" = {editable = true, path = "."}
+make-release = {ref = "release-v0.4.2", git = "ssh://git@git.pierrebeaujean.net/pierre/make-release.git"}
+"flake8" = "*"
+"flake8-quotes" = "*"
+"autopep8" = "*"
+sphinxcontrib-autoprogram = "*"
+Sphinx = "*"
+
+[requires]
+python_version = "3.6"

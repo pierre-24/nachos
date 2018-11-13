@@ -2,24 +2,24 @@ all: help
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  install-dependencies        to install python dependencies through pip"
-	@echo "  install-dependencies-dev    to install python dependencies (for dev) through pip"
+	@echo "  init                        to install python dependencies through pipenv"
+	@echo "  sync                        update dependencies of pipenv"
 	@echo "  lint                        to lint backend code (flake8)"
 	@echo "  test                        to run test suite"
 	@echo "  doc                         to build documentation"
 	@echo "  help                        to get this help"
 
-install-dependencies:
-	pip3 install --upgrade -r requirements.txt
+init:
+	pipenv install --dev --ignore-pipfile
 
-install-dependencies-dev: install-dependencies
-	pip3 install --upgrade -r requirements-dev.txt
+sync:
+	pipenv sync --dev
 
 lint:
-	flake8 nachos tests --max-line-length=120 --ignore=N802
+	pipenv run flake8 qcip_gui --max-line-length=120 --ignore=N802
 
 test:
-	python setup.py test
+	pipenv run python -m unittest discover -s tests
 
 doc:
-	cd documentation; make html
+	cd documentation; pipenv run make html
