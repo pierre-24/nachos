@@ -534,7 +534,7 @@ class Shaker:
 
         .. math::
             \\begin{align}
-            \\lambda^{\pm ij\\ldots}_{xy\\ldots}= [(\\omega_x+\\omega_y+\\ldots)& +(\\omega_i+\\omega_j+\\ldots)]^{-1}
+            \\lambda^{\\pm ij\\ldots}_{xy\\ldots}= [(\\omega_x+\\omega_y+\\ldots)& +(\\omega_i+\\omega_j+\\ldots)]^{-1}
             \\times\\\\
              &[(\\omega_x+\\omega_y+\\ldots)-(\\omega_i+\\omega_j+\\ldots)]^{-1}
             \\end{align}
@@ -1097,8 +1097,8 @@ class Shaker:
                             for f in frequencies:
                                 ws = p[0][1] * f
                                 values[f] -= \
-                                    (tmp1 +
-                                     Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
+                                    (tmp1 + Shaker.lambda_(
+                                        ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
                                     self.lambda_(ws, self.mwh.frequencies[c]) * \
                                     self.lambda_(ws, self.mwh.frequencies[d])
 
@@ -1246,8 +1246,8 @@ class Shaker:
                             for f in frequencies:
                                 ws = p[0][1] * f
                                 values[f] -= \
-                                    (tmp1 +
-                                     Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
+                                    (tmp1 + Shaker.lambda_(
+                                        ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
                                     self.lambda_(ws, self.mwh.frequencies[c]) * \
                                     self.lambda_(ws, self.mwh.frequencies[d])
 
@@ -1307,9 +1307,10 @@ class Shaker:
                     tmp_ab1 = f_ab1 * t_nnf[a, b, p[0][0]]
                     tmp_ab3 = f_ab1 * t_nnff[a, b, p[1][0], p[2][0]]
 
-                    tmp_ab2 = f_ab2 * \
-                        (t_nnf[a, b, p[0][0]] * t_nff[a, p[1][0], p[2][0]] +
-                         t_nnff[a, b, p[1][0], p[2][0]] * t_nf[a, p[0][0]])
+                    e_1 = t_nnf[a, b, p[0][0]] * t_nff[a, p[1][0], p[2][0]]
+                    e_1 += t_nnff[a, b, p[1][0], p[2][0]] * t_nf[a, p[0][0]]
+
+                    tmp_ab2 = f_ab2 * e_1
 
                     for c in self.mwh.included_modes:
                         tmp1 = (tmp_ab1 * t_nff[c, p[1][0], p[2][0]] + tmp_ab3 * t_nf[c, p[0][0]]) * t_nnn[a, b, c]
@@ -1930,8 +1931,8 @@ class Shaker:
                                 ws = p[0][1] * f
                                 w23 = (p[2][1] * f, p[3][1] * f)
                                 values[f] -= \
-                                    (tmp1 +
-                                     Shaker.lambda_(w23, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
+                                    (tmp1 + Shaker.lambda_(
+                                        w23, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
                                     self.lambda_(w23, self.mwh.frequencies[c]) * \
                                     self.lambda_(ws, self.mwh.frequencies[d])
 
@@ -1990,9 +1991,10 @@ class Shaker:
                     tmp_ab1 = f_ab1 * t_nnf[a, b, p[0][0]]
                     tmp_ab3 = f_ab1 * t_nnfff[a, b, p[1][0], p[2][0], p[3][0]]
 
-                    tmp_ab2 = f_ab2 * \
-                        (t_nnf[a, b, p[0][0]] * t_nfff[a, p[1][0], p[2][0], p[3][0]] +
-                         t_nnfff[a, b, p[1][0], p[2][0], p[3][0]] * t_nf[a, p[0][0]])
+                    e = t_nnf[a, b, p[0][0]] * t_nfff[a, p[1][0], p[2][0], p[3][0]]
+                    e += t_nnfff[a, b, p[1][0], p[2][0], p[3][0]] * t_nf[a, p[0][0]]
+
+                    tmp_ab2 = f_ab2 * e
 
                     for c in self.mwh.included_modes:
                         tmp1 = (tmp_ab1 * t_nfff[c, p[1][0], p[2][0], p[3][0]] + tmp_ab3 * t_nf[c, p[0][0]]) * \
@@ -2111,8 +2113,8 @@ class Shaker:
                             for f in frequencies:
                                 ws = p[0][1] * f
                                 values[f] -= \
-                                    (tmp1 +
-                                     Shaker.lambda_(ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
+                                    (tmp1 + Shaker.lambda_(
+                                        ws, (self.mwh.frequencies[a], self.mwh.frequencies[b])) * tmp2) * \
                                     self.lambda_(ws, self.mwh.frequencies[c]) * \
                                     self.lambda_(ws, self.mwh.frequencies[d])
 
