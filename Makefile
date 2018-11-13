@@ -16,7 +16,7 @@ sync:
 	pipenv sync --dev
 
 lint:
-	pipenv run flake8 qcip_gui --max-line-length=120 --ignore=N802
+	pipenv run flake8 nachos tests --max-line-length=120 --ignore=N802
 
 test:
 	pipenv run python -m unittest discover -s tests
