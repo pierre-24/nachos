@@ -21,6 +21,5 @@ make-doc:
     - python-numpy
   script:
     - ssh-add <(echo "$SSH_PRIVATE_KEY_HAL")
-    - python setup.py install
     - make doc
     - scp -r ./documentation/build/html $DOC_LOCATION
