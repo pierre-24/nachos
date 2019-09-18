@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-qcip-tools = {ref = "release-v0.5.4", git = "ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git"}
+qcip-tools = {ref = "release-v0.6.1", git = "ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git"}
 "h5py" = "*"
 PyYAML = "*"
 prompt_toolkit = "==1.0.15"
