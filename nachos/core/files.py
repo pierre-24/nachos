@@ -148,7 +148,7 @@ class Recipe:
         :raise BadRecipe: if parameters are not allowed
         """
 
-        up = yaml.load(fp)
+        up = yaml.load(fp, Loader=yaml.Loader)
         self.recipe.update(up)
         self._update(up)
         self.check_data()
@@ -192,7 +192,7 @@ class Recipe:
         """
 
         self.check_data()
-        fp.write(yaml.dump(self.recipe, default_flow_style=False))
+        fp.write(yaml.dump(self.recipe, default_flow_style=False, Dumper=yaml.Dumper))
 
     def __getitem__(self, item):
         return self.recipe[item]
@@ -214,10 +214,10 @@ class Recipe:
         bases = []
 
         for level in self['differentiation']:
-                if level >= level_min:
-                    for basis in self['differentiation'][level]:
-                        d = derivatives.Derivative(basis if basis != 'energy' else '', spacial_dof=self.dof)
-                        bases.append((d, level))
+            if level >= level_min:
+                for basis in self['differentiation'][level]:
+                    d = derivatives.Derivative(basis if basis != 'energy' else '', spacial_dof=self.dof)
+                    bases.append((d, level))
 
         return bases
 

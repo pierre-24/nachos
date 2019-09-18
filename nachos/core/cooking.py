@@ -240,8 +240,8 @@ class Cooker:
         real_fields = [0] * (3 * len(geometry))
 
         for index, a in enumerate(deformed_geometry):
-                for i in range(3):
-                    diff_value = (a.position[i] - geometry[index].position[i]) / quantities.AuToAngstrom
-                    real_fields[index * 3 + i] = 0 if math.fabs(diff_value) < threshold else diff_value
+            for i in range(3):
+                diff_value = (a.position[i] - geometry[index].position[i]) / quantities.AuToAngstrom
+                real_fields[index * 3 + i] = 0 if math.fabs(diff_value) < threshold else diff_value
 
         return real_fields
