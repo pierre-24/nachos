@@ -27,6 +27,7 @@ CONFIG = {
             'max_cycles': 600,
             'extra_keywords': '',
             'extra_sections': '',
+            'extra_sections_before': '',
             'gen_basis': '',
             'vshift': 1000,
             'XC': '',

@@ -145,6 +145,29 @@ class Preparer:
             if current_section:
                 extra_sections.append(current_section)
 
+        extra_sections_before = None
+        if 'extra_sections_before' in self.recipe['flavor_extra'] and \
+                self.recipe['flavor_extra']['extra_sections_before'] != '':
+            path = os.path.join(self.recipe.directory, self.recipe['flavor_extra']['extra_sections_before'])
+            if not os.path.exists(path):
+                raise BadPreparation('extra section file {} cannot be opened'.format(path))
+
+            with open(path) as f:
+                content = f.readlines()
+
+            extra_sections_before = []
+            current_section = []
+            for l in content:
+                c = l.strip()
+                if c == '':
+                    extra_sections_before.append(current_section)
+                    current_section = []
+                else:
+                    current_section.append(c)
+
+            if current_section:
+                extra_sections_before.append(current_section)
+
         for fields, level in self.fields_needed_by_recipe:
             counter += 1
 
@@ -217,6 +240,9 @@ class Preparer:
             # other blocks
             if self.recipe['basis_set'] == 'gen':
                 fi.other_blocks.append(gen_basis_set)
+
+            if extra_sections_before:
+                fi.other_blocks.extend(extra_sections_before)
 
             if self.recipe['type'] == 'F':
                 fi.other_blocks.append(['\t'.join(['{: .10f}'.format(a) for a in real_fields])])
