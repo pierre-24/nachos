@@ -127,9 +127,12 @@ class Cooker:
                     with open(i) as f:
                         try:
                             fx = helpers.open_chemistry_file(f)
-                            self.cook_from_file(fx, i, storage)
+                            obtained = self.cook_from_file(fx, i, storage)
                             if verbosity_level >= 1:
-                                out.write('ok\n')
+                                out.write(
+                                    '({}) ... ok\n'.format(', '.join(obtained))
+                                    if len(obtained) != 0 else 'empty')
+
                         except helpers.ProbablyNotAChemistryFile:
                             if verbosity_level >= 1:
                                 out.write('skipped\n')
@@ -146,11 +149,14 @@ class Cooker:
         :type name: str
         :param storage: storage object
         :type storage: nachos.core.files.ComputationalResults
-        :return:
+        :return: what was obtained
+        :rtype: list
         """
 
         def almost_the_same(a, b, threshold=1e-3):
             return math.fabs(a - b) < threshold
+
+        obtained = []
 
         # catch field
         if self.recipe['type'] == 'F':
@@ -168,7 +174,7 @@ class Cooker:
         fields = Cooker.real_fields_to_fields(real_fields, self.recipe['min_field'], self.recipe['ratio'])
 
         if fields not in self.fields_needed:
-            return None  # not part of this calculation
+            return []  # not part of this calculation
 
         level = next(a[1] for a in self.fields_needed_by_recipe if a[0] == fields)
         derivatives_per_level = self.recipe.bases(level_min=level)
@@ -177,16 +183,20 @@ class Cooker:
         if derivatives.Derivative() in derivatives_in_level and f.file_type != 'DALTON_LOG':
             try:
                 energies = f.property('computed_energies')
-                energy = energies['total']
 
                 if f.file_type == 'GAUSSIAN_FCHK':
                     energy = energies[self.recipe['method']]  # tries to catch the energy for the correct method
+                    obtained.append('energy:' + self.recipe['method'])
+                else:
+                    energy = energies['total']
+                    obtained.append('energy')
 
                 storage.add_result(
                     fields,
                     '',
                     derivatives.Tensor('', components=numpy.array((energy,))),
                     allow_replace=True)
+
             except (PropertyNotPresent, PropertyNotDefined, KeyError):
                 pass
 
@@ -207,6 +217,8 @@ class Cooker:
 
                         e_deriv[freq] = b
 
+                    obtained.append(d)
+
                     storage.add_result(
                         fields,
                         d,
@@ -223,6 +235,7 @@ class Cooker:
                     storage.add_result(fields, d, geometrical_derivatives[d])
         except (PropertyNotPresent, PropertyNotDefined):
             pass
+        return obtained
 
     @staticmethod
     def real_fields_to_fields(real_field, min_field, ratio):
