@@ -177,12 +177,17 @@ class Cooker:
         if derivatives.Derivative() in derivatives_in_level and f.file_type != 'DALTON_LOG':
             try:
                 energies = f.property('computed_energies')
+                energy = energies['total']
+
+                if f.file_type == 'GAUSSIAN_FCHK':
+                    energy = energies[self.recipe['method']]  # tries to catch the energy for the correct method
+
                 storage.add_result(
                     fields,
                     '',
-                    derivatives.Tensor('', components=numpy.array((energies['total'],))),
+                    derivatives.Tensor('', components=numpy.array((energy,))),
                     allow_replace=True)
-            except (PropertyNotPresent, PropertyNotDefined):
+            except (PropertyNotPresent, PropertyNotDefined, KeyError):
                 pass
 
         try:
