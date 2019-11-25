@@ -58,6 +58,22 @@ CONFIG = {
             'merge_level_3': 0,
             'merge_level_4': 0
         }
+    },
+
+    'qchem': {
+        'types': ['F', 'G'],
+        'methods': [
+            ('HF', {'G': 0, 'F': 0}),
+            ('CCSD', {'G': 0, 'F': 0})
+        ],
+        'bases': ['energy'],
+        'default_for_extra_fields': {
+            'convergence': 11,
+            'cc_convergence': 10,
+            'max_cycles': 600,
+            'memory_static': 2000,
+            'memory_cc': 2000
+        }
     }
 }
 
