@@ -16,10 +16,10 @@ sync:
 	pipenv sync --dev
 
 lint:
-	flake8 nachos tests --max-line-length=120 --ignore=N802
+	pipenv run flake8 nachos tests --max-line-length=120 --ignore=N802
 
 test:
-	python -m unittest discover -s tests
+	pipenv run python -m unittest discover -s tests
 
 doc:
-	cd documentation; make html
+	cd documentation; pipenv run make html
