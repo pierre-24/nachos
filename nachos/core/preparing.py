@@ -74,6 +74,27 @@ WAVE_FUNCTION = """
 """
 
 
+QCHEM_INPUT = """
+$molecule
+{charge} {mult}
+{mol}$end
+
+$rem
+BASIS = {basis}
+METHOD = {method}
+SCF_CONVERGENCE = {conv}
+SCF_MAX_CYCLES = {max_cycles}
+SYMMETRY = false
+MEM_STATIC = {mem_static}
+CC_MEMORY = {mem_cc}
+CC_CONVERGENCE = {cc_conv}
+cc_symmetry = 0
+N_FROZEN_CORE = FC
+CC_PRINT_PREC = 16
+$end
+"""
+
+
 class Preparer:
     """Prepare the input files
 
@@ -621,25 +642,12 @@ class Preparer:
                 molecule = self.recipe.geometry
 
             with open('{}/{}_{:04d}.inp'.format(self.directory, self.recipe['name'], counter), 'w') as f:
-                # write geometry
-                f.write('$molecule\n{} {}\n{}$end\n'.format(
-                    molecule.charge, molecule.multiplicity, molecule.output_atoms()))
 
-                # write parameters
-                rem_section = """$rem
-BASIS = {basis}
-METHOD = {method}
-SCF_CONVERGENCE = {conv}
-SCF_MAX_CYCLES = {max_cycles}
-SYMMETRY = false
-MEM_STATIC = {mem_static}
-CC_MEMORY = {mem_cc}
-CC_CONVERGENCE = {cc_conv}
-cc_symmetry = 0
-N_FROZEN_CORE = FC
-CC_PRINT_PREC = 16
-$end\n"""
-                f.write(rem_section.format(
+                # write geometry and parameters
+                f.write(QCHEM_INPUT.format(
+                    charge=molecule.charge,
+                    mult=molecule.multiplicity,
+                    mol=molecule.output_atoms(),
                     method=self.recipe['method'],
                     basis=self.recipe['basis_set'],
                     conv=self.recipe['flavor_extra']['convergence'],
@@ -651,7 +659,7 @@ $end\n"""
 
                 # write electric field if any
                 if self.recipe['type'] == 'F':
-                    f.write('$multipole_field\nX      {: .12f}\nY      {: .12f}\nZ      {: .12f}\n$end'.format(
+                    f.write('\n$multipole_field\nX      {: .12f}\nY      {: .12f}\nZ      {: .12f}\n$end'.format(
                         *real_fields))
 
         return counter

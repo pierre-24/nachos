@@ -63,8 +63,11 @@ CONFIG = {
     'qchem': {
         'types': ['F', 'G'],
         'methods': [
-            ('HF', {'G': 0, 'F': 0}),
-            ('CCSD', {'G': 0, 'F': 0})
+            # See http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html
+            # for a list of available CCMAN methods
+            ('CCMP2', {'G': 0, 'F': 0}),
+            ('CCSD', {'G': 0, 'F': 0}),
+            ('CCSD(T)', {'G': 0, 'F': 0})
         ],
         'bases': ['energy'],
         'default_for_extra_fields': {
