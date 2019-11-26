@@ -74,6 +74,27 @@ WAVE_FUNCTION = """
 """
 
 
+QCHEM_INPUT = """
+$molecule
+{charge} {mult}
+{mol}$end
+
+$rem
+BASIS = {basis}
+METHOD = {method}
+SCF_CONVERGENCE = {conv}
+SCF_MAX_CYCLES = {max_cycles}
+SYMMETRY = false
+MEM_STATIC = {mem_static}
+CC_MEMORY = {mem_cc}
+CC_CONVERGENCE = {cc_conv}
+cc_symmetry = 0
+N_FROZEN_CORE = FC
+CC_PRINT_PREC = 16
+$end
+"""
+
+
 class Preparer:
     """Prepare the input files
 
@@ -603,6 +624,45 @@ class Preparer:
             f.write(inputs_matching)
 
         return files_created
+
+    def prepare_qchem_inputs(self):
+        counter = 0
+
+        for fields, level in self.fields_needed_by_recipe:
+            counter += 1
+
+            # TODO: do better than just energy
+            # bases = self.recipe.bases(level_min=level)
+
+            real_fields = numerical_differentiation.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
+
+            if self.recipe['type'] == 'G':
+                molecule = Preparer.deform_geometry(self.recipe.geometry, real_fields)
+            else:
+                molecule = self.recipe.geometry
+
+            with open('{}/{}_{:04d}.inp'.format(self.directory, self.recipe['name'], counter), 'w') as f:
+
+                # write geometry and parameters
+                f.write(QCHEM_INPUT.format(
+                    charge=molecule.charge,
+                    mult=molecule.multiplicity,
+                    mol=molecule.output_atoms(),
+                    method=self.recipe['method'] if self.recipe['method'] != 'MP2' else 'CCMP2',
+                    basis=self.recipe['basis_set'],
+                    conv=self.recipe['flavor_extra']['convergence'],
+                    cc_conv=self.recipe['flavor_extra']['cc_convergence'],
+                    max_cycles=self.recipe['flavor_extra']['max_cycles'],
+                    mem_static=self.recipe['flavor_extra']['memory_static'],
+                    mem_cc=self.recipe['flavor_extra']['memory_cc'],
+                ))
+
+                # write electric field if any
+                if self.recipe['type'] == 'F':
+                    f.write('\n$multipole_field\nX      {: .12f}\nY      {: .12f}\nZ      {: .12f}\n$end'.format(
+                        *real_fields))
+
+        return counter
 
     @staticmethod
     def deform_geometry(geometry, real_fields, geometry_in_angstrom=True):

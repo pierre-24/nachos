@@ -58,6 +58,30 @@ CONFIG = {
             'merge_level_3': 0,
             'merge_level_4': 0
         }
+    },
+
+    'qchem': {
+        'types': ['F', 'G'],
+        'methods': [
+            # Only works with CCMAN2 (!)
+            # See http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html
+            # for a list of available CCMAN2 methods
+            ('MP2', {'G': 0, 'F': 0}),
+            ('MP3', {'G': 0, 'F': 0}),
+            ('QCISD', {'G': 0, 'F': 0}),
+            ('QCISD(T)', {'G': 0, 'F': 0}),
+            ('CCD', {'G': 0, 'F': 0}),
+            ('CCSD', {'G': 0, 'F': 0}),
+            ('CCSD(T)', {'G': 0, 'F': 0})
+        ],
+        'bases': ['energy'],
+        'default_for_extra_fields': {
+            'convergence': 11,
+            'cc_convergence': 10,
+            'max_cycles': 600,
+            'memory_static': 2000,
+            'memory_cc': 2000
+        }
     }
 }
 
