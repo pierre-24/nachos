@@ -348,6 +348,47 @@ class PrepareTestCase(NachosTestCase):
                 for i, a in enumerate(fi.molecule):
                     self.assertArraysAlmostEqual(deformed[i].position, a.position)
 
+    def test_preparer_for_F_qchem(self):
+        """Test the preparer class"""
+
+        name = 'water_test'
+        min_field = .0004
+
+        differentiation = {
+            3: ['energy']
+        }
+
+        opt_dict = dict(
+            flavor='qchem',
+            type='F',
+            method='MP2',
+            basis_set='6-31+G*',
+            geometry=self.geometry,
+            differentiation=differentiation,
+            name=name,
+            min_field=min_field
+        )
+
+        r = files.Recipe(**opt_dict)
+        r.check_data()
+
+        fields = preparing.fields_needed_by_recipe(r)
+
+        preparer = preparing.Preparer(recipe=r, directory=self.working_directory)
+        preparer.prepare()
+
+        for _ in range(5):  # 5 random tests that files contains what they should!
+            n = random.randrange(1, len(fields) + 1)
+            fields_n, level = fields[n - 1]
+            path = os.path.join(self.working_directory, name + '_{:04d}.inp').format(n)
+            self.assertTrue(os.path.exists(path), msg=path)
+            real_fields = numerical_differentiation.real_fields(fields_n, min_field, 2.)
+            with open(path) as f:
+                content = f.readlines()
+                # check field:
+                for i in range(3):
+                    self.assertArraysAlmostEqual(float(content[-4 + i][6:].strip()), real_fields[i])
+
     def test_nachos_prepare(self):
         """Test the preparer program"""
 

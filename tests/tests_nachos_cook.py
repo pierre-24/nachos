@@ -13,6 +13,7 @@ class CookTestCase(NachosTestCase):
 
     def setUp(self):
         self.zip_F = self.copy_to_temporary_directory('numdiff_F.zip')
+        self.zip_F_qchem = self.copy_to_temporary_directory('numdiff_F_qchem.zip')
         self.zip_G = self.copy_to_temporary_directory('numdiff_G.zip')
         self.zip_G_dalton = self.copy_to_temporary_directory('numdiff_G_dalton.zip')
         self.working_directory = self.setup_temporary_directory()
@@ -223,6 +224,43 @@ class CookTestCase(NachosTestCase):
                         electrical_derivatives['dDDd'][fr], results['dDDd']['1064nm'], skip_frequency_test=True)
                     self.assertTensorsAlmostEqual(
                         electrical_derivatives['XDDD'][fr], results['XDDD']['1064nm'], skip_frequency_test=True)
+
+    def test_cook_F_qchem(self):
+        self.unzip_it(self.zip_F_qchem, self.working_directory)
+        directory = os.path.join(self.working_directory, 'numdiff_F_qchem')
+        path = os.path.join(directory, 'nachos_recipe.yml')
+
+        r = files.Recipe(directory=directory)
+
+        with open(path) as f:
+            r.read(f)
+
+        fields = preparing.fields_needed_by_recipe(r)
+
+        c = cooking.Cooker(r, directory)
+        storage = c.cook([directory])
+
+        # write and read
+        self.assertEqual(storage.check(), ([], []))
+        storage.write('nachos_data.h5')
+        s = files.ComputationalResults(r, directory=directory)
+        s.read('nachos_data.h5')
+        self.assertEqual(s.check(), ([], []))
+
+        # check data
+        for _ in range(10):
+            n = random.randrange(1, len(fields) + 1)
+            fields_n, level = fields[n - 1]
+            t_fields = tuple(fields_n)
+            path = os.path.join(directory, r['name'] + '_{:04d}.log').format(n)
+            self.assertTrue(os.path.exists(path), msg=path)
+
+            with open(path) as f:
+                fx = cooking.QChemLogFile()
+                fx.read(f)
+                results = s.results[t_fields]
+
+                self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''].components[0])
 
     def test_nachos_cook(self):
         """Test the cooker program"""

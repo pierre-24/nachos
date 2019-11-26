@@ -205,7 +205,7 @@ def qchem__log__property__computed_energies(obj, *args, **kwargs):
 
         inf = l.split()
 
-        if inf[0] == 'CCSD' and inf[1] == 'correlation':
+        if inf[1] == 'correlation':
             continue
 
         if inf[0] == 'SCF':

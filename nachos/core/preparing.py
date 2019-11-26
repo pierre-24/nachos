@@ -648,7 +648,7 @@ class Preparer:
                     charge=molecule.charge,
                     mult=molecule.multiplicity,
                     mol=molecule.output_atoms(),
-                    method=self.recipe['method'],
+                    method=self.recipe['method'] if self.recipe['method'] != 'MP2' else 'CCMP2',
                     basis=self.recipe['basis_set'],
                     conv=self.recipe['flavor_extra']['convergence'],
                     cc_conv=self.recipe['flavor_extra']['cc_convergence'],
