@@ -63,7 +63,7 @@ Here is the schematic of the workflow with the nachos package:
 In short,
 
 1. `nachos_make <#id1>`_ creates a *recipe* (``nachos_recipe.yml``, but you can change that), which is the file that explains what to do and how to do it ;
-2. `nachos_prepare <#id2>`_ uses the recipe to generate the different input files for the quantum chemistry program of your choice (currently Gaussian and Dalton) ;
+2. `nachos_prepare <#id2>`_ uses the recipe to generate the different input files for the quantum chemistry program of your choice (currently Gaussian, Dalton and Q-Chem) ;
 3. The quantum chemistry program process the different input files and generate output files ;
 4. `nachos_cook <#id3>`_ carry out all the information that it can get from output files (FCHK files for gaussian, TAR archives and OUT files for Dalton) and store them in a *data file* (``nachos_data.h5``, but you can change that) ;
 5. `nachos_bake <#id4>`_ perform the requested numerical differentiation(s) out of the data from the *data file*, and store them in a *final file* (``molecule_nd.h5``, but you can change that) ;
@@ -104,7 +104,7 @@ See below for more details on every command.
     + For some terminal, it is not possible to use the extended prompt toolkit, use ``-N`` to get an alternative.
     + Default behavior is if there is an error in the input argument, the corresponding question is asked again.
       If you just want the program to fail (because you are using it in a script), use the ``-S`` option.
-    + ``F`` differentiation is **only possible** with gaussian.
+    + ``F`` differentiation is **only possible** with gaussian and qchem.
 
 The program prompts for different information in order to create a *recipe file*, if not given in command line, and generate a recipe in output (``-o`` option, default is ``nachos_recipe.yml``).
 
@@ -118,7 +118,7 @@ The program prompts for different information in order to create a *recipe file*
      - Note
    * - ``--flavor``
      - "What flavor for you, today?"
-     - ``gaussian`` | ``dalton``
+     - ``gaussian`` | ``dalton`` | ``qchem``
      -
    * - ``--type``
      - "What type of differentiation?"
@@ -311,6 +311,47 @@ This also determine the maximum properties available at this level i.e. what you
   + WL90c
   + XAlpha
 
++ For ``qchem``, only the methods supported by `CCMAN2 <http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html>`_ are available (that's the only methods for which the number of digits available for the energy can be increased to fit the required precision, otherwise you get at most 9-10 digits). Thus,
+
+  .. list-table::
+       :header-rows: 1
+       :widths: 30 20 20 30
+
+       * - Method
+         - Maximum level of electrical properties
+         - Maximum level of geometrical properties
+         - Available
+       * - ``CCMP2``
+         - 0
+         - 0
+         - ``energy``
+       * - ``MP3``
+         - 0
+         - 0
+         - ``energy``
+       * - ``QCISD``
+         - 0
+         - 0
+         - ``energy``
+       * - ``QCISD(T)``
+         - 0
+         - 0
+         - ``energy``
+       * - ``CCD``
+         - 0
+         - 0
+         - ``energy``
+       * - ``CCSD``
+         - 0
+         - 0
+         - ``energy``
+       * - ``CCSD(T)``
+         - 0
+         - 0
+         - ``energy``
+
+  Note that the dipole moment is also available in the output, so it may be added latter on.
+
 
 .. warning::
 
@@ -374,7 +415,7 @@ Note that you don't have to redefine every variable, since they have a default v
        * - ``cc_convergence``
          - ``11``
          - CC convergence criterion
-       * - ``max_cycle``
+       * - ``max_cycles``
          - ``600``
          - Maximum number of SCF and CC cycles
        * - ``extra_keywords``
@@ -441,6 +482,30 @@ Note that you don't have to redefine every variable, since they have a default v
 
   Splitting and merging modify the number of calculation, but also the times it takes (because Dalton tries to solve all response functions at the same time, therefore you may need to increase ``response_max_it``).
 
++ For ``qchem``, the options are
+
+  .. list-table::
+       :header-rows: 1
+       :widths: 20 20 60
+
+       * - Option
+         - Default value
+         - Note
+       * - ``convergence``
+         - ``11``
+         - SCF convergence criterion
+       * - ``cc_convergence``
+         - ``0``
+         - CC convergence criterion
+       * - ``max_cycles``
+         - ``600``
+         - Maximum number of SCF and CC cycles
+       * - ``memory_static``
+         - ``2000``
+         - Memory (in MiB) for the SCF part
+       * - ``memory_cc``
+         - ``2000``
+         - Memory (in MiB) for CCMAN2 (you **should increase it** if you use a large basis set)
 
 .. autoprogram:: nachos.prepare:get_arguments_parser()
     :prog: nachos_prepare
@@ -474,7 +539,7 @@ The ``-V 1`` option allows you to know how much files where generated.
 .. autoprogram:: nachos.cook:get_arguments_parser()
     :prog: nachos_cook
 
-The program fetch the different computational results from each files that it can fin (it looks for FCHK files with gaussian, TAR archive and OUT files for dalton), and mix them together in a single *data file*.
+The program fetch the different computational results from each files that it can fin (it looks for FCHK files with gaussian, TAR archive and OUT files for dalton, LOG for Q-Chem), and mix them together in a single *data file*.
 
 By default, the program looks for output files **in the same directory as the recipe**. You can supply directories as argument, but in this case, the program does not look in the recipe directory (so don't forget to add it to the list).
 

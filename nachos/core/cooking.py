@@ -141,7 +141,7 @@ class QChemLogFile(
                 line_geom = index + 2
             elif 'CCMAN2:' in line:
                 self.chunks[-1].line_end = index - 1
-                self.chunks.append(ProgramCalled('ccman', index, -1))
+                self.chunks.append(ProgramCalled('ccman2', index, -1))
             elif 'Orbital Energies (a.u.) and Symmetries' in line:
                 self.chunks[-1].line_end = index - 1
                 self.chunks.append(ProgramCalled('analysis', index, -1))
@@ -193,7 +193,7 @@ def qchem__log__property__computed_energies(obj, *args, **kwargs):
     :rtype: dict
     """
 
-    found = obj.search('SCF energy', into='ccman')
+    found = obj.search('SCF energy', into='ccman2')
     if found == -1:
         raise PropertyNotDefined('computed_energy')
 

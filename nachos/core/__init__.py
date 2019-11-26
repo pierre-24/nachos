@@ -63,9 +63,14 @@ CONFIG = {
     'qchem': {
         'types': ['F', 'G'],
         'methods': [
+            # Only works with CCMAN2 (!)
             # See http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html
-            # for a list of available CCMAN methods
+            # for a list of available CCMAN2 methods
             ('CCMP2', {'G': 0, 'F': 0}),
+            ('MP3', {'G': 0, 'F': 0}),
+            ('QCISD', {'G': 0, 'F': 0}),
+            ('QCISD(T)', {'G': 0, 'F': 0}),
+            ('CCD', {'G': 0, 'F': 0}),
             ('CCSD', {'G': 0, 'F': 0}),
             ('CCSD(T)', {'G': 0, 'F': 0})
         ],
