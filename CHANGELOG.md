@@ -4,8 +4,10 @@
 
 + Add inversion in analyze (!16)
 + Group vibrational contributions (!17)
-+ Update for pip 10 (!18)
++ Update to pip 10 (!18)
 + Switch to pipenv (!19) (and upgrade to the latest version of qcip_tools)
++ Add more information in `nachos_cook` and catch correct energy with Gaussian (!22)
++ Add Q-Chem (!23), but only for [CCMAN2](http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html) energies
 
 ## Version 0.3
 
