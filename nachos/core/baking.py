@@ -78,6 +78,20 @@ class Baker:
             for b in self.storage.results[zero_field]:
                 f.derivatives[b] = self.storage.results[zero_field][b]
 
+        # print fields (by request of Benoit)
+        if verbosity_level > 1:
+            fields = []
+            for i in range(0, self.recipe['k_max']):
+                fields.append(self.recipe['min_field'] * self.recipe['ratio'] ** i)
+
+            out.write('! Note:\n')
+            out.write('! Type of differentiation is: {}.\n'.format(
+                'electrical' if self.recipe['type'] == 'F' else 'geometrical'))
+            out.write('! Minimum field is: {} (a.u), ratio is: {}, k_max is: {}.\n'.format(
+                self.recipe['min_field'], self.recipe['ratio'], self.recipe['k_max']))
+            out.write('! Thus, fields used (a.u.) during differentiation are: {}.\n\n'.format(
+                ', '.join('{}'.format(i) for i in fields)))
+
         for initial_derivative, level in bases:
             for diff_order in range(1, level + 1):
                 diff_derivative = derivatives.Derivative(self.recipe['type'] * diff_order, spacial_dof=dof)

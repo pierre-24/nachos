@@ -8,6 +8,7 @@ import argparse
 from qcip_tools import derivatives_g, derivatives
 from qcip_tools.chemistry_files import helpers, PropertyNotDefined, PropertyNotPresent
 
+import nachos
 from nachos.core import files, baking
 from nachos import exit_failure
 
@@ -91,6 +92,10 @@ def get_arguments_parser():
 # main
 def main():
     args = get_arguments_parser().parse_args()
+
+    if args.verbose >= 1:
+        print('This is nachos_bake (v{}) from nachos (v{})\n'.format(__version__, nachos.__version__))
+
     recipe_directory = os.path.dirname(args.recipe.name)
     recipe = files.Recipe(directory=recipe_directory)
 

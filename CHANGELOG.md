@@ -8,6 +8,7 @@
 + Switch to pipenv (!19) (and upgrade to the latest version of qcip_tools)
 + Add more information in `nachos_cook` and catch correct energy with Gaussian (!22)
 + Add Q-Chem (!23), but only for [CCMAN2](http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html) energies
++ Output version and parameters (as requested by Benoît)
 
 ## Version 0.3
 

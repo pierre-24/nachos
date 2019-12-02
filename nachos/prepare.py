@@ -6,6 +6,7 @@ import argparse
 import os
 import shutil
 
+import nachos
 from nachos import is_dir, exit_failure
 from nachos.core import files, preparing
 
@@ -47,6 +48,10 @@ def get_arguments_parser():
 # main
 def main():
     args = get_arguments_parser().parse_args()
+
+    if args.verbose >= 1:
+        print('This is nachos_prepare (v{}) from nachos (v{})\n'.format(__version__, nachos.__version__))
+
     directory = os.path.abspath(args.directory)
     recipe_directory = os.path.dirname(args.recipe.name)
 

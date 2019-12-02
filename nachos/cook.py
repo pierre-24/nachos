@@ -5,6 +5,7 @@ Out of the results of calculation, create a h5 file to store them
 import os
 import argparse
 
+import nachos
 from nachos.core import files, cooking, preparing
 from nachos import exit_failure
 
@@ -42,6 +43,10 @@ def get_arguments_parser():
 # main
 def main():
     args = get_arguments_parser().parse_args()
+
+    if args.verbose >= 1:
+        print('This is nachos_cook (v{}) from nachos (v{})\n'.format(__version__, nachos.__version__))
+
     recipe_directory = os.path.dirname(args.recipe.name)
     recipe = files.Recipe(directory=recipe_directory)
 

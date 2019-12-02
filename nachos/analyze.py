@@ -8,6 +8,7 @@ import os
 from qcip_tools import derivatives, derivatives_e
 from qcip_tools.chemistry_files import chemistry_datafile
 
+import nachos
 from nachos import exit_failure, shake
 from nachos.core import analyzing, shaking
 
@@ -142,6 +143,8 @@ def get_arguments_parser():
 # main
 def main():
     args = get_arguments_parser().parse_args()
+
+    print('This is nachos_analyze (v{}) from nachos (v{})\n'.format(__version__, nachos.__version__))
 
     df = chemistry_datafile.ChemistryDataFile()
 

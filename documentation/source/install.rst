@@ -10,7 +10,7 @@ To install the latest version of nachos:
 .. code-block:: bash
 
   # install qcip_tools (base library):
-  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.5.2
+  pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.1
   # install nachos:
   pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/chimie/lct/nachos.git
 
