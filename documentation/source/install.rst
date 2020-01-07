@@ -70,16 +70,8 @@ Installation for contributors
 To contribute to the project, you need to clone the repository:
 
 + Clone it: ``git clone git@git.pierrebeaujean.net:pierre/nachos.git``.
-+ Create virtualenv and activate it:
++ Install pipenv: ``pip3 install pipenv``
++ Install virtualenv and dependencies: ``make init``.
++ Don't forget to create a separate branch to implement your changes (see `the contribution part <contributing.html>`_).
 
-.. code-block:: bash
-
-  virtualenv venv --python=python3
-  # activate virtualenv (you need to do that every time)
-  source venv/bin/activate
-
-+ Install (dev) dependencies : ``make install-dependencies-dev``.
-+ Finally, "install" the pakage: ``pip install develop``
-+ Don't forget to create a separate branch to implement your changes (see `the contribution part <contributing.html>`_)
-
-You can launch the tests series with ``python3 setup.py test``
+You can launch the tests series with ``make test``

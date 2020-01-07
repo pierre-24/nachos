@@ -31,6 +31,15 @@ Adapted from the (in)famous `Git flow <http://nvie.com/posts/a-successful-git-br
 + Theses merge requests should be unitary, and include unit test(s) and documentation if needed. The test suite must succeed for the merge request to be accepted.
 + At some (random) points, ``dev`` will be merged by the maintainer into ``master`` to create a new version, with a tag of the form ``release-vXX``.
 
+.. note::
+
+    Since ``nachos` now rely on `pipenv <https://pipenv.readthedocs.io>`_, the workflow is currently the following :
+
+    1. Normal installation use ``pipenv install --dev --ignore-pipfile`` (``make init``)
+    2. To update the dependencies from upstream, ``pipenv sync --dev``  (``make sync``).
+    3. To update the ``Pipfile.lock`` (and thus the actual version of the dependencies), a **specific** merge request is done, with the result of ``pipenv lock`` (followed by ``make sync`` on the dev's machine).
+
+
 Licence
 -------
 
