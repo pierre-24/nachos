@@ -33,7 +33,7 @@ Adapted from the (in)famous `Git flow <http://nvie.com/posts/a-successful-git-br
 
 .. note::
 
-    Since ``nachos` now rely on `pipenv <https://pipenv.readthedocs.io>`_, the workflow is currently the following :
+    Since ``nachos`` now rely on `pipenv <https://pipenv.readthedocs.io>`_, the workflow is currently the following :
 
     1. Normal installation use ``pipenv install --dev --ignore-pipfile`` (``make init``)
     2. To update the dependencies from upstream, ``pipenv sync --dev``  (``make sync``).
