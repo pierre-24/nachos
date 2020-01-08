@@ -100,35 +100,48 @@ class Baker:
                 if derivatives.is_electrical(initial_derivative) or self.recipe['type'] == 'F':
                     results_per_frequency = {}
 
+                    freqs = []
                     if 'D' in initial_derivative.representation():
-                        for freq in self.recipe['frequencies']:
-                            r, trigs = compute_numerical_derivative_of_tensor(
-                                self.recipe,
-                                initial_derivative,
-                                diff_derivative,
-                                self.storage.tensor_element_access,
-                                frequency=freq)
-                            results_per_frequency[freq] = r
-                            Baker.output_information(
-                                self.recipe, initial_derivative, diff_derivative, r, trigs, out, verbosity_level)
+                        freqs.extend(self.recipe['frequencies'])
                     else:
+                        freqs = ['static']
+
+                    for freq in freqs:
                         r, trigs = compute_numerical_derivative_of_tensor(
                             self.recipe,
                             initial_derivative,
                             diff_derivative,
                             self.storage.tensor_element_access,
-                            frequency='static')
-                        results_per_frequency['static'] = r
+                            frequency=freq)
+                        results_per_frequency[freq] = r
                         Baker.output_information(
-                            self.recipe, initial_derivative, diff_derivative, r, trigs, out, verbosity_level)
+                            self.recipe,
+                            initial_derivative,
+                            diff_derivative,
+                            r,
+                            trigs,
+                            self.storage.tensor_element_access,
+                            out,
+                            verbosity_level)
 
                     f.derivatives[final_derivative.representation()] = results_per_frequency
                 else:
                     r, trigs = compute_numerical_derivative_of_tensor(
-                        self.recipe, initial_derivative, diff_derivative, self.storage.tensor_element_access)
+                        self.recipe,
+                        initial_derivative,
+                        diff_derivative,
+                        self.storage.tensor_element_access)
                     f.derivatives[final_derivative.representation()] = r
 
-                    Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
+                    Baker.output_information(
+                        self.recipe,
+                        initial_derivative,
+                        diff_derivative,
+                        r,
+                        trigs,
+                        self.storage.tensor_element_access,
+                        out,
+                        verbosity_level)
         return f
 
     @staticmethod
@@ -176,6 +189,7 @@ class Baker:
             diff_derivative,
             final_result,
             romberg_triangles,
+            tensor_access,
             out=sys.stdout,
             verbosity_level=0):
         """Output information about what was computed
@@ -200,6 +214,7 @@ class Baker:
         :type final_result: qcip_tools.derivatives.Tensor
         :param romberg_triangles: the different Romberg triangles
         :type romberg_triangles: collections.OrderedDict
+        :param tensor_func: function to access to the tensor
         :param out: output
         :type out: file
         :param verbosity_level: how far should we print information
@@ -222,11 +237,48 @@ class Baker:
                             derivatives.representation_to_operator(recipe['type'], a, recipe.geometry) for a in d_coo)
                     ))
 
+                    # generate fields
+                    if 'G' in diff_derivative.representation():
+                        field = [0] * diff_derivative.spacial_dof
+                    else:
+                        field = [0] * 3
+
+                    for b in d_coo:
+                        field[b] = 1
+
+                    all_fields = [[0] * len(field)]
+                    for i in range(1, recipe['k_max'] + 1):
+                        all_fields.append(list(x * i for x in field))
+                        all_fields.insert(0, list(-x * i for x in field))
+
                     for b_coo in romberg_triangles[d_coo]:
                         if initial_derivative != '':
                             out.write('\n# component {} of {}:\n'.format(
                                 fancy_output_component_of_derivative(initial_derivative, b_coo, recipe.geometry),
                                 basis_name))
+
+                        out.write('\n--------------------------------------------\n')
+                        out.write(' F        V(F)              V(F)-V(0)\n')
+                        out.write('--------------------------------------------\n')
+                        zero_field_val = tensor_access(
+                            [0] * len(field), 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
+
+                        for i, c in enumerate(all_fields):
+                            k = i - recipe['k_max']
+
+                            field_val = 0
+                            if k != 0:
+                                field_val = recipe['min_field'] * recipe['ratio'] ** (abs(k) - 1) * (-1 if k < 0 else 1)
+
+                            val = tensor_access(
+                                c, 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
+                            dV = val - zero_field_val
+                            out.write(
+                                '{: .5f} {: .10e} {: .10e}\n'.format(
+                                    field_val,
+                                    val, dV))
+
+                        out.write('--------------------------------------------\n\n')
 
                         romberg_triangle = romberg_triangles[d_coo][b_coo]
                         out.write(romberg_triangle.romberg_triangle_repr(with_decoration=True))
@@ -255,9 +307,13 @@ class Baker:
                 out.write('\n')
 
                 out.write('** Ratio (%):\n')
-                u.components = (u.components / final_result.components) * 100
+                ru = derivatives.Tensor(
+                    u.representation, components=(u.components / final_result.components) * 100,
+                    spacial_dof=u.spacial_dof,
+                    frequency=u.frequency
+                )
 
-                out.write(u.to_string(molecule=recipe.geometry))
+                out.write(ru.to_string(molecule=recipe.geometry))
                 out.write('\n')
 
 
