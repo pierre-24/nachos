@@ -111,18 +111,27 @@ class Preparer:
         self.directory = directory
         self.fields_needed_by_recipe = fields_needed_by_recipe(self.recipe)
 
-    def prepare(self):
-        """Create the different input files in the directory"""
+    def prepare(self, dry_run=False):
+        """Create the different input files in the directory
 
-        return getattr(self, 'prepare_{}_inputs'.format(self.recipe['flavor']))()
+        :param dry_run: do not create the files
+        :type dry_run: bool
+        :rtype: list
+        """
 
-    def prepare_gaussian_inputs(self):
+        return getattr(self, 'prepare_{}_inputs'.format(self.recipe['flavor']))(dry_run=dry_run)
+
+    def prepare_gaussian_inputs(self, dry_run=False):
         """Create inputs for gaussian
+
+        :param dry_run: do not create the files
+        :type dry_run: bool
+        :rtype: list
         """
 
         base_m = False
         counter = 0
-        files_created = 0
+        files_created = []
 
         # try to open custom basis set if any
         gen_basis_set = []
@@ -284,10 +293,15 @@ class Preparer:
                     fi.other_blocks.insert(0, [
                         '{}'.format(derivatives_e.convert_frequency_from_string(a)) for a in
                         self.recipe['frequencies']])
-                with open('{}/{}_{:04d}{}.com'.format(
-                        self.directory, self.recipe['name'], counter, 'a' if compute_polar_and_G else ''), 'w') as f:
-                    fi.write(f)
-                    files_created += 1
+
+                file_name = '{}/{}_{:04d}{}.com'.format(
+                    self.directory, self.recipe['name'], counter, 'a' if compute_polar_and_G else '')
+                if not dry_run:
+                    with open(file_name, 'w') as f:
+                        fi.write(f)
+
+                files_created.append((
+                    fields, list(str(a[0]) for a in bases if derivatives.is_electrical(a[0])), file_name))
                 fi.input_card.pop(-1)
                 fi.other_blocks.pop(0)
 
@@ -298,15 +312,24 @@ class Preparer:
                 elif compute_G:
                     fi.input_card.append('force')
 
-                with open('{}/{}_{:04d}{}.com'.format(
-                        self.directory, self.recipe['name'], counter, 'b' if compute_polar_and_G else ''), 'w') as f:
-                    fi.write(f)
-                    files_created += 1
+                file_name = '{}/{}_{:04d}{}.com'.format(
+                    self.directory, self.recipe['name'], counter, 'b' if compute_polar_and_G else '')
+
+                if not dry_run:
+                    with open(file_name, 'w') as f:
+                        fi.write(f)
+
+                files_created.append((
+                    fields, list(str(a[0]) for a in bases if not derivatives.is_electrical(a[0])), file_name))
 
         return files_created
 
-    def prepare_dalton_inputs(self):
+    def prepare_dalton_inputs(self, dry_run=False):
         """Create inputs for dalton. Note that it assume geometrical derivatives for the moment
+
+        :param dry_run: do not create the files
+        :type dry_run: bool
+        :rtype: list
         """
 
         if self.recipe['type'] != 'G':
@@ -314,7 +337,7 @@ class Preparer:
 
         base_m = False
         counter = 0
-        files_created = 0
+        files_created = []
         inputs_matching = ''
 
         dal_files = {}
@@ -613,26 +636,37 @@ class Preparer:
             fi.basis_set = self.recipe['basis_set']
 
             mol_path = '{}_{:04d}.mol'.format(self.recipe['name'], counter)
-            with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
-                fi.write(f, nosym=True)
 
-                for bases_repr in bases_reprs:
-                    inputs_matching += '{} {}\n'.format(dal_files[bases_repr], mol_path)
-                    files_created += 1
+            if not dry_run:
+                with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
+                    fi.write(f, nosym=True)
 
-        with open('{}/inputs_matching.txt'.format(self.directory), 'w') as f:
-            f.write(inputs_matching)
+            for bases_repr in bases_reprs:
+                inputs_matching += '{} {}\n'.format(dal_files[bases_repr], mol_path)
+                files_created.append((fields, bases_repr, mol_path))
+
+        if not dry_run:
+            with open('{}/inputs_matching.txt'.format(self.directory), 'w') as f:
+                f.write(inputs_matching)
 
         return files_created
 
-    def prepare_qchem_inputs(self):
+    def prepare_qchem_inputs(self, dry_run=False):
+        """
+
+        :param dry_run: do not create the files
+        :type dry_run: bool
+        :rtype: list
+        """
+
+        files_created = []
         counter = 0
 
         for fields, level in self.fields_needed_by_recipe:
-            counter += 1
 
             # TODO: do better than just energy
             # bases = self.recipe.bases(level_min=level)
+            counter += 1
 
             real_fields = numerical_differentiation.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
 
@@ -641,28 +675,33 @@ class Preparer:
             else:
                 molecule = self.recipe.geometry
 
-            with open('{}/{}_{:04d}.inp'.format(self.directory, self.recipe['name'], counter), 'w') as f:
+            file_name = '{}/{}_{:04d}.inp'.format(self.directory, self.recipe['name'], counter)
 
-                # write geometry and parameters
-                f.write(QCHEM_INPUT.format(
-                    charge=molecule.charge,
-                    mult=molecule.multiplicity,
-                    mol=molecule.output_atoms(),
-                    method=self.recipe['method'] if self.recipe['method'] != 'MP2' else 'CCMP2',
-                    basis=self.recipe['basis_set'],
-                    conv=self.recipe['flavor_extra']['convergence'],
-                    cc_conv=self.recipe['flavor_extra']['cc_convergence'],
-                    max_cycles=self.recipe['flavor_extra']['max_cycles'],
-                    mem_static=self.recipe['flavor_extra']['memory_static'],
-                    mem_cc=self.recipe['flavor_extra']['memory_cc'],
-                ))
+            if not dry_run:
+                with open(file_name, 'w') as f:
 
-                # write electric field if any
-                if self.recipe['type'] == 'F':
-                    f.write('\n$multipole_field\nX      {: .12f}\nY      {: .12f}\nZ      {: .12f}\n$end'.format(
-                        *real_fields))
+                    # write geometry and parameters
+                    f.write(QCHEM_INPUT.format(
+                        charge=molecule.charge,
+                        mult=molecule.multiplicity,
+                        mol=molecule.output_atoms(),
+                        method=self.recipe['method'] if self.recipe['method'] != 'MP2' else 'CCMP2',
+                        basis=self.recipe['basis_set'],
+                        conv=self.recipe['flavor_extra']['convergence'],
+                        cc_conv=self.recipe['flavor_extra']['cc_convergence'],
+                        max_cycles=self.recipe['flavor_extra']['max_cycles'],
+                        mem_static=self.recipe['flavor_extra']['memory_static'],
+                        mem_cc=self.recipe['flavor_extra']['memory_cc'],
+                    ))
 
-        return counter
+                    # write electric field if any
+                    if self.recipe['type'] == 'F':
+                        f.write('\n$multipole_field\nX      {: .12f}\nY      {: .12f}\nZ      {: .12f}\n$end'.format(
+                            *real_fields))
+
+            files_created.append((fields, ['energy', ], file_name))
+
+        return files_created
 
     @staticmethod
     def deform_geometry(geometry, real_fields, geometry_in_angstrom=True):

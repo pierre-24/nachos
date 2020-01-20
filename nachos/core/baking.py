@@ -204,7 +204,7 @@ class Baker:
             - **>2:** output decision process to find best value in Romberg triangle.
 
             Therefore, it triggers once again the computation of the best value in Romberg triangle
-            if verbosity_level is > 1.
+            if verbosity_level is > 2.
 
         :param recipe: the corresponding recipe
         :type recipe: nachos.core.files.Recipe
