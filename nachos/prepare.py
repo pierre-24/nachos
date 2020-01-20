@@ -43,7 +43,7 @@ def get_arguments_parser():
         action='store_true',
         help='copy geometry, extra files, and recipe into destination directory')
     arguments_parser.add_argument(
-        '-d', '--dry-run', action='store_true', help='dry run (do not create the files)')
+        '-D', '--dry-run', action='store_true', help='dry run (do not create the files)')
 
     return arguments_parser
 
@@ -69,7 +69,7 @@ def main():
     preparer = preparing.Preparer(recipe, directory)
 
     try:
-        n = preparer.prepare(dry_run=not args.dry_run)
+        n = preparer.prepare(dry_run=args.dry_run)
     except preparing.BadPreparation as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 
