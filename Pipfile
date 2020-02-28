@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-qcip-tools = {ref = "release-v0.6.1", git = "ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git"}
+qcip-tools = {ref = "release-v0.6.2", git = "ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git"}
 "h5py" = "*"
 PyYAML = "*"
 prompt_toolkit = "==1.0.15"
@@ -19,4 +19,4 @@ sphinxcontrib-autoprogram = "*"
 Sphinx = "*"
 
 [requires]
-python_version = "3.6"
+python_version = "3.7"
