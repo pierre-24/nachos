@@ -19,7 +19,7 @@ pyfiglet==0.8.post1       # via mendeleev
 python-dateutil==2.8.1    # via pandas
 pytz==2019.3              # via pandas
 pyyaml==5.3               # via nachos (setup.py)
-git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.2#egg=qcip-tools  # via nachos (setup.py)
+git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.2  # via nachos (setup.py)
 requests==2.23.0          # via qcip-tools
 scipy==1.4.1              # via qcip-tools
 six==1.14.0               # via h5py, prompt-toolkit, python-dateutil

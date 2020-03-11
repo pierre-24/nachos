@@ -1,4 +1,4 @@
 pyyaml
 h5py
-qcip-tools @ git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.2#egg=qcip-tools
+qcip-tools @ git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.2
 prompt_toolkit==1.0.15
