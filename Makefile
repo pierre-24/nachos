@@ -10,10 +10,10 @@ help:
 	@echo "  help                        to get this help"
 
 init:
-	pipenv install --dev --ignore-pipfile
+	pip install .
 
 sync:
-	pipenv sync --dev
+	pip-sync
 
 lint:
 	pipenv run flake8 nachos tests --max-line-length=120 --ignore=N802
