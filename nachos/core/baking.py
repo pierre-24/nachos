@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy
 
 from qcip_tools import derivatives
 from qcip_tools.chemistry_files import chemistry_datafile
@@ -214,7 +215,6 @@ class Baker:
         :type final_result: qcip_tools.derivatives.Tensor
         :param romberg_triangles: the different Romberg triangles
         :type romberg_triangles: collections.OrderedDict
-        :param tensor_func: function to access to the tensor
         :param out: output
         :type out: file
         :param verbosity_level: how far should we print information
@@ -257,9 +257,9 @@ class Baker:
                                 fancy_output_component_of_derivative(initial_derivative, b_coo, recipe.geometry),
                                 basis_name))
 
-                        out.write('\n--------------------------------------------\n')
-                        out.write(' F        V(F)              V(F)-V(0)\n')
-                        out.write('--------------------------------------------\n')
+                        out.write('\n----------------------------------------------\n')
+                        out.write(' F          V(F)              V(F)-V(0)\n')
+                        out.write('----------------------------------------------\n')
                         zero_field_val = tensor_access(
                             [0] * len(field), 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
 
@@ -274,11 +274,11 @@ class Baker:
                                 c, 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
                             dV = val - zero_field_val
                             out.write(
-                                '{: .5f} {: .10e} {: .10e}\n'.format(
+                                '{: .7f} {: .10e} {: .10e}\n'.format(
                                     field_val,
                                     val, dV))
 
-                        out.write('--------------------------------------------\n\n')
+                        out.write('----------------------------------------------\n\n')
 
                         romberg_triangle = romberg_triangles[d_coo][b_coo]
                         out.write(romberg_triangle.romberg_triangle_repr(with_decoration=True))
@@ -296,7 +296,16 @@ class Baker:
             out.write(final_result.to_string(molecule=recipe.geometry))
             out.write('\n')
 
-            if verbosity_level >= 2:
+            if verbosity_level >= 2 and initial_derivative != '':
+                out.write('\n** Checking Kleinman conditions:\n')
+                for i in final_result.representation.smart_iterator():
+                    values = list(
+                        final_result.components[j] for j in final_result.representation.inverse_smart_iterator(i))
+                    if len(values) > 1:
+                        out.write('- {}: '.format(fancy_output_component_of_derivative(final_result.representation, i)))
+                        out.write('{: .5e} ± {:.5e}'.format(numpy.mean(values), numpy.std(values)))
+                        out.write('\n')
+
                 out.write('\n** Estimated uncertainties:\n')
                 out.write('*** Values:\n')
 
@@ -306,7 +315,7 @@ class Baker:
                 out.write(u.to_string(molecule=recipe.geometry, threshold=1e-8))
                 out.write('\n')
 
-                out.write('** Ratio (%):\n')
+                out.write('*** Ratio (%):\n')
                 ru = derivatives.Tensor(
                     u.representation, components=(u.components / final_result.components) * 100,
                     spacial_dof=u.spacial_dof,
