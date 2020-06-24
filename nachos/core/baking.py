@@ -306,6 +306,7 @@ class Baker:
                         out.write('{: .5e} ± {:.5e}'.format(numpy.mean(values), numpy.std(values)))
                         out.write('\n')
 
+            if verbosity_level >= 2:
                 out.write('\n** Estimated uncertainties:\n')
                 out.write('*** Values:\n')
 
