@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy
 
 from qcip_tools import derivatives
 from qcip_tools.chemistry_files import chemistry_datafile
@@ -99,38 +100,99 @@ class Baker:
 
                 if derivatives.is_electrical(initial_derivative) or self.recipe['type'] == 'F':
                     results_per_frequency = {}
+
+                    freqs = []
                     if 'D' in initial_derivative.representation():
-                        for freq in self.recipe['frequencies']:
-                            r, trigs = compute_numerical_derivative_of_tensor(
-                                self.recipe,
-                                initial_derivative,
-                                diff_derivative,
-                                self.storage.tensor_element_access,
-                                frequency=freq)
-                            results_per_frequency[freq] = r
-                            Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
+                        freqs.extend(self.recipe['frequencies'])
                     else:
+                        freqs = ['static']
+
+                    for freq in freqs:
                         r, trigs = compute_numerical_derivative_of_tensor(
                             self.recipe,
                             initial_derivative,
                             diff_derivative,
                             self.storage.tensor_element_access,
-                            frequency='static')
-                        results_per_frequency['static'] = r
-                        Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
+                            frequency=freq)
+                        results_per_frequency[freq] = r
+                        Baker.output_information(
+                            self.recipe,
+                            initial_derivative,
+                            diff_derivative,
+                            r,
+                            trigs,
+                            self.storage.tensor_element_access,
+                            out,
+                            verbosity_level)
 
                     f.derivatives[final_derivative.representation()] = results_per_frequency
                 else:
                     r, trigs = compute_numerical_derivative_of_tensor(
-                        self.recipe, initial_derivative, diff_derivative, self.storage.tensor_element_access)
+                        self.recipe,
+                        initial_derivative,
+                        diff_derivative,
+                        self.storage.tensor_element_access)
                     f.derivatives[final_derivative.representation()] = r
 
-                    Baker.output_information(self.recipe, initial_derivative, r, trigs, out, verbosity_level)
+                    Baker.output_information(
+                        self.recipe,
+                        initial_derivative,
+                        diff_derivative,
+                        r,
+                        trigs,
+                        self.storage.tensor_element_access,
+                        out,
+                        verbosity_level)
         return f
 
     @staticmethod
+    def make_uncertainty_tensor(romberg_triangles, initial_derivative, diff_derivative, frequency):
+        """
+
+        :param romberg_triangles: the different Romberg triangles
+        :type romberg_triangles: collections.OrderedDict
+        :param initial_derivative: starting point
+        :type initial_derivative: qcip_tools.derivatives.Derivative
+        :param diff_derivative: differentialtion
+        :type diff_derivative: qcip_tools.derivatives.Derivative
+        :param frequency: the frequency
+        :type frequency: str|float
+        :rtype: qcip_tools.derivatives.Tensor
+        """
+
+        final_derivative = initial_derivative.differentiate(diff_derivative.representation())
+        t = derivatives.Tensor(final_derivative, spacial_dof=final_derivative.spacial_dof, frequency=frequency)
+
+        for d_coo in romberg_triangles:
+            for b_coo in romberg_triangles[d_coo]:
+                total_coo = list(d_coo if type(d_coo) is tuple else (d_coo, ))
+                if final_derivative.basis != '':
+                    total_coo.extend(b_coo if type(b_coo) is tuple else (b_coo, ))
+
+                uncertainty = romberg_triangles[d_coo][b_coo]()[-1]
+
+                for e in initial_derivative.inverse_smart_iterator(b_coo):
+                    for ex in diff_derivative.inverse_smart_iterator(d_coo):
+                        if initial_derivative.representation() != '':
+                            if 'G' in diff_derivative.representation():
+                                t.components[ex][e] = uncertainty
+                            else:
+                                t.components[e][ex] = uncertainty
+                        else:
+                            t.components[ex] = uncertainty
+
+        return t
+
+    @staticmethod
     def output_information(
-            recipe, initial_derivative, final_result, romberg_triangles, out=sys.stdout, verbosity_level=0):
+            recipe,
+            initial_derivative,
+            diff_derivative,
+            final_result,
+            romberg_triangles,
+            tensor_access,
+            out=sys.stdout,
+            verbosity_level=0):
         """Output information about what was computed
 
         .. note::
@@ -143,7 +205,7 @@ class Baker:
             - **>2:** output decision process to find best value in Romberg triangle.
 
             Therefore, it triggers once again the computation of the best value in Romberg triangle
-            if verbosity_level is > 1.
+            if verbosity_level is > 2.
 
         :param recipe: the corresponding recipe
         :type recipe: nachos.core.files.Recipe
@@ -175,11 +237,48 @@ class Baker:
                             derivatives.representation_to_operator(recipe['type'], a, recipe.geometry) for a in d_coo)
                     ))
 
+                    # generate fields
+                    if 'G' in diff_derivative.representation():
+                        field = [0] * diff_derivative.spacial_dof
+                    else:
+                        field = [0] * 3
+
+                    for b in d_coo:
+                        field[b] = 1
+
+                    all_fields = [[0] * len(field)]
+                    for i in range(1, recipe['k_max'] + 1):
+                        all_fields.append(list(x * i for x in field))
+                        all_fields.insert(0, list(-x * i for x in field))
+
                     for b_coo in romberg_triangles[d_coo]:
                         if initial_derivative != '':
                             out.write('\n# component {} of {}:\n'.format(
                                 fancy_output_component_of_derivative(initial_derivative, b_coo, recipe.geometry),
                                 basis_name))
+
+                        out.write('\n----------------------------------------------\n')
+                        out.write(' F          V(F)              V(F)-V(0)\n')
+                        out.write('----------------------------------------------\n')
+                        zero_field_val = tensor_access(
+                            [0] * len(field), 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
+
+                        for i, c in enumerate(all_fields):
+                            k = i - recipe['k_max']
+
+                            field_val = 0
+                            if k != 0:
+                                field_val = recipe['min_field'] * recipe['ratio'] ** (abs(k) - 1) * (-1 if k < 0 else 1)
+
+                            val = tensor_access(
+                                c, 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
+                            dV = val - zero_field_val
+                            out.write(
+                                '{: .7f} {: .10e} {: .10e}\n'.format(
+                                    field_val,
+                                    val, dV))
+
+                        out.write('----------------------------------------------\n\n')
 
                         romberg_triangle = romberg_triangles[d_coo][b_coo]
                         out.write(romberg_triangle.romberg_triangle_repr(with_decoration=True))
@@ -196,6 +295,36 @@ class Baker:
 
             out.write(final_result.to_string(molecule=recipe.geometry))
             out.write('\n')
+
+            if verbosity_level >= 2 and initial_derivative != '':
+                out.write('\n** Checking Kleinman conditions:\n')
+                for i in final_result.representation.smart_iterator():
+                    values = list(
+                        final_result.components[j] for j in final_result.representation.inverse_smart_iterator(i))
+                    if len(values) > 1:
+                        out.write('- {}: '.format(fancy_output_component_of_derivative(final_result.representation, i)))
+                        out.write('{: .5e} ± {:.5e}'.format(numpy.mean(values), numpy.std(values)))
+                        out.write('\n')
+
+            if verbosity_level >= 2:
+                out.write('\n** Estimated uncertainties:\n')
+                out.write('*** Values:\n')
+
+                u = Baker.make_uncertainty_tensor(
+                    romberg_triangles, initial_derivative, diff_derivative, final_result.frequency)
+
+                out.write(u.to_string(molecule=recipe.geometry, threshold=1e-8))
+                out.write('\n')
+
+                out.write('*** Ratio (%):\n')
+                ru = derivatives.Tensor(
+                    u.representation, components=(u.components / final_result.components) * 100,
+                    spacial_dof=u.spacial_dof,
+                    frequency=u.frequency
+                )
+
+                out.write(ru.to_string(molecule=recipe.geometry))
+                out.write('\n')
 
 
 def project_geometrical_derivatives(recipe, datafile, mass_weighted_hessian, out=sys.stdout, verbosity_level=0):

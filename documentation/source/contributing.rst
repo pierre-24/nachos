@@ -27,17 +27,17 @@ Workflow
 Adapted from the (in)famous `Git flow <http://nvie.com/posts/a-successful-git-branching-model/>`_.
 
 + Development is mad in ``dev`` branch, while ``master`` contains the production version (and is protected from edition).
-+ Functionalities are added through merge request (MR) in the ``dev`` branch. Do not work in ``dev`` directly, but create a new branch (``git checkout -b my_branch origin/dev``).
++ Functionalities are added through pull requests (PR) in the ``dev`` branch. Do not work in ``dev`` directly, but create a new branch (``git checkout -b my_branch origin/dev``).
 + Theses merge requests should be unitary, and include unit test(s) and documentation if needed. The test suite must succeed for the merge request to be accepted.
 + At some (random) points, ``dev`` will be merged by the maintainer into ``master`` to create a new version, with a tag of the form ``release-vXX``.
 
 .. note::
 
-    Since ``nachos` now rely on `pipenv <https://pipenv.readthedocs.io>`_, the workflow is currently the following :
+    Since ``nachos`` now rely on `pip-tools <https://github.com/jazzband/pip-tools>`_, the workflow is currently the following :
 
-    1. Normal installation use ``pipenv install --dev --ignore-pipfile`` (``make init``)
-    2. To update the dependencies from upstream, ``pipenv sync --dev``  (``make sync``).
-    3. To update the ``Pipfile.lock`` (and thus the actual version of the dependencies), a **specific** merge request is done, with the result of ``pipenv lock`` (followed by ``make sync`` on the dev's machine).
+    1. Normal installation use ``pip-sync && pip install -e .`` (``make init``)
+    2. To update the dependencies from upstream, ``pip-sync``  (``make sync``).
+    3. To update the ``requirements.txt`` (and thus the actual version of the dependencies), a **specific** merge request is done, with the result of ``pipenv lock`` (followed by ``make sync`` on the dev's machine).
 
 
 Licence

@@ -1,37 +1,61 @@
+from setuptools import setup, find_packages
+from os import path
+
 import nachos
 
-from setuptools import setup
-try: # for pip >= 10
-    from pip._internal.req import parse_requirements
-except ImportError: # for pip <= 9.0.3
-    from pip.req import parse_requirements
+here = path.abspath(path.dirname(__file__))
 
-pkgs = []
-dependency_links = []
-for pkg in parse_requirements('requirements.txt', session=False):
-    if pkg.link:
-        dependency_links.append(str(pkg.link))
-    else:
-        pkgs.append(str(pkg.req))
+# Get the long description from the README file
+with open(path.join(here, 'README.md')) as f:
+    long_description = f.read()
+
+with open(path.join(here, 'requirements/requirements-base.in')) as f:
+    requirements = f.readlines()
+
+with open(path.join(here, 'requirements/requirements.in')) as f:
+    requirements_dev = f.readlines()[1:]
 
 setup(
     name='nachos',
-    packages=['nachos', 'nachos.core'],
     version=nachos.__version__,
-    author=nachos.__author__,
-    author_email=nachos.__email__,
+
+    # Description
     description=nachos.__doc__,
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    keywords='website',
+
+    project_urls={
+        'Bug Reports': 'https://gitlab.unamur.be/chimie/lct/nachos/issues',
+        'Source': 'https://gitlab.unamur.be/chimie/lct/nachos',
+    },
+
+    url='https://gitlab.unamur.be/chimie/lct/nachos',
+    author=nachos.__author__,
+
+    # Classifiers
     classifiers=[
         'Environment :: Scientific',
         'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3'
+
+        # Specify the Python versions:
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
-    install_requires=pkgs,
-    dependency_links=dependency_links,
-    python_requires='>=3',
+
+    packages=find_packages(),
+    python_requires='>=3.5',
     test_suite='tests',
     entry_points={
         'console_scripts': nachos.make_console_scripts()
+    },
+
+    # requirements
+    install_requires=requirements,
+
+    extras_require={  # Optional
+        'dev': requirements_dev,
     },
 )

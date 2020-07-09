@@ -39,8 +39,11 @@ def get_arguments_parser():
     arguments_parser.add_argument(
         '-r', '--recipe', type=argparse.FileType('r'), help='Recipe file', default='./nachos_recipe.yml')
     arguments_parser.add_argument(
-        '-c', '--copy-files', action='store_true',
+        '-c', '--copy-files',
+        action='store_true',
         help='copy geometry, extra files, and recipe into destination directory')
+    arguments_parser.add_argument(
+        '-D', '--dry-run', action='store_true', help='dry run (do not create the files)')
 
     return arguments_parser
 
@@ -66,11 +69,11 @@ def main():
     preparer = preparing.Preparer(recipe, directory)
 
     try:
-        n = preparer.prepare()
+        n = preparer.prepare(dry_run=args.dry_run)
     except preparing.BadPreparation as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 
-    if args.copy_files:
+    if args.copy_files and not args.dry_run:
         shutil.copy(os.path.join(recipe_directory, recipe['geometry']), directory)
         recipe['geometry'] = os.path.basename(os.path.join(recipe_directory, recipe['geometry']))
 
@@ -82,7 +85,7 @@ def main():
             recipe.write(f)
 
     if args.verbose >= 1:
-        print('prepared {} calculation(s) to run'.format(n))
+        print('prepared {} calculation(s) to run'.format(len(n)))
 
 
 if __name__ == '__main__':

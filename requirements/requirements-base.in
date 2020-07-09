@@ -1,0 +1,4 @@
+pyyaml>=5.0
+h5py
+qcip-tools @ git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.4
+prompt_toolkit==1.0.15
