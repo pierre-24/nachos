@@ -9,6 +9,8 @@ steps:
   environment:
     SSH_KEY_GITEA:
       from_secret: private_key_gitea
+    SSH_KEY_GITLAB:
+      from_secret: private_key_gitlab
   commands:
   # ssh stuffs
     - eval $(ssh-agent -s)
@@ -18,6 +20,10 @@ steps:
     - chmod 600 $HOME/.ssh/id_rsa.gitea
     - ssh-add $HOME/.ssh/id_rsa.gitea
     - ssh-keyscan -H gitea.pierrebeaujean.net >> $HOME/.ssh/known_hosts
+    - echo "$SSH_KEY_GITLAB" > $HOME/.ssh/id_rsa.gitlab
+    - chmod 600 $HOME/.ssh/id_rsa.gitlab
+    - ssh-add $HOME/.ssh/id_rsa.gitlab
+    - ssh-keyscan -H gitlab.unamur.be >> $HOME/.ssh/known_hosts
   # install
     - make init
   # test
