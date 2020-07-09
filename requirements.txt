@@ -19,7 +19,6 @@ idna==2.9                 # via requests
 imagesize==1.2.0          # via sphinx
 importlib-metadata==1.7.0  # via flake8, pint
 jinja2==2.11.2            # via sphinx
-git+ssh://gitea@gitea.pierrebeaujean.net/unamur/make-release.git@release-v0.4.2  # via -r requirements/requirements.in
 markupsafe==1.1.1         # via jinja2
 mccabe==0.6.1             # via flake8
 mendeleev==0.6.0          # via qcip-tools
@@ -35,8 +34,9 @@ pygments==2.6.1           # via sphinx
 pyparsing==2.4.7          # via packaging
 python-dateutil==2.8.1    # via pandas
 pytz==2019.3              # via babel, pandas
-pyyaml==3.12              # via -r requirements/requirements-base.in, make-release
-git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.2  # via -r requirements/requirements-base.in
+pyyaml==5.3.1             # via -r requirements/requirements-base.in, release-it
+git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.4  # via -r requirements/requirements-base.in
+git+ssh://gitea@gitea.pierrebeaujean.net/unamur/make-release.git@release-v0.4.3  # via -r requirements/requirements.in
 requests==2.23.0          # via qcip-tools, sphinx
 scipy==1.5.1              # via qcip-tools
 six==1.14.0               # via h5py, packaging, prompt-toolkit, python-dateutil, sphinxcontrib-autoprogram
