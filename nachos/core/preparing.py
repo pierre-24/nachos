@@ -164,8 +164,8 @@ class Preparer:
 
             extra_sections = []
             current_section = []
-            for l in content:
-                c = l.strip()
+            for line in content:
+                c = line.strip()
                 if c == '':
                     extra_sections.append(current_section)
                     current_section = []
@@ -187,8 +187,8 @@ class Preparer:
 
             extra_sections_before = []
             current_section = []
-            for l in content:
-                c = l.strip()
+            for line in content:
+                c = line.strip()
                 if c == '':
                     extra_sections_before.append(current_section)
                     current_section = []
@@ -209,7 +209,7 @@ class Preparer:
 
             bases = self.recipe.bases(level_min=level)
 
-            for b, l in bases:
+            for b, line in bases:
                 basis = b.representation()
                 if not compute_G and basis == 'G':
                     compute_G = True

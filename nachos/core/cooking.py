@@ -112,10 +112,10 @@ class QChemLogFile(
         count = 0
         num_of_qchem = 0
 
-        for l in f.readlines():
+        for line in f.readlines():
             if count > 100:
                 break
-            if 'Q-Chem' in l or 'qchem' in l:
+            if 'Q-Chem' in line or 'qchem' in line:
                 num_of_qchem += 1
             count += 1
 
@@ -149,11 +149,11 @@ class QChemLogFile(
         if line_geom == -1:
             raise Exception('geometry not found')
 
-        for l in self.lines[line_geom:]:
-            if '---------------' in l:
+        for line in self.lines[line_geom:]:
+            if '---------------' in line:
                 break
 
-            inf = l.split()
+            inf = line.split()
             self.molecule.insert(atom.Atom(
                 symbol=inf[1],
                 position=[float(a) for a in inf[2:5]]
@@ -199,11 +199,11 @@ def qchem__log__property__computed_energies(obj, *args, **kwargs):
 
     energies = {'total': .0}
 
-    for l in obj.lines[found:]:
-        if len(l) < 5:
+    for line in obj.lines[found:]:
+        if len(line) < 5:
             break
 
-        inf = l.split()
+        inf = line.split()
 
         if inf[1] == 'correlation':
             continue
@@ -266,8 +266,8 @@ class Cooker:
             if not os.path.isdir(directory):
                 raise BadCooking('{} is no directory!'.format(directory))
 
-            for l in look_for:
-                for i in glob.glob('{}/{}'.format(directory, l)):
+            for line in look_for:
+                for i in glob.glob('{}/{}'.format(directory, line)):
                     if verbosity_level >= 1:
                         out.write('* cooking with {} ... '.format(i))
 

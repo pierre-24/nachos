@@ -472,8 +472,8 @@ class Maker:
             validator=BasisValidator(config['bases'], max_diff, recipe['method']))
 
         need_frequency = False
-        for l in recipe['differentiation']:
-            for basis in recipe['differentiation'][l]:
+        for level in recipe['differentiation']:
+            for basis in recipe['differentiation'][level]:
                 if 'D' in basis:
                     need_frequency = True
                     break
