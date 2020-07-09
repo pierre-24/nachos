@@ -10,8 +10,7 @@ help:
 	@echo "  help                        to get this help"
 
 init:
-	pip3 install .
-	pip3 install nachos[dev]
+	pip-sync && pip3 install -e .
 
 sync:
 	pip-sync
