@@ -5,7 +5,7 @@ import argparse
 import os
 import sys
 
-__version__ = '0.3.5.1'
+__version__ = '0.3.6'
 __author__ = 'Pierre Beaujean'
 __maintainer__ = 'Pierre Beaujean'
 __email__ = 'pierre.beaujean@unamur.be'
