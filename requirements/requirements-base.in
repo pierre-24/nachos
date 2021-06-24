@@ -1,6 +1,6 @@
 pyyaml>=5.0
 h5py
-qcip-tools @ git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.5
+qcip-tools @ git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.6
 prompt_toolkit==1.0.15
 pandas>=1.2
 scipy>=1.7

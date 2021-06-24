@@ -58,6 +58,7 @@ pandas==1.2.5
     # via
     #   -r requirements/requirements-base.in
     #   mendeleev
+    #   qcip-tools
 pint==0.14
     # via qcip-tools
 prompt_toolkit==1.0.15
@@ -84,7 +85,7 @@ pyyaml==5.3.1
     # via
     #   -r requirements/requirements-base.in
     #   release-it
-git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.5
+git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.6
     # via -r requirements/requirements-base.in
 git+ssh://gitea@gitea.pierrebeaujean.net/unamur/make-release.git@release-v0.4.3
     # via -r requirements/requirements.in
