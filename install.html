@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Installing nachos &mdash; nachos 0.3.6 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How to use nachos" href="use.html" />
+    <link rel="prev" title="Welcome to nachos’ documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> nachos
+          </a>
+              <div class="version">
+                0.3.6
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installing nachos</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#normal-install">Normal install</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#optional-patching-dalton">(<em>optional</em>) Patching Dalton</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-for-contributors">Installation for contributors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="use.html">How to use nachos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Code documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">nachos</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Installing nachos</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/install.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="installing-nachos">
+<h1>Installing nachos<a class="headerlink" href="#installing-nachos" title="Permalink to this headline"></a></h1>
+<section id="normal-install">
+<h2>Normal install<a class="headerlink" href="#normal-install" title="Permalink to this headline"></a></h2>
+<p>To install the latest version of nachos:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># install qcip_tools (base library):</span>
+pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/chimie/lct/qcip_tools.git@release-v0.6.1
+<span class="c1"># install nachos:</span>
+pip3 install --user --upgrade git+ssh://git@gitlab.unamur.be/chimie/lct/nachos.git
+</pre></div>
+</div>
+<p>Add <code class="docutils literal notranslate"><span class="pre">&#64;release-vXX</span></code> at the end of the last line to fetch a given version (listed <a class="reference external" href="https://gitlab.unamur.be/chimie/lct/nachos/blob/master/README.md">in the README</a>).</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">--user</span></code> allow you to install the package without being superuser (see <a class="reference external" href="https://pip.pypa.io/en/stable/user_guide/#user-installs">here</a>).
+You will probably need to add <code class="docutils literal notranslate"><span class="pre">$HOME/.local/bin</span></code> to <code class="docutils literal notranslate"><span class="pre">$PATH</span></code> for this to work:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s1">&#39;PATH=$HOME/.local/bin:$PATH&#39;</span> &gt;&gt; ~/.bashrc
+</pre></div>
+</div>
+<p>On the other hand, you can install it in a <em>virtualenv</em> (see below).</p>
+</section>
+<section id="optional-patching-dalton">
+<h2>(<em>optional</em>) Patching Dalton<a class="headerlink" href="#optional-patching-dalton" title="Permalink to this headline"></a></h2>
+<p>By default, it is possible to perform numerical differentiation with Dalton, but the following patch will improve different stuffs:</p>
+<ul class="simple">
+<li><p>Increase values of some constants, so that more frequencies and responses functions can be computed in the same input ;</p></li>
+<li><p>Outputs responses functions in a better place (<code class="docutils literal notranslate"><span class="pre">DALTON.PROP</span></code> in the archive), with more digits (important for the accuracy) ;</p></li>
+<li><p>Allow to compute numerical differentiation of gamma (because it is otherwise not possible, since only the components that participate to <span class="math notranslate nohighlight">\(\gamma_{||}\)</span> are computed).</p></li>
+</ul>
+<p>You can download the patch here: <a class="reference download internal" download="" href="_downloads/346475937813d2efa4e1a7a2e51f59ab/dalton.patch"><code class="xref download docutils literal notranslate"><span class="pre">dalton.patch</span></code></a> :</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget --http-user<span class="o">=</span>doc --http-passwd<span class="o">=</span>doc http://perso.unamur.be/~pbeaujea/nachos/html/_downloads/dalton.patch
+</pre></div>
+</div>
+<p>To apply this patch you need to recompile Dalton (so you need git, a fortran compiler, and eventual BLAS/LAPACK/MKL).
+The following  commands allow you to <a class="reference external" href="https://gitlab.com/dalton/dalton">get the sources</a>, and check if everything is ok:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone --recursive https://gitlab.com/dalton/dalton.git
+<span class="nb">cd</span> dalton/
+git checkout -b special_version origin/release/2016
+<span class="c1"># use &quot;origin/master&quot; if you want the latest (maybe buggy) version</span>
+git apply --check /path/to/dalton.patch
+</pre></div>
+</div>
+<p>If it is the case (no <code class="docutils literal notranslate"><span class="pre">error</span></code> in the output of the previous command), you can apply it and compile a new version of Dalton:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git am --signoff &lt; /path/to/dalton.patch
+<span class="c1">#  You may get &quot;trailing whitespace&quot; error, but it&#39;s ok</span>
+./setup --prefix<span class="o">=</span>/path/to/destination <span class="c1"># [--int64]</span>
+<span class="nb">cd</span> build
+make
+make install
+</pre></div>
+</div>
+</section>
+<section id="installation-for-contributors">
+<h2>Installation for contributors<a class="headerlink" href="#installation-for-contributors" title="Permalink to this headline"></a></h2>
+<p>To contribute to the project, you need to clone the repository:</p>
+<ul class="simple">
+<li><p>Clone it: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git&#64;git.pierrebeaujean.net:pierre/nachos.git</span></code>.</p></li>
+<li><p>Install pip-tools: <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">pip-tools</span></code></p></li>
+<li><p>Install virtualenv <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv;</span> <span class="pre">source</span> <span class="pre">venv/bin/activate</span></code></p></li>
+<li><p>Install dependencies: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">init</span></code>.</p></li>
+<li><p>Don’t forget to create a separate branch to implement your changes (see <a class="reference external" href="contributing.html">the contribution part</a>).</p></li>
+</ul>
+<p>You can launch the tests series with <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code></p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to nachos’ documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="use.html" class="btn btn-neutral float-right" title="How to use nachos" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Pierre Beaujean (University of Namur).</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
