@@ -26,8 +26,8 @@ setup(
     keywords='website',
 
     project_urls={
-        'Bug Reports': 'https://github.com/pierre-24/issues',
-        'Source': 'https://gitlab.unamur.be/chimie/lct/nachos',
+        'Bug Reports': 'https://github.com/pierre-24/nachos/issues',
+        'Source': 'https://github.com/pierre-24/nachos',
     },
 
     url='https://github.com/pierre-24/nachos',
