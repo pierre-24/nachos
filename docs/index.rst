@@ -9,8 +9,7 @@ Code for numerical differentiation of energy and other properties (oriented towa
 Based on `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_.
 
 .. toctree::
-   :maxdepth: 3
-   :caption: Contents:
+   :maxdepth: 2
 
    install
    use

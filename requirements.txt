@@ -19,7 +19,9 @@ charset-normalizer==2.0.10
 colorama==0.4.4
     # via mendeleev
 docutils==0.17.1
-    # via sphinx
+    # via
+    #   sphinx
+    #   sphinx-rtd-theme
 flake8==4.0.1
     # via
     #   -r requirements/requirements.in
@@ -112,7 +114,10 @@ soupsieve==2.3.1
 sphinx==4.4.0
     # via
     #   -r requirements/requirements.in
+    #   sphinx-rtd-theme
     #   sphinxcontrib-autoprogram
+sphinx-rtd-theme==1.0.0
+    # via -r requirements/requirements.in
 sphinxcontrib-applehelp==1.0.2
     # via sphinx
 sphinxcontrib-autoprogram==0.1.7

@@ -36,6 +36,6 @@ Then, the documentation on how to use the different programs is available [there
 
 You can reports bugs and suggestions any time by email or using the bugtracker.
 
-If you want to contribute to the code, see the [contribution page](./documentation/source/contributing.rst). 
+If you want to contribute to the code, see the [contribution page](docs/contributing.rst). 
 Please note that the code is not actually developed on the git server of the University of Namur (which only contains the releases) but on a personal protected git server (with CI activated and properly configured). 
 Feel free to ask access if needed.
