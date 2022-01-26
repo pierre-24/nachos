@@ -126,16 +126,16 @@ For example, the first order geometrical derivative (with respect to normal mode
 </li>
 <li><p>Nachos is abble to perform differentiation with respect to static electric field (<code class="docutils literal notranslate"><span class="pre">F</span></code>) and cartesian coordinate (<code class="docutils literal notranslate"><span class="pre">G</span></code>).
 Given the cartesian hessian, <code class="docutils literal notranslate"><span class="pre">nachos_bake</span></code> (see below) perform a vibrational analysis and is able to project <code class="docutils literal notranslate"><span class="pre">G</span></code> derivatives over normal mode, giving the corresponding <code class="docutils literal notranslate"><span class="pre">N</span></code> ones.</p></li>
-<li><p>Nachos (because of the underlying library, <a class="reference external" href="https://gitlab.unamur.be/pierre.beaujean/qcip_tools">qcip_tools</a>) takes advantage of permutation symmetry and <a class="reference external" href="https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem">Shwarz’s theorem</a> (referred as “Kleinman symmetry” in the field of nonlinear optics).</p></li>
+<li><p>Nachos (because of the underlying library, <a class="reference external" href="https://github.com/pierre-24/qcip_tools">qcip_tools</a>) takes advantage of permutation symmetry and <a class="reference external" href="https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem">Shwarz’s theorem</a> (referred as “Kleinman symmetry” in the field of nonlinear optics).</p></li>
 </ul>
 </section>
 <section id="general-workflow">
 <h2>General workflow<a class="headerlink" href="#general-workflow" title="Permalink to this headline"></a></h2>
 <p>Here is the schematic of the workflow with the nachos package:</p>
-<figure class="align-center" id="id8">
+<figure class="align-center" id="id7">
 <img alt="_images/workflow.png" src="_images/workflow.png" />
 <figcaption>
-<p><span class="caption-text">Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>In short,</p>
@@ -1329,7 +1329,7 @@ Therefore, the ZPVA part is only computed for available frequencies, and the pv 
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <ul class="simple">
-<li><p>The different properties are actually function of the corresponding tensors in <a class="reference external" href="https://gitlab.unamur.be/pierre.beaujean/qcip_tools">qcip_tools</a>, so this list may not be exhaustive (but at your own risks).</p></li>
+<li><p>The different properties are actually function of the corresponding tensors in <a class="reference external" href="https://pierre-24.github.io/qcip_tools/code-documentation/derivatives_e.html">qcip_tools electrical properties</a>, so this list may not be exhaustive (but at your own risks).</p></li>
 <li><p>Please use the <code class="docutils literal notranslate"><span class="pre">-O</span></code> option to restrict the effect when fetching SHG or THS properties, and use <code class="docutils literal notranslate"><span class="pre">-f</span></code> to restrict the amount of frequencies printed.</p></li>
 <li><p>If vibrational contribution have been added via <code class="docutils literal notranslate"><span class="pre">nachos_shake</span></code> to the program, the different values for each contribution will be printed.
 The <code class="docutils literal notranslate"><span class="pre">-I</span></code> option may be used to get <code class="docutils literal notranslate"><span class="pre">property(total-current)</span></code> rather than <code class="docutils literal notranslate"><span class="pre">property(current)</span></code>, which is usefull to assess the impact of a given vibrationnal contribution on the total value (since some properties, like HRS and THS properties are not additive).
