@@ -5,3 +5,4 @@ autopep8
 sphinxcontrib-autoprogram
 Sphinx
 sphinx_rtd_theme
+bump2version
