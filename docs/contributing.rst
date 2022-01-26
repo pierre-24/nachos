@@ -2,7 +2,7 @@
 Contributing
 ============
 
-You first need to `install <./install.html>`_ if you wan to contribute to the code.
+You first need to `install <./install.html>`_ if you want to contribute to the code.
 
 You may want to take a look into `qcip_tools <https://github.com/pierre-24/qcip_tools>`_, the base library behind nachos.
 
