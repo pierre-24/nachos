@@ -47,7 +47,7 @@ Concepts
 +  Nachos is abble to perform differentiation with respect to static electric field (``F``) and cartesian coordinate (``G``).
    Given the cartesian hessian, ``nachos_bake`` (see below) perform a vibrational analysis and is able to project ``G`` derivatives over normal mode, giving the corresponding ``N`` ones.
 
-+ Nachos (because of the underlying library, `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_) takes advantage of permutation symmetry and `Shwarz's theorem <https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem>`_ (referred as "Kleinman symmetry" in the field of nonlinear optics).
++ Nachos (because of the underlying library, `qcip_tools <https://github.com/pierre-24/qcip_tools>`_) takes advantage of permutation symmetry and `Shwarz's theorem <https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem>`_ (referred as "Kleinman symmetry" in the field of nonlinear optics).
 
 General workflow
 ----------------
