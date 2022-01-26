@@ -47,7 +47,7 @@ Concepts
 +  Nachos is abble to perform differentiation with respect to static electric field (``F``) and cartesian coordinate (``G``).
    Given the cartesian hessian, ``nachos_bake`` (see below) perform a vibrational analysis and is able to project ``G`` derivatives over normal mode, giving the corresponding ``N`` ones.
 
-+ Nachos (because of the underlying library, `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_) takes advantage of permutation symmetry and `Shwarz's theorem <https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem>`_ (referred as "Kleinman symmetry" in the field of nonlinear optics).
++ Nachos (because of the underlying library, `qcip_tools <https://github.com/pierre-24/qcip_tools>`_) takes advantage of permutation symmetry and `Shwarz's theorem <https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem>`_ (referred as "Kleinman symmetry" in the field of nonlinear optics).
 
 General workflow
 ----------------
@@ -763,7 +763,7 @@ You can restrict the number of vibrational contribution with the ``-O`` option, 
 
 .. note::
 
-    + The different properties are actually function of the corresponding tensors in `qcip_tools <https://gitlab.unamur.be/pierre.beaujean/qcip_tools>`_, so this list may not be exhaustive (but at your own risks).
+    + The different properties are actually function of the corresponding tensors in `qcip_tools electrical properties <https://pierre-24.github.io/qcip_tools/code-documentation/derivatives_e.html>`_, so this list may not be exhaustive (but at your own risks).
     + Please use the ``-O`` option to restrict the effect when fetching SHG or THS properties, and use ``-f`` to restrict the amount of frequencies printed.
     + If vibrational contribution have been added via ``nachos_shake`` to the program, the different values for each contribution will be printed.
       The ``-I`` option may be used to get ``property(total-current)`` rather than ``property(current)``, which is usefull to assess the impact of a given vibrationnal contribution on the total value (since some properties, like HRS and THS properties are not additive).

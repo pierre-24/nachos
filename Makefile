@@ -22,4 +22,4 @@ test:
 	python -m unittest discover -s tests
 
 doc:
-	cd documentation; make html
+	cd docs; make html
