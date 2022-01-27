@@ -27,6 +27,7 @@ Concepts
 
    where :math:`m` is the number of iterations (or refinement steps).
    This leads to a so-called *Romberg triangle*, from which the value of the derivative is extracted.
+   The algorithm to select the best value is described in `qcip_tools numerical differentiation page <https://pierre-24.github.io/qcip_tools/code-documentation/numerical_differentiation.html>`_.
 
 +  The different quantities are written **as derivatives with respect to the energy**.
    For example, the geometric Hessian, second order of the energy with respect to geometrical derivatives, is written ``GG``, ``G`` meaning *geometrical derivative with respect to cartesian coordinates*.
