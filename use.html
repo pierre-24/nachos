@@ -99,13 +99,13 @@ It exploits the following identity, given <span class="math notranslate nohighli
 \[\left.\frac{\partial f(x)}{\partial x}\right|_{x=0} = \lim_{h_0\rightarrow 0} \underbrace{\frac{f(h_0)-f(0)}{h_0}}_{\text{forward derivative}} = \lim_{h_0\rightarrow 0} \underbrace{\frac{f(h_0)-f(-h_0)}{2\,h_0}}_{\text{centered derivative}},\]</div>
 <p>where <span class="math notranslate nohighlight">\(h_0\)</span> is the minimal field (<code class="docutils literal notranslate"><span class="pre">min_field</span></code> parameter).</p>
 </li>
-<li><p>The code use the Romberg procedure to remove contamination from higher orders (see <a class="reference external" href="dx.doi.org/10.1002/qua.24685">this publication</a> for more details).
+<li><p>The code use the Romberg procedure to remove contamination from higher orders (see <a class="reference external" href="https://dx.doi.org/10.1002/qua.24685">this publication</a> for more details).
 The derivative is computed for different values of <span class="math notranslate nohighlight">\(h=a^k\,h_0\)</span>, with <span class="math notranslate nohighlight">\(k&lt;k_{max}\)</span> the field amplitude (which lead to the <code class="docutils literal notranslate"><span class="pre">k_max</span></code> parameter), and <span class="math notranslate nohighlight">\(a\)</span> is the common ratio (<code class="docutils literal notranslate"><span class="pre">ratio</span></code> parameter).
 The procedure goes as follow:</p>
 <div class="math notranslate nohighlight">
 \[\begin{split}\begin{align}
 &amp;H_{k,0} = \frac{f(a^kh_0)-f(-a^kh_0)}{2\,a^kh_0},\\
-&amp;H_{k,m+1} = \frac{a^{2m}\,H_{k,m}-H_{k+1,m}}{a^{2m}-1},
+&amp;H_{k,m} = \frac{a^{2m}\,H_{k,m-1}-H_{k+1,m-1}}{a^{2m}-1},
 \end{align}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(m\)</span> is the number of iterations (or refinement steps).
 This leads to a so-called <em>Romberg triangle</em>, from which the value of the derivative is extracted.</p>

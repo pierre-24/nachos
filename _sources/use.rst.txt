@@ -14,7 +14,7 @@ Concepts
 
    where :math:`h_0` is the minimal field (``min_field`` parameter).
 
-+  The code use the Romberg procedure to remove contamination from higher orders (see `this publication <dx.doi.org/10.1002/qua.24685>`_ for more details).
++  The code use the Romberg procedure to remove contamination from higher orders (see `this publication <https://dx.doi.org/10.1002/qua.24685>`_ for more details).
    The derivative is computed for different values of :math:`h=a^k\,h_0`, with :math:`k<k_{max}` the field amplitude (which lead to the ``k_max`` parameter), and :math:`a` is the common ratio (``ratio`` parameter).
    The procedure goes as follow:
 
@@ -22,7 +22,7 @@ Concepts
 
       \begin{align}
       &H_{k,0} = \frac{f(a^kh_0)-f(-a^kh_0)}{2\,a^kh_0},\\
-      &H_{k,m+1} = \frac{a^{2m}\,H_{k,m}-H_{k+1,m}}{a^{2m}-1},
+      &H_{k,m} = \frac{a^{2m}\,H_{k,m-1}-H_{k+1,m-1}}{a^{2m}-1},
       \end{align}
 
    where :math:`m` is the number of iterations (or refinement steps).
