@@ -108,7 +108,8 @@ The procedure goes as follow:</p>
 &amp;H_{k,m} = \frac{a^{2m}\,H_{k,m-1}-H_{k+1,m-1}}{a^{2m}-1},
 \end{align}\end{split}\]</div>
 <p>where <span class="math notranslate nohighlight">\(m\)</span> is the number of iterations (or refinement steps).
-This leads to a so-called <em>Romberg triangle</em>, from which the value of the derivative is extracted.</p>
+This leads to a so-called <em>Romberg triangle</em>, from which the value of the derivative is extracted.
+The algorithm to select the best value is described in <a class="reference external" href="https://pierre-24.github.io/qcip_tools/code-documentation/numerical_differentiation.html">qcip_tools numerical differentiation page</a>.</p>
 </li>
 <li><p>The different quantities are written <strong>as derivatives with respect to the energy</strong>.
 For example, the geometric Hessian, second order of the energy with respect to geometrical derivatives, is written <code class="docutils literal notranslate"><span class="pre">GG</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code> meaning <em>geometrical derivative with respect to cartesian coordinates</em>.
