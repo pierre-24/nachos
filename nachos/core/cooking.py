@@ -332,7 +332,10 @@ class Cooker:
                 energies = f.property('computed_energies')
 
                 if f.file_type in ['GAUSSIAN_FCHK', 'QCHEM_LOG']:
-                    energy = energies[self.recipe['method']]  # tries to catch the energy for the correct method
+                    key = self.recipe['method']
+                    if key == 'DFT':
+                        key = 'SCF/DFT'
+                    energy = energies[key]  # tries to catch the energy for the correct method
                     obtained.append('energy:' + self.recipe['method'])
                 else:
                     energy = energies['total']
