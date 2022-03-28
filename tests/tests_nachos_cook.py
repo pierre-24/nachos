@@ -280,8 +280,13 @@ class CookTestCase(NachosTestCase):
                 fx = gaussian.Output()
                 fx.read(f)
 
-                self.assertEqual(t_fields, tuple(fx.property('n:input_electric_field')[1:]))
+                # check fields
+                self.assertEqual(
+                    numerical_differentiation.real_fields(fields_n, r['min_field'], r['ratio']),
+                    list(fx.property('n:input_electric_field')[1:])
+                )
 
+                # check SCS-MP2 energy
                 results = storage.results[t_fields]
                 energies = fx.property('computed_energies')
                 sc_energies = fx.property('n:spin_components_e2')
