@@ -34,7 +34,7 @@ class Cooker:
         self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
-    def cook(self, directories, out=sys.stdout, verbosity_level=0):
+    def cook(self, directories, out=sys.stdout, verbosity_level=0, use_gaussian_logs=False):
         """Cook files in directories, all together in a storage file
 
         :param directories: directories where QM results should be looked for
@@ -43,6 +43,8 @@ class Cooker:
         :type out: file
         :param verbosity_level: wetter to write information or not
         :type verbosity_level: bool
+        :param use_gaussian_logs: use Gaussian LOGs instead of FCHKs. But don't ;)
+        :type use_gaussian_logs: bool
         :rtype: nachos.core.files.ComputationalResults
         """
 
@@ -50,7 +52,7 @@ class Cooker:
 
         if self.recipe['flavor'] == 'gaussian':
             look_for = ['*.fchk']
-            if self.recipe['method'] == 'SCS-MP2':
+            if use_gaussian_logs:
                 look_for = ['*.log']
         elif self.recipe['flavor'] == 'dalton':
             look_for = ['*.tar.gz']
@@ -130,13 +132,20 @@ class Cooker:
             try:
                 energies = f.property('computed_energies')
 
-                if f.file_type in ['GAUSSIAN_FCHK', 'QCHEM_LOG']:
-                    key = self.recipe['method']
-                    if key == 'DFT':
-                        key = 'SCF/DFT'
-                    energy = energies[key]  # tries to catch the energy for the correct method
+                if f.file_type in ['GAUSSIAN_FCHK', 'QCHEM_LOG', 'GAUSSIAN_LOG']:
+                    if self.recipe['method'] == 'SCS-MP2':
+                        # use the parameters from S. Grimme. J. Chem. Phys. 118, 9095 (2003).
+                        energy = energies['HF']
+                        sc_energies = f.property('n:spin_components_e2')
+                        energy += 1 / 3 * (sc_energies['aa'] + sc_energies['bb'])  # p_T * E_T
+                        energy += 6 / 5 * sc_energies['ab']  # p_S * E_S
+                    else:
+                        key = self.recipe['method']
+                        if key == 'DFT':
+                            key = 'SCF/DFT'
+                        energy = energies[key]  # tries to catch the energy for the correct method
                     obtained.append('energy:' + self.recipe['method'])
-                else:
+                else:  # ?!?
                     energy = energies['total']
                     obtained.append('energy')
 
