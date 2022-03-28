@@ -5,6 +5,7 @@ import subprocess
 from qcip_tools import numerical_differentiation
 from qcip_tools.chemistry_files import gaussian, dalton, xyz
 
+import nachos.qcip_tools_ext.qchem
 from tests import NachosTestCase
 from nachos.core import files, cooking, preparing
 
@@ -256,7 +257,7 @@ class CookTestCase(NachosTestCase):
             self.assertTrue(os.path.exists(path), msg=path)
 
             with open(path) as f:
-                fx = cooking.QChemLogFile()
+                fx = nachos.qcip_tools_ext.qchem.QChemLogFile()
                 fx.read(f)
                 results = s.results[t_fields]
 
