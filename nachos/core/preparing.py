@@ -245,9 +245,15 @@ class Preparer:
             fi.options['chk'] = 'xxx'
 
             # input card
+            method = self.recipe['method']
+            if self.recipe['method'] == 'DFT':
+                method = self.recipe['flavor_extra']['XC']
+            elif self.recipe['method'] == 'SCS-MP2':
+                method = 'MP2'  # SCS_MP2 is just MP2 with a trick
+
             input_card = [
                 '#P {}{} {} nosym{}'.format(
-                    self.recipe['method'] if self.recipe['method'] != 'DFT' else self.recipe['flavor_extra']['XC'],
+                    method,
                     '=Full' if
                     self.recipe['method'] not in ['DFT', 'HF'] and int(self.recipe['flavor_extra']['use_full']) != 0
                     else '',

@@ -242,9 +242,9 @@ class Cooker:
 
         :param directories: directories where QM results should be looked for
         :type directories: list of str
-        :param out: outpout of eventual information
+        :param out: output of eventual information
         :type out: file
-        :param verbosity_level: wheter to write information or not
+        :param verbosity_level: wetter to write information or not
         :type verbosity_level: bool
         :rtype: nachos.core.files.ComputationalResults
         """
