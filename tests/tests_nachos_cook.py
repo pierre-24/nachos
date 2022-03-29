@@ -13,11 +13,11 @@ from nachos.core import files, cooking, preparing
 class CookTestCase(NachosTestCase):
 
     def setUp(self):
-        self.zip_F = self.copy_to_temporary_directory('numdiff_F.zip')
-        self.zip_F_qchem = self.copy_to_temporary_directory('numdiff_F_qchem.zip')
-        self.zip_F_scs_mp2 = self.copy_to_temporary_directory('numdiff_F_SCS-MP2.zip')
-        self.zip_G = self.copy_to_temporary_directory('numdiff_G.zip')
-        self.zip_G_dalton = self.copy_to_temporary_directory('numdiff_G_dalton.zip')
+        self.zip_F = 'numdiff_F.zip'
+        self.zip_F_qchem = 'numdiff_F_qchem.zip'
+        self.zip_F_scs_mp2 = 'numdiff_F_SCS-MP2.zip'
+        self.zip_G = 'numdiff_G.zip'
+        self.zip_G_dalton = 'numdiff_G_dalton.zip'
         self.working_directory = self.setup_temporary_directory()
 
     def tearDown(self):

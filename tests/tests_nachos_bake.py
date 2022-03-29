@@ -13,9 +13,9 @@ from nachos.core import files, baking
 class BakeTestCase(NachosTestCase):
 
     def setUp(self):
-        self.zip_F = self.copy_to_temporary_directory('numdiff_F.zip')
-        self.zip_G = self.copy_to_temporary_directory('numdiff_G.zip')
-        self.zip_G_dalton = self.copy_to_temporary_directory('numdiff_G_dalton.zip')
+        self.zip_F = 'numdiff_F.zip'
+        self.zip_G = 'numdiff_G.zip'
+        self.zip_G_dalton = 'numdiff_G_dalton.zip'
         self.working_directory = self.setup_temporary_directory()
 
     def tearDown(self):
