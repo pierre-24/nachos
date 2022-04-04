@@ -58,12 +58,23 @@ def gaussian__Output__get_computed_energies(obj, *args, **kwargs):
     :rtype: dict
     """
     energies = {}
+    modified_gaussian = False  # pristine Gaussian 16
 
     # fetch HF or DFT energy
     n = _find_in_links(obj, 'SCF Done:', [502, 503, 506, 508])
     if n > 0:
         chunks = obj.lines[n][12:].split()
         e = float(chunks[2])
+        if (len(chunks[2]) - chunks[2].find('.')) != 9:
+            modified_gaussian = True
+        else:  # try to fetch more decimals above: "E = xxx" contains eleven of them
+            for line in reversed(obj.lines[:n]):
+                if 'Delta-E=' in line:
+                    e = float(line.split()[1])
+                    break
+                elif 'Cycle' in line:
+                    break
+
         if 'HF' in chunks[0]:
             energies['HF'] = e
         else:
@@ -74,24 +85,37 @@ def gaussian__Output__get_computed_energies(obj, *args, **kwargs):
     # fetch MP2 energies
     n = _find_in_links(obj, 'EUMP2 =', [804, 903, 905, 906])
     if n > 0:
-        energies['MP2'] = float(obj.lines[n].split()[-1])
+        chunk = obj.lines[n].split()[-1]
+        if not modified_gaussian:
+            chunk = chunk.replace('D', 'E')
+
+        energies['MP2'] = float(chunk)
         energies['total'] = energies['MP2']
 
     # fetch MP3 energies
     n = _find_in_links(obj, 'EUMP3=', [913])
     if n > 0:
-        energies['MP3'] = float(obj.lines[n].split()[-1])
+        chunk = obj.lines[n].split()[-1]
+        if not modified_gaussian:
+            chunk = chunk.replace('D', 'E')
+        energies['MP3'] = float(chunk)
 
     # fetch CCSD energies
     n = obj.search('Wavefunction amplitudes converged.', into=913)
     if n > 0:
-        energies['CCSD'] = float(obj.lines[n - 3][:-16].split()[-1])
+        chunk = obj.lines[n - 3][:-16].split()[-1]
+        if not modified_gaussian:
+            chunk = chunk.replace('D', 'E')
+        energies['CCSD'] = float(chunk)
         energies['total'] = energies['CCSD']
 
     # fetch CCSD(T) energies
     n = obj.search('CCSD(T)=', into=913)
     if n > 0:
-        energies['CCSD(T)'] = float(obj.lines[n].split()[-1])
+        chunk = obj.lines[n].split()[-1]
+        if not modified_gaussian:
+            chunk = chunk.replace('D', 'E')
+        energies['CCSD(T)'] = float(chunk)
         energies['total'] = energies['CCSD(T)']
 
     return energies
