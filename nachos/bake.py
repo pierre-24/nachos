@@ -123,25 +123,28 @@ def main():
     recipe_directory = os.path.dirname(args.recipe.name)
     recipe = files.Recipe(directory=recipe_directory)
 
-    if args.romberg:
-        if not (0 <= args.romberg[0] < recipe['k_max']):
-            return exit_failure(
-                'Error while treating --romberg: k (={}) >= k_max (={})'.format(args.romberg[0], recipe['k_max']))
-        if not (0 <= args.romberg[1] < recipe['k_max'] - args.romberg[0]):
-            return exit_failure(
-                'Error while treating --romberg: no such m={} with k={}'.format(*reversed(args.romberg)))
-
     try:
         recipe.read(args.recipe)
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
+    # Romberg
+    if args.romberg:
+        if not (0 <= args.romberg[0] < recipe['k_max']):
+            return exit_failure(
+                'Error while treating --romberg: k (={}) >= k_max (={})'.format(args.romberg[0], recipe['k_max']))
+        if not (0 <= args.romberg[1] < (recipe['k_max'] - args.romberg[0])):
+            return exit_failure(
+                'Error while treating --romberg: no such m={} with k={}'.format(*reversed(args.romberg)))
+
+    # Storage
     if not os.path.exists(os.path.join(recipe_directory, args.data)):
         return exit_failure('Data file {} does not exists'.format(os.path.join(recipe_directory, args.data)))
 
     storage = files.ComputationalResults(recipe, directory=recipe_directory)
     storage.read(args.data)
 
+    # go and bake
     baker = baking.Baker(recipe, storage, directory=recipe_directory)
     only = None
 
