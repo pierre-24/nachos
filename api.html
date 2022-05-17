@@ -88,7 +88,7 @@
 <span id="core-nachos-core"></span><h2>Core (<code class="docutils literal notranslate"><span class="pre">nachos.core</span></code>)<a class="headerlink" href="#module-nachos.core" title="Permalink to this headline"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="nachos.core.compute_numerical_derivative_of_tensor">
-<span class="sig-prename descclassname"><span class="pre">nachos.core.</span></span><span class="sig-name descname"><span class="pre">compute_numerical_derivative_of_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivative_repr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.compute_numerical_derivative_of_tensor" title="Permalink to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">nachos.core.</span></span><span class="sig-name descname"><span class="pre">compute_numerical_derivative_of_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivative_repr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_choice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.compute_numerical_derivative_of_tensor" title="Permalink to this definition"></a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -99,6 +99,7 @@
 <li><p><strong>frequency</strong> (<em>float</em><em>|</em><em>str</em>) – frequency if electrical derivative</p></li>
 <li><p><strong>dry_run</strong> (<em>bool</em>) – do not fill the tensor or perform Romberg analysis</p></li>
 <li><p><strong>kwargs</strong> (<em>dict</em>) – args passed to tensor_func</p></li>
+<li><p><strong>force_choice</strong> (<em>tuple</em>) – force the choice in the Romberg triangle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -773,7 +774,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="nachos.core.baking.Baker.bake">
-<span class="sig-name descname"><span class="pre">bake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity_level=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_zero_field_basis=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.baking.Baker.bake" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">bake</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity_level=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">copy_zero_field_basis=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_choice=None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.baking.Baker.bake" title="Permalink to this definition"></a></dt>
 <dd><p>Perform the numerical differentiation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -782,6 +783,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 <li><p><strong>out</strong> (<em>file</em>) – output if information is needed to be outputed</p></li>
 <li><p><strong>verbosity_level</strong> (<em>int</em>) – how far should we print information</p></li>
 <li><p><strong>copy_zero_field_basis</strong> (<em>bool</em>) – copy the basis found in zero field</p></li>
+<li><p><strong>force_choice</strong> (<em>tuple</em>) – force the choice in the Romberg triangle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>

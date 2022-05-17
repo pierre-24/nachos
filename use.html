@@ -923,7 +923,7 @@ dalton <span class="nv">$INPUT_FILES</span>
 <h3>nachos_bake<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
 <p>From h5 file, perform numerical differentiation</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_bake [-h] [-v] [-r RECIPE] [-d DATA] [-o OUTPUT] [-V VERBOSE]</span>
-<span class="go">                   [-S] [-O ONLY] [-p] [-H HESSIAN]</span>
+<span class="go">                   [-S] [-O ONLY] [-p] [-H HESSIAN] [-R ROMBERG]</span>
 </pre></div>
 </div>
 <dl class="std option">
@@ -984,6 +984,12 @@ dalton <span class="nv">$INPUT_FILES</span>
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-H">
 <span id="cmdoption-nachos_bake-hessian"></span><span id="cmdoption-nachos-bake-hessian"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--hessian</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-H" title="Permalink to this definition"></a></dt>
 <dd><p>consume hessian from an other file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-R">
+<span id="cmdoption-nachos_bake-romberg"></span><span id="cmdoption-nachos-bake-romberg"></span><span class="sig-name descname"><span class="pre">-R</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--romberg</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-R" title="Permalink to this definition"></a></dt>
+<dd><p>Bypass detection and force a value in the triangle. Must be of the form <cite>k;m</cite>.</p>
 </dd></dl>
 
 </section>
