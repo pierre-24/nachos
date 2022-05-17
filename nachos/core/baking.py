@@ -36,7 +36,7 @@ class Baker:
         if self.storage.check() != ([], []):
             raise BadBaking('The storage (h5 file) does not fulfill the recipe!')
 
-    def bake(self, only=None, out=sys.stdout, verbosity_level=0, copy_zero_field_basis=False):
+    def bake(self, only=None, out=sys.stdout, verbosity_level=0, copy_zero_field_basis=False, force_choice=None):
         """Perform the numerical differentiation
 
         :param only: list of derivatives to perform (None = all of them)
@@ -47,6 +47,8 @@ class Baker:
         :type verbosity_level: int
         :param copy_zero_field_basis: copy the basis found in zero field
         :type copy_zero_field_basis: bool
+        :param force_choice: force the choice in the Romberg triangle
+        :type force_choice: tuple
         :rtype: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
         """
 
@@ -113,7 +115,8 @@ class Baker:
                             initial_derivative,
                             diff_derivative,
                             self.storage.tensor_element_access,
-                            frequency=freq)
+                            frequency=freq,
+                            force_choice=force_choice)
                         results_per_frequency[freq] = r
                         Baker.output_information(
                             self.recipe,

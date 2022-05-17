@@ -87,7 +87,7 @@ CONFIG = {
 
 
 def compute_numerical_derivative_of_tensor(
-        recipe, basis, derivative_repr, tensor_func, frequency=None, dry_run=False, **kwargs):
+        recipe, basis, derivative_repr, tensor_func, frequency=None, dry_run=False, force_choice=None, **kwargs):
     """
 
     :param recipe: recipe
@@ -103,6 +103,8 @@ def compute_numerical_derivative_of_tensor(
     :type dry_run: bool
     :param kwargs: args passed to tensor_func
     :type kwargs: dict
+    :param force_choice: force the choice in the Romberg triangle
+    :type force_choice: tuple
     :return: tensor
     :rtype: qcip_tools.derivatives.Tensor, dict
     """
@@ -116,7 +118,8 @@ def compute_numerical_derivative_of_tensor(
         accuracy_level=recipe['accuracy_level'],
         frequency=frequency,
         dry_run=dry_run,
-        recipe=recipe,
+        force_choice=force_choice,
+        recipe=recipe,  # kwarg
         **kwargs)
 
 

@@ -2,6 +2,8 @@ import os
 import math
 import subprocess
 
+import numpy
+
 from tests import NachosTestCase
 
 from qcip_tools import derivatives, derivatives_g
@@ -92,6 +94,38 @@ class BakeTestCase(NachosTestCase):
 
         with self.assertRaises(baking.BadBaking):
             baker.bake(only=[(derivatives.Derivative('dDF'), 0)])
+
+    def test_bake_gaussian_F_with_force(self):
+        self.unzip_it(self.zip_F, self.working_directory)
+        directory = os.path.join(self.working_directory, 'numdiff_F')
+        recipe_path = os.path.join(directory, 'nachos_recipe.yml')
+        storage_path = os.path.join(directory, 'verification', 'nachos_data.h5')
+        solution_path = os.path.join(directory, 'verification', 'water_test_0001.fchk')
+
+        r = files.Recipe(directory=directory)
+
+        with open(recipe_path) as f:
+            r.read(f)
+
+        fchk = gaussian.FCHK()
+        with open(solution_path) as f:
+            fchk.read(f)
+
+        electrical_derivatives = fchk.property('electrical_derivatives')
+
+        storage = files.ComputationalResults(r, directory=directory)
+        storage.read(storage_path)
+        baker = baking.Baker(r, storage, directory=directory)
+
+        cf_free = baker.bake(only=[(derivatives.Derivative(), 2)])
+        cf_force = baker.bake(only=[(derivatives.Derivative(), 2)], force_choice=(2, 2))
+        self.assertIn('FF', cf_force.derivatives)
+
+        self.assertTensorsAlmostEqual(
+            electrical_derivatives['FF']['static'], cf_force.derivatives['FF']['static'])
+
+        diffs = cf_free.derivatives['FF']['static'].components - cf_force.derivatives['FF']['static'].components
+        self.assertTrue(numpy.all(diffs < 1e-3))
 
     def test_bake_gaussian_G(self):
         self.unzip_it(self.zip_G, self.working_directory)

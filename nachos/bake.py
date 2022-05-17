@@ -59,6 +59,25 @@ def treat_only_arg(recipe, t):
     return only
 
 
+def treat_romberg_arg(a):
+    """Treat the --romberg arg
+    """
+    chunks = a.split(';')
+    if len(chunks) != 2:
+        raise argparse.ArgumentTypeError('Romberg must be two values')
+
+    try:
+        k = int(chunks[0])
+        m = int(chunks[1])
+    except ValueError:
+        raise argparse.ArgumentTypeError('k and m must be integers')
+
+    if k < 0 or m < 0:
+        raise argparse.ArgumentTypeError('k and m must be positive integers')
+
+    return k, m
+
+
 # program options
 def get_arguments_parser():
     arguments_parser = argparse.ArgumentParser(description=__doc__)
@@ -86,6 +105,11 @@ def get_arguments_parser():
         help='consume hessian from an other file',
         action=helpers.create_open_chemistry_file_action())
 
+    arguments_parser.add_argument(
+        '-R', '--romberg',
+        type=treat_romberg_arg,
+        help='Bypass detection and force a value in the triangle. Must be of the form `k;m`.')
+
     return arguments_parser
 
 
@@ -104,12 +128,23 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
+    # Romberg
+    if args.romberg:
+        if not (0 <= args.romberg[0] < recipe['k_max']):
+            return exit_failure(
+                'Error while treating --romberg: k (={}) >= k_max (={})'.format(args.romberg[0], recipe['k_max']))
+        if not (0 <= args.romberg[1] < (recipe['k_max'] - args.romberg[0])):
+            return exit_failure(
+                'Error while treating --romberg: no such m={} with k={}'.format(*reversed(args.romberg)))
+
+    # Storage
     if not os.path.exists(os.path.join(recipe_directory, args.data)):
         return exit_failure('Data file {} does not exists'.format(os.path.join(recipe_directory, args.data)))
 
     storage = files.ComputationalResults(recipe, directory=recipe_directory)
     storage.read(args.data)
 
+    # go and bake
     baker = baking.Baker(recipe, storage, directory=recipe_directory)
     only = None
 
@@ -120,7 +155,12 @@ def main():
             return exit_failure('error while treating --only: {}'.format(str(e)))
 
     try:
-        cf = baker.bake(copy_zero_field_basis=not args.do_not_steal, verbosity_level=args.verbose, only=only)
+        cf = baker.bake(
+            copy_zero_field_basis=not args.do_not_steal,
+            verbosity_level=args.verbose,
+            only=only,
+            force_choice=args.romberg
+        )
     except baking.BadBaking as e:
         return exit_failure('error while baking: {}'.format(str(e)))
 
