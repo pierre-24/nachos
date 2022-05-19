@@ -9,6 +9,7 @@ CONFIG = {
             ('HF', {'G': 2, 'F': 3}),
             ('DFT', {'G': 2, 'F': 3}),
             ('MP2', {'G': 2, 'F': 2}),  # ... but only static polarizability
+            ('SCS-MP2', {'G': 0, 'F': 0}),  # special MP2-SCS, from energy
             ('MP3', {'G': 1, 'F': 1}),
             ('MP4D', {'G': 1, 'F': 1}),
             ('MP4DQ', {'G': 1, 'F': 1}),

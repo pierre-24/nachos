@@ -37,6 +37,9 @@ def get_arguments_parser():
 
     arguments_parser.add_argument('directories', nargs='*', type=is_dir, help='directory where to look for QM results')
 
+    arguments_parser.add_argument(
+        '--gaussian-logs', action='store_true', help='Use Gaussian LOGs instead of FCHKs (... but why in the world?!?)')
+
     return arguments_parser
 
 
@@ -63,7 +66,7 @@ def main():
         directories = args.directories
 
     try:
-        storage = cooker.cook(directories, verbosity_level=args.verbose)
+        storage = cooker.cook(directories, verbosity_level=args.verbose, use_gaussian_logs=args.gaussian_logs)
     except cooking.BadCooking as e:
         return exit_failure('error while cooking inputs: {}'.format(str(e)))
 

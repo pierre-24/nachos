@@ -389,6 +389,47 @@ class PrepareTestCase(NachosTestCase):
                 for i in range(3):
                     self.assertArraysAlmostEqual(float(content[-4 + i][6:].strip()), real_fields[i])
 
+    def test_prepare_mp2_SCS(self):
+        """Just test that SCS-MP2 results in MP2"""
+
+        name = 'water_test'
+        min_field = .0004
+
+        differentiation = {
+            1: ['energy']
+        }
+
+        opt_dict = dict(
+            flavor='gaussian',
+            type='F',
+            method='SCS-MP2',
+            basis_set='6-31+G*',
+            geometry=self.geometry,
+            differentiation=differentiation,
+            name=name,
+            min_field=min_field,
+            flavor_extra={'use_full': False}
+        )
+
+        r = files.Recipe(**opt_dict)
+        r.check_data()
+
+        fields = preparing.fields_needed_by_recipe(r)
+
+        preparer = preparing.Preparer(recipe=r, directory=self.working_directory)
+        preparer.prepare()
+
+        # check a random file
+        n = random.randrange(1, len(fields) + 1)
+        path = os.path.join(self.working_directory, name + '_{:04d}.com').format(n)
+        self.assertTrue(os.path.exists(path), msg=path)
+
+        with open(path) as f:
+            content = f.readlines()
+            self.assertNotIn('SCS-MP2', content[3])
+            self.assertNotIn('MP2=Full', content[3])
+            self.assertIn('MP2', content[3])
+
     def test_nachos_prepare(self):
         """Test the preparer program"""
 

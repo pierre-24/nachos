@@ -4,218 +4,15 @@ import math
 import numpy
 import sys
 
-from qcip_tools import quantities, derivatives, derivatives_g, derivatives_e, chemistry_files, molecule, atom
-from qcip_tools.chemistry_files import helpers, gaussian, PropertyNotPresent, PropertyNotDefined, dalton
+from qcip_tools import quantities, derivatives, derivatives_e
+from qcip_tools.chemistry_files import helpers, PropertyNotPresent, PropertyNotDefined
 
 from nachos.core import files, preparing
+from nachos.qcip_tools_ext import gaussian, qchem  # noqa
 
 
 class BadCooking(Exception):
     pass
-
-
-@gaussian.FCHK.define_property('n:input_electric_field')
-def gaussian__FCHK__get_input_electric_field(obj, *args, **kwargs):
-    """Get the input electric field
-
-    :param obj: object
-    :type obj: qcip_tools.chemistry_files.gaussian.FCHK
-    :rtype: dict
-    """
-
-    if 'External E-field' in obj:
-        field = obj.get('External E-field')
-        return field
-    else:
-        raise PropertyNotPresent('n:input_electric_field')
-
-
-@dalton.Output.define_property('geometrical_derivatives')
-def dalton__output__get_gradient(obj, *args, **kwargs):
-    """Get the cartesian gradient out of a dalton calculation output
-
-    (redefined so that it only fetch the gradient)
-
-    :param obj: object
-    :type obj: qcip_tools.chemistry_files.dalton.Output
-    :rtype: dict
-    """
-
-    geometrical_derivatives = {}
-
-    dof = 3 * len(obj.molecule)
-    trans_plus_rot = 5 if obj.molecule.linear() else 6
-
-    # CC
-    x = obj.search('Molecular gradient', into='CC')
-    if x != -1:
-        gradient = derivatives_g.BaseGeometricalDerivativeTensor(
-            representation='G', spacial_dof=dof, trans_plus_rot=trans_plus_rot)
-
-        for i in range(len(obj.molecule)):
-            line = obj.lines[x + 3 + i].split()
-            gradient.components[i * 3:(i + 1) * 3] = [float(a) for a in line[1:]]
-        geometrical_derivatives['G'] = gradient
-
-    # general !
-    if obj.chunk_exists('ABACUS'):
-        x = obj.search('Molecular gradient', into='ABACUS')
-        if x != -1:
-            gradient = derivatives_g.BaseGeometricalDerivativeTensor(
-                representation='G', spacial_dof=dof, trans_plus_rot=trans_plus_rot)
-
-            for i in range(len(obj.molecule)):
-                line = obj.lines[x + 3 + i].split()
-                gradient.components[i * 3:(i + 1) * 3] = [float(a) for a in line[1:]]
-            geometrical_derivatives['G'] = gradient
-
-    if not geometrical_derivatives:
-        raise PropertyNotPresent('geometrical_derivatives')
-
-    return geometrical_derivatives
-
-
-class ProgramCalled:
-    """Remind when a program is called
-
-    :param prog_name: program
-    :type prog_name: str
-    :type line_start: int
-    :type line_end: int
-    """
-
-    def __init__(self, prog_name, line_start, line_end):
-
-        self.prog_name = prog_name
-        self.line_start = line_start
-        self.line_end = line_end
-
-    def __repr__(self):
-        return 'Program {}: {}:{}'.format(self.prog_name, self.line_start, self.line_end)
-
-
-class QChemLogFile(
-        chemistry_files.ChemistryLogFile, chemistry_files.WithIdentificationMixin, chemistry_files.WithMoleculeMixin):
-
-    #: The identifier
-    file_type = 'QCHEM_LOG'
-    chunk_title_variable = 'prog_name'
-
-    def __init__(self):
-        self.molecule = molecule.Molecule()
-
-    @classmethod
-    def attempt_identification(cls, f):
-        """A QChem log ... Contains a few "qchem" in the beginning (limit to the 100 first lines)"
-        """
-
-        count = 0
-        num_of_qchem = 0
-
-        for line in f.readlines():
-            if count > 100:
-                break
-            if 'Q-Chem' in line or 'qchem' in line:
-                num_of_qchem += 1
-            count += 1
-
-        return num_of_qchem > 5
-
-    def read(self, f):
-        """
-
-        :param f: File
-        :type f: file
-        """
-
-        super().read(f)
-        self.chunks.append(ProgramCalled('intro', 1, -1))
-
-        line_geom = -1
-
-        for index, line in enumerate(self.lines):
-            if 'General SCF calculation program' in line:
-                self.chunks[-1].line_end = index - 1
-                self.chunks.append(ProgramCalled('scf', index, -1))
-            elif 'Standard Nuclear Orientation (Angstroms)' in line:
-                line_geom = index + 2
-            elif 'CCMAN2:' in line:
-                self.chunks[-1].line_end = index - 1
-                self.chunks.append(ProgramCalled('ccman2', index, -1))
-            elif 'Orbital Energies (a.u.) and Symmetries' in line:
-                self.chunks[-1].line_end = index - 1
-                self.chunks.append(ProgramCalled('analysis', index, -1))
-
-        if line_geom == -1:
-            raise Exception('geometry not found')
-
-        for line in self.lines[line_geom:]:
-            if '---------------' in line:
-                break
-
-            inf = line.split()
-            self.molecule.insert(atom.Atom(
-                symbol=inf[1],
-                position=[float(a) for a in inf[2:5]]
-            ))
-
-
-helpers.EXTRA_CHEMISTRY_FILES.append(QChemLogFile)
-
-
-@QChemLogFile.define_property('n:input_electric_field')
-def qchem__log__property__input_electric_field(obj, *args, **kwargs):
-    """Get the input electric field
-
-    :param obj: object
-    :type obj: QChemLogFile
-    :rtype: dict
-    """
-
-    field = [.0, .0, .0, .0]
-
-    found = obj.search('Cartesian multipole field', into='intro')
-    if found == -1:
-        return field
-
-    for i in range(3):
-        field[i + 1] = float(obj.lines[found + 3 + i][16:].strip())
-
-    return field
-
-
-@QChemLogFile.define_property('computed_energies')
-def qchem__log__property__computed_energies(obj, *args, **kwargs):
-    """Get the energies. Returns a dictionary of the energies at different level of approximation.
-
-    :param obj: object
-    :type obj: QChemLogFile
-    :rtype: dict
-    """
-
-    found = obj.search('SCF energy', into='ccman2')
-    if found == -1:
-        raise PropertyNotDefined('computed_energy')
-
-    energies = {'total': .0}
-
-    for line in obj.lines[found:]:
-        if len(line) < 5:
-            break
-
-        inf = line.split()
-
-        if inf[1] == 'correlation':
-            continue
-
-        if inf[0] == 'SCF':
-            inf[0] = 'HF'
-
-        e = float(inf[-1])
-        energies[inf[0] if inf[0] != 'SCF' else 'HF'] = e
-        energies['total'] = e
-
-    return energies
 
 
 class Cooker:
@@ -237,15 +34,17 @@ class Cooker:
         self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
-    def cook(self, directories, out=sys.stdout, verbosity_level=0):
+    def cook(self, directories, out=sys.stdout, verbosity_level=0, use_gaussian_logs=False):
         """Cook files in directories, all together in a storage file
 
         :param directories: directories where QM results should be looked for
         :type directories: list of str
-        :param out: outpout of eventual information
+        :param out: output of eventual information
         :type out: file
-        :param verbosity_level: wheter to write information or not
+        :param verbosity_level: wetter to write information or not
         :type verbosity_level: bool
+        :param use_gaussian_logs: use Gaussian LOGs instead of FCHKs. But don't ;)
+        :type use_gaussian_logs: bool
         :rtype: nachos.core.files.ComputationalResults
         """
 
@@ -253,6 +52,8 @@ class Cooker:
 
         if self.recipe['flavor'] == 'gaussian':
             look_for = ['*.fchk']
+            if use_gaussian_logs:
+                look_for = ['*.log']
         elif self.recipe['flavor'] == 'dalton':
             look_for = ['*.tar.gz']
             if any(a[0] == 'G' for a in self.recipe.bases()):
@@ -331,13 +132,20 @@ class Cooker:
             try:
                 energies = f.property('computed_energies')
 
-                if f.file_type in ['GAUSSIAN_FCHK', 'QCHEM_LOG']:
-                    key = self.recipe['method']
-                    if key == 'DFT':
-                        key = 'SCF/DFT'
-                    energy = energies[key]  # tries to catch the energy for the correct method
+                if f.file_type in ['GAUSSIAN_FCHK', 'QCHEM_LOG', 'GAUSSIAN_LOG']:
+                    if self.recipe['method'] == 'SCS-MP2':
+                        # use the parameters from S. Grimme. J. Chem. Phys. 118, 9095 (2003).
+                        energy = energies['HF']
+                        sc_energies = f.property('n:spin_components_e2')
+                        energy += 1 / 3 * (sc_energies['aa'] + sc_energies['bb'])  # p_T * E_T
+                        energy += 6 / 5 * sc_energies['ab']  # p_S * E_S
+                    else:
+                        key = self.recipe['method']
+                        if key == 'DFT':
+                            key = 'SCF/DFT'
+                        energy = energies[key]  # tries to catch the energy for the correct method
                     obtained.append('energy:' + self.recipe['method'])
-                else:
+                else:  # ?!?
                     energy = energies['total']
                     obtained.append('energy')
 

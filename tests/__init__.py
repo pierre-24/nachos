@@ -138,8 +138,11 @@ class NachosTestCase(unittest.TestCase):
 
         return subprocess.Popen(cmd, stdin=in_pipe, stdout=out_pipe, stderr=err_pipe, cwd=cwd)
 
-    def unzip_it(self, path, directory=None):
-        zf = zipfile.ZipFile(path, 'r')
+    def unzip_it(self, path: str, directory=None):
+        """Copy a zip file to temprary directory and unzip it"""
+
+        p = self.copy_to_temporary_directory(path)
+        zf = zipfile.ZipFile(p, 'r')
 
         if not directory:
             directory = self.temporary_directory
@@ -149,3 +152,5 @@ class NachosTestCase(unittest.TestCase):
 
         zf.extractall(directory)
         zf.close()
+
+        return p
