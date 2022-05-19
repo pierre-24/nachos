@@ -618,14 +618,15 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="nachos.core.cooking.Cooker.cook">
-<span class="sig-name descname"><span class="pre">cook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity_level=0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.Cooker.cook" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">cook</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directories</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out=&lt;_io.TextIOWrapper</span> <span class="pre">name='&lt;stdout&gt;'</span> <span class="pre">mode='w'</span> <span class="pre">encoding='utf-8'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbosity_level=0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_gaussian_logs=False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.Cooker.cook" title="Permalink to this definition"></a></dt>
 <dd><p>Cook files in directories, all together in a storage file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>directories</strong> (<em>list of str</em>) – directories where QM results should be looked for</p></li>
-<li><p><strong>out</strong> (<em>file</em>) – outpout of eventual information</p></li>
-<li><p><strong>verbosity_level</strong> (<em>bool</em>) – wheter to write information or not</p></li>
+<li><p><strong>out</strong> (<em>file</em>) – output of eventual information</p></li>
+<li><p><strong>verbosity_level</strong> (<em>bool</em>) – wetter to write information or not</p></li>
+<li><p><strong>use_gaussian_logs</strong> (<em>bool</em>) – use Gaussian LOGs instead of FCHKs. But don’t ;)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -654,101 +655,6 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 </dl>
 </dd></dl>
 
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nachos.core.cooking.ProgramCalled">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.cooking.</span></span><span class="sig-name descname"><span class="pre">ProgramCalled</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">line_end</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.ProgramCalled" title="Permalink to this definition"></a></dt>
-<dd><p>Remind when a program is called</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>prog_name</strong> (<em>str</em>) – program</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="nachos.core.cooking.QChemLogFile">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.cooking.</span></span><span class="sig-name descname"><span class="pre">QChemLogFile</span></span><a class="headerlink" href="#nachos.core.cooking.QChemLogFile" title="Permalink to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="nachos.core.cooking.QChemLogFile.attempt_identification">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">attempt_identification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.QChemLogFile.attempt_identification" title="Permalink to this definition"></a></dt>
-<dd><p>A QChem log … Contains a few “qchem” in the beginning (limit to the 100 first lines)”</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="nachos.core.cooking.QChemLogFile.file_type">
-<span class="sig-name descname"><span class="pre">file_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'QCHEM_LOG'</span></em><a class="headerlink" href="#nachos.core.cooking.QChemLogFile.file_type" title="Permalink to this definition"></a></dt>
-<dd><p>The identifier</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nachos.core.cooking.QChemLogFile.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.QChemLogFile.read" title="Permalink to this definition"></a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>f</strong> (<em>file</em>) – File</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nachos.core.cooking.dalton__output__get_gradient">
-<span class="sig-prename descclassname"><span class="pre">nachos.core.cooking.</span></span><span class="sig-name descname"><span class="pre">dalton__output__get_gradient</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.dalton__output__get_gradient" title="Permalink to this definition"></a></dt>
-<dd><p>Get the cartesian gradient out of a dalton calculation output</p>
-<p>(redefined so that it only fetch the gradient)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>qcip_tools.chemistry_files.dalton.Output</em>) – object</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nachos.core.cooking.gaussian__FCHK__get_input_electric_field">
-<span class="sig-prename descclassname"><span class="pre">nachos.core.cooking.</span></span><span class="sig-name descname"><span class="pre">gaussian__FCHK__get_input_electric_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.gaussian__FCHK__get_input_electric_field" title="Permalink to this definition"></a></dt>
-<dd><p>Get the input electric field</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>qcip_tools.chemistry_files.gaussian.FCHK</em>) – object</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nachos.core.cooking.qchem__log__property__computed_energies">
-<span class="sig-prename descclassname"><span class="pre">nachos.core.cooking.</span></span><span class="sig-name descname"><span class="pre">qchem__log__property__computed_energies</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.qchem__log__property__computed_energies" title="Permalink to this definition"></a></dt>
-<dd><p>Get the energies. Returns a dictionary of the energies at different level of approximation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#nachos.core.cooking.QChemLogFile" title="nachos.core.cooking.QChemLogFile"><em>QChemLogFile</em></a>) – object</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="nachos.core.cooking.qchem__log__property__input_electric_field">
-<span class="sig-prename descclassname"><span class="pre">nachos.core.cooking.</span></span><span class="sig-name descname"><span class="pre">qchem__log__property__input_electric_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.cooking.qchem__log__property__input_electric_field" title="Permalink to this definition"></a></dt>
-<dd><p>Get the input electric field</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>obj</strong> (<a class="reference internal" href="#nachos.core.cooking.QChemLogFile" title="nachos.core.cooking.QChemLogFile"><em>QChemLogFile</em></a>) – object</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
 </dd></dl>
 
 </section>

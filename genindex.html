@@ -85,7 +85,6 @@
  | <a href="#N"><strong>N</strong></a>
  | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
- | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
@@ -193,6 +192,13 @@
         <li><a href="use.html#cmdoption-nachos_make-frequencies">nachos_make command line option</a>
 </li>
         <li><a href="use.html#cmdoption-nachos_shake-f">nachos_shake command line option</a>
+</li>
+      </ul></li>
+      <li>
+    --gaussian-logs
+
+      <ul>
+        <li><a href="use.html#cmdoption-nachos_cook-gaussian-logs">nachos_cook command line option</a>
 </li>
       </ul></li>
       <li>
@@ -659,8 +665,6 @@
 </li>
       <li><a href="api.html#nachos.core.analyzing.Analyzer">Analyzer (class in nachos.core.analyzing)</a>
 </li>
-      <li><a href="api.html#nachos.core.cooking.QChemLogFile.attempt_identification">attempt_identification() (nachos.core.cooking.QChemLogFile class method)</a>
-</li>
   </ul></td>
 </tr></table>
 
@@ -733,8 +737,6 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#nachos.core.cooking.dalton__output__get_gradient">dalton__output__get_gradient() (in module nachos.core.cooking)</a>
-</li>
       <li><a href="api.html#nachos.core.preparing.Preparer.deform_geometry">deform_geometry() (nachos.core.preparing.Preparer static method)</a>
 </li>
       <li><a href="api.html#nachos.core.files.DerivativeAlreadyDefined">DerivativeAlreadyDefined</a>
@@ -784,8 +786,6 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#nachos.core.files.FieldsNotNeeded">FieldsNotNeeded</a>
 </li>
-      <li><a href="api.html#nachos.core.cooking.QChemLogFile.file_type">file_type (nachos.core.cooking.QChemLogFile attribute)</a>
-</li>
       <li><a href="api.html#nachos.core.making.FrequenciesValidator">FrequenciesValidator (class in nachos.core.making)</a>
 </li>
       <li><a href="api.html#nachos.core.shaking.VibrationalContribution.from_representation">from_representation() (nachos.core.shaking.VibrationalContribution static method)</a>
@@ -796,8 +796,6 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#nachos.core.cooking.gaussian__FCHK__get_input_electric_field">gaussian__FCHK__get_input_electric_field() (in module nachos.core.cooking)</a>
-</li>
       <li><a href="api.html#nachos.core.making.GenBasisValidator">GenBasisValidator (class in nachos.core.making)</a>
 </li>
       <li><a href="api.html#nachos.core.making.BasisCompleter.get_completions">get_completions() (nachos.core.making.BasisCompleter method)</a>
@@ -1015,6 +1013,8 @@
     nachos_cook command line option
 
       <ul>
+        <li><a href="use.html#cmdoption-nachos_cook-gaussian-logs">--gaussian-logs</a>
+</li>
         <li><a href="use.html#cmdoption-nachos_cook-h">--help</a>
 </li>
         <li><a href="use.html#cmdoption-nachos_cook-o">--output</a>
@@ -1189,13 +1189,11 @@
 </li>
       <li><a href="api.html#nachos.core.preparing.Preparer.prepare_gaussian_inputs">prepare_gaussian_inputs() (nachos.core.preparing.Preparer method)</a>
 </li>
-      <li><a href="api.html#nachos.core.preparing.Preparer.prepare_qchem_inputs">prepare_qchem_inputs() (nachos.core.preparing.Preparer method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#nachos.core.preparing.Preparer">Preparer (class in nachos.core.preparing)</a>
+      <li><a href="api.html#nachos.core.preparing.Preparer.prepare_qchem_inputs">prepare_qchem_inputs() (nachos.core.preparing.Preparer method)</a>
 </li>
-      <li><a href="api.html#nachos.core.cooking.ProgramCalled">ProgramCalled (class in nachos.core.cooking)</a>
+      <li><a href="api.html#nachos.core.preparing.Preparer">Preparer (class in nachos.core.preparing)</a>
 </li>
       <li><a href="api.html#nachos.core.baking.project_geometrical_derivatives">project_geometrical_derivatives() (in module nachos.core.baking)</a>
 </li>
@@ -1204,28 +1202,12 @@
   </ul></td>
 </tr></table>
 
-<h2 id="Q">Q</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#nachos.core.cooking.qchem__log__property__computed_energies">qchem__log__property__computed_energies() (in module nachos.core.cooking)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#nachos.core.cooking.qchem__log__property__input_electric_field">qchem__log__property__input_electric_field() (in module nachos.core.cooking)</a>
-</li>
-      <li><a href="api.html#nachos.core.cooking.QChemLogFile">QChemLogFile (class in nachos.core.cooking)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#nachos.core.cooking.QChemLogFile.read">read() (nachos.core.cooking.QChemLogFile method)</a>
+      <li><a href="api.html#nachos.core.files.ComputationalResults.read">read() (nachos.core.files.ComputationalResults method)</a>
 
       <ul>
-        <li><a href="api.html#nachos.core.files.ComputationalResults.read">(nachos.core.files.ComputationalResults method)</a>
-</li>
         <li><a href="api.html#nachos.core.files.Recipe.read">(nachos.core.files.Recipe method)</a>
 </li>
       </ul></li>

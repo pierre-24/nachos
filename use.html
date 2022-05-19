@@ -494,9 +494,9 @@ This also determine the maximum properties available at this level i.e. what you
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CCSD</span></code></p></td>
 <td><p>1</p></td>
 <td><p>1</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CCSD(T)</span></code></p></td>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CCSD(T)</span></code>, <code class="docutils literal notranslate"><span class="pre">SCS-MP2</span></code></p></td>
 <td><p>0</p></td>
 <td><p>0</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
@@ -504,6 +504,7 @@ This also determine the maximum properties available at this level i.e. what you
 </tbody>
 </table>
 <p>Some method are not available, but may be added in the future if needed (CI methods, for example).</p>
+<p><code class="docutils literal notranslate"><span class="pre">SCS-MP2</span></code> is computed according to <a class="reference external" href="https://dx.doi.org/10.1063/1.1569242">S. Grimme. J. Chem. Phys. 118, 9095 (2003).</a> with the default parameters of 1/3 and 6/5.</p>
 </li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">dalton</span></code>:</p>
 <table class="colwidths-given docutils align-default">
@@ -876,6 +877,7 @@ dalton <span class="nv">$INPUT_FILES</span>
 <h3>nachos_cook<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
 <p>Out of the results of calculation, create a h5 file to store them</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_cook [-h] [-v] [-V VERBOSE] [-r RECIPE] [-o OUTPUT]</span>
+<span class="go">                   [--gaussian-logs]</span>
 <span class="go">                   [directories [directories ...]]</span>
 </pre></div>
 </div>
@@ -915,10 +917,17 @@ dalton <span class="nv">$INPUT_FILES</span>
 <dd><p>Output h5 file</p>
 </dd></dl>
 
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-gaussian-logs">
+<span id="cmdoption-nachos-cook-gaussian-logs"></span><span class="sig-name descname"><span class="pre">--gaussian-logs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-gaussian-logs" title="Permalink to this definition"></a></dt>
+<dd><p>Use Gaussian LOGs instead of FCHKs (… but why in the world?!?)</p>
+</dd></dl>
+
 </section>
 <p>The program fetch the different computational results from each files that it can fin (it looks for FCHK files with gaussian, TAR archive and OUT files for dalton, LOG for Q-Chem), and mix them together in a single <em>data file</em>.</p>
 <p>By default, the program looks for output files <strong>in the same directory as the recipe</strong>. You can supply directories as argument, but in this case, the program does not look in the recipe directory (so don’t forget to add it to the list).</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> option allows you to know which files the program actually discovered and used.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--gaussian-logs</span></code> is experimental, and is only tested for HF, MP2 and SCS-MP2 (that is the <strong>only</strong> way to get this one).</p>
 <section id="id4">
 <h3>nachos_bake<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
 <p>From h5 file, perform numerical differentiation</p>
@@ -1007,7 +1016,7 @@ It expects a semicolon list like the <code class="docutils literal notranslate">
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GG</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Using <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F:1;FF:1&quot;</span></code> will request to peform the first order geometrical derivatives <strong>only</strong> for the dipole moment and static polarizability, while <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F;FF:1&quot;</span></code> will request the same for static hyperpolarizability, but adds the second order for the dipole moment (as written in the recipe).
+<p>Using <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F:1;FF:1&quot;</span></code> will request to perform the first order geometrical derivatives <strong>only</strong> for the dipole moment and static polarizability, while <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F;FF:1&quot;</span></code> will request the same for static hyperpolarizability, but adds the second order for the dipole moment (as written in the recipe).
 In both cases, dynamic polarizability is not differentiated.</p>
 <p>The output depends on the value of <code class="docutils literal notranslate"><span class="pre">-V</span></code>, which can be:</p>
 <ul class="simple">

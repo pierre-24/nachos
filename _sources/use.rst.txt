@@ -260,13 +260,15 @@ This also determine the maximum properties available at this level i.e. what you
        * - ``CCSD``
          - 1
          - 1
-         - ``energy``, ``G``
-       * - ``CCSD(T)``
+         - ``energy``, ``F``, ``G``
+       * - ``CCSD(T)``, ``SCS-MP2``
          - 0
          - 0
          - ``energy``
 
   Some method are not available, but may be added in the future if needed (CI methods, for example).
+
+  ``SCS-MP2`` is computed according to `S. Grimme. J. Chem. Phys. 118, 9095 (2003). <https://dx.doi.org/10.1063/1.1569242>`_ with the default parameters of 1/3 and 6/5.
 
 + For ``dalton``:
 
@@ -546,6 +548,8 @@ By default, the program looks for output files **in the same directory as the re
 
 The ``-V 1`` option allows you to know which files the program actually discovered and used.
 
+The ``--gaussian-logs`` is experimental, and is only tested for HF, MP2 and SCS-MP2 (that is the **only** way to get this one).
+
 
 
 .. autoprogram:: nachos.bake:get_arguments_parser()
@@ -568,7 +572,7 @@ So, for example, if you have a recipe that contains:
       1:
         - GG
 
-Using ``-O "F:1;FF:1"`` will request to peform the first order geometrical derivatives **only** for the dipole moment and static polarizability, while ``-O "F;FF:1"`` will request the same for static hyperpolarizability, but adds the second order for the dipole moment (as written in the recipe).
+Using ``-O "F:1;FF:1"`` will request to perform the first order geometrical derivatives **only** for the dipole moment and static polarizability, while ``-O "F;FF:1"`` will request the same for static hyperpolarizability, but adds the second order for the dipole moment (as written in the recipe).
 In both cases, dynamic polarizability is not differentiated.
 
 The output depends on the value of ``-V``, which can be:
