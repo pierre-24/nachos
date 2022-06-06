@@ -52,6 +52,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#id4">nachos_bake</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id5">nachos_shake</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id6">nachos_analyze</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id7">nachos_peek</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#appendix">Appendix</a><ul>
@@ -133,10 +134,10 @@ Given the cartesian hessian, <code class="docutils literal notranslate"><span cl
 <section id="general-workflow">
 <h2>General workflow<a class="headerlink" href="#general-workflow" title="Permalink to this headline"></a></h2>
 <p>Here is the schematic of the workflow with the nachos package:</p>
-<figure class="align-center" id="id7">
+<figure class="align-center" id="id8">
 <img alt="_images/workflow.png" src="_images/workflow.png" />
 <figcaption>
-<p><span class="caption-text">Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).</span><a class="headerlink" href="#id7" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
 </figcaption>
 </figure>
 <p>In short,</p>
@@ -146,7 +147,7 @@ Given the cartesian hessian, <code class="docutils literal notranslate"><span cl
 <li><p>The quantum chemistry program process the different input files and generate output files ;</p></li>
 <li><p><a class="reference external" href="#id3">nachos_cook</a> carry out all the information that it can get from output files (FCHK files for gaussian, TAR archives and OUT files for Dalton) and store them in a <em>data file</em> (<code class="docutils literal notranslate"><span class="pre">nachos_data.h5</span></code>, but you can change that) ;</p></li>
 <li><p><a class="reference external" href="#id4">nachos_bake</a> perform the requested numerical differentiation(s) out of the data from the <em>data file</em>, and store them in a <em>final file</em> (<code class="docutils literal notranslate"><span class="pre">molecule_nd.h5</span></code>, but you can change that) ;</p></li>
-<li><p>(<em>optional</em>) <a class="reference external" href="#id6">nachos_analyze</a> allow to quickly get a given property for each quantity stored in the <em>final file</em> (e.g. a tensor component, an average, …) ;</p></li>
+<li><p>(<em>optional</em>) <a class="reference external" href="#id6">nachos_analyze</a> allow to quickly get a given property for each quantity stored in the <em>final file</em> (e.g. a tensor component, an average, …). <a class="reference external" href="#id8">nachos_peek</a>  also allow you to do that, but it dumps everything ;</p></li>
 <li><p>(<em>optional</em>) if possible, <a class="reference external" href="#id5">nachos_shake</a> will add the different vibrational contribution to the electrical derivatives of the energy.</p></li>
 </ol>
 <p>Therefore, it should looks like:</p>
@@ -167,6 +168,8 @@ nachos_shake
 
 <span class="c1"># ... eventually, post-analyze:</span>
 nachos_analyze -p <span class="s2">&quot;xxxx&quot;</span> &gt; nachos.log
+<span class="c1"># ... and/or ...</span>
+nachos_peek molecule_nd.h5
 </pre></div>
 </div>
 <p>See below for more details on every command.</p>
@@ -1352,6 +1355,33 @@ The <code class="docutils literal notranslate"><span class="pre">-I</span></code
 The <code class="docutils literal notranslate"><span class="pre">-g</span></code> option can be used to group vibrational contribution by perturbation order (for example, <span class="math notranslate nohighlight">\([\mu\alpha]^{1,1} + [\mu\alpha]^{2,0} + [\mu\alpha]^{0,2}\)</span> as <span class="math notranslate nohighlight">\([\mu\alpha]^\text{II}\)</span>)</p></li>
 </ul>
 </div>
+<section id="id7">
+<h3>nachos_peek<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
+<p>Peek into an output file (LOG, FCHK, H5, …)</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_peek [-h] [-v] [infile]</span>
+</pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_peek-arg-infile">
+<span id="cmdoption-nachos-peek-arg-infile"></span><span class="sig-name descname"><span class="pre">infile</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-arg-infile" title="Permalink to this definition"></a></dt>
+<dd><p>source of the derivatives</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_peek-h">
+<span id="cmdoption-nachos-peek-h"></span><span id="cmdoption-nachos_peek-help"></span><span id="cmdoption-nachos-peek-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-h" title="Permalink to this definition"></a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_peek-v">
+<span id="cmdoption-nachos-peek-v"></span><span id="cmdoption-nachos_peek-version"></span><span id="cmdoption-nachos-peek-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-v" title="Permalink to this definition"></a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+</section>
+<p>This program reads the (pure) geometrical and electrical derivatives found in a file.
+This program is less advance than <code class="docutils literal notranslate"><span class="pre">nachos_analyze</span></code>, since it <strong>does not</strong> include vibrational corrections.</p>
 </section>
 <section id="appendix">
 <h2>Appendix<a class="headerlink" href="#appendix" title="Permalink to this headline"></a></h2>
