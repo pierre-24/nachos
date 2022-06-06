@@ -10,6 +10,9 @@
 + Add uncertainties to the output.
 + Switch to `pip-tools`
 + Go to Github, and use `bump2version` and GH actions.
++ Add SCS-MP2 and ability to extract data from Gaussian LOG file.
++ Skip the auto procedure for choosing best value in Romberg triangle.
++ Add `nachos_peek` to look into files.
 
 ## Version 0.3
 
