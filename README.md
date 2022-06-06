@@ -8,7 +8,7 @@ Maintained by [Pierre Beaujean](https://pierrebeaujean.net) and created in the f
 This tool is based on [qcip_tools](https://github.com/pierre-24/qcip_tools/).
 
 
-Current release: [v0.3.7](https://github.com/pierre-24/nachos/releases/tag/v0.3.7) (see [CHANGELOG](./CHANGELOG.md)).
+Current release: [v0.3.8](https://github.com/pierre-24/nachos/releases/tag/v0.3.8) (see [CHANGELOG](./CHANGELOG.md)).
 
 ## Documentation
 
