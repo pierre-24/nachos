@@ -68,7 +68,7 @@ In short,
 3. The quantum chemistry program process the different input files and generate output files ;
 4. `nachos_cook <#id3>`_ carry out all the information that it can get from output files (FCHK files for gaussian, TAR archives and OUT files for Dalton) and store them in a *data file* (``nachos_data.h5``, but you can change that) ;
 5. `nachos_bake <#id4>`_ perform the requested numerical differentiation(s) out of the data from the *data file*, and store them in a *final file* (``molecule_nd.h5``, but you can change that) ;
-6. (*optional*) `nachos_analyze <#id6>`_ allow to quickly get a given property for each quantity stored in the *final file* (e.g. a tensor component, an average, ...) ;
+6. (*optional*) `nachos_analyze <#id6>`_ allow to quickly get a given property for each quantity stored in the *final file* (e.g. a tensor component, an average, ...). `nachos_peek <#id8>`_  also allow you to do that, but it dumps everything ;
 7. (*optional*) if possible, `nachos_shake <#id5>`_ will add the different vibrational contribution to the electrical derivatives of the energy.
 
 Therefore, it should looks like:
@@ -92,6 +92,8 @@ Therefore, it should looks like:
 
     # ... eventually, post-analyze:
     nachos_analyze -p "xxxx" > nachos.log
+    # ... and/or ...
+    nachos_peek molecule_nd.h5
 
 
 See below for more details on every command.
@@ -773,6 +775,12 @@ You can restrict the number of vibrational contribution with the ``-O`` option, 
     + If vibrational contribution have been added via ``nachos_shake`` to the program, the different values for each contribution will be printed.
       The ``-I`` option may be used to get ``property(total-current)`` rather than ``property(current)``, which is usefull to assess the impact of a given vibrationnal contribution on the total value (since some properties, like HRS and THS properties are not additive).
       The ``-g`` option can be used to group vibrational contribution by perturbation order (for example, :math:`[\mu\alpha]^{1,1} + [\mu\alpha]^{2,0} + [\mu\alpha]^{0,2}` as :math:`[\mu\alpha]^\text{II}`)
+
+.. autoprogram:: nachos.peek:get_arguments_parser()
+    :prog: nachos_peek
+
+This program reads the (pure) geometrical and electrical derivatives found in a file.
+This program is less advance than ``nachos_analyze``, since it **does not** include vibrational corrections.
 
 Appendix
 --------
