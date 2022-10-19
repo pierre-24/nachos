@@ -260,9 +260,9 @@ class Baker:
                                 fancy_output_component_of_derivative(initial_derivative, b_coo, recipe.geometry),
                                 basis_name))
 
-                        out.write('\n----------------------------------------------\n')
+                        out.write('\n------------------------------------------------------\n')
                         out.write(' F          V(F)              V(F)-V(0)\n')
-                        out.write('----------------------------------------------\n')
+                        out.write('------------------------------------------------------\n')
                         zero_field_val = tensor_access(
                             [0] * len(field), 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
 
@@ -277,11 +277,11 @@ class Baker:
                                 c, 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
                             dV = val - zero_field_val
                             out.write(
-                                '{: .7f} {: .10e} {: .10e}\n'.format(
+                                '{: .7f} {: .14e} {: .14e}\n'.format(
                                     field_val,
                                     val, dV))
 
-                        out.write('----------------------------------------------\n\n')
+                        out.write('------------------------------------------------------\n\n')
 
                         romberg_triangle = romberg_triangles[d_coo][b_coo]
                         out.write(romberg_triangle.romberg_triangle_repr(with_decoration=True))
