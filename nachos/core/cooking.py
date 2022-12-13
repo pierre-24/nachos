@@ -110,6 +110,11 @@ class Cooker:
         if self.recipe['type'] == 'F':
             try:
                 real_fields = f.property('n:input_electric_field')[1:4]
+
+                if f.file_type in ['GAUSSIAN_FCHK', 'GAUSSIAN_LOG']:
+                    # Gaussian computes actually for the opposite field!
+                    real_fields = list(-x for x in real_fields)
+
             except PropertyNotPresent:
                 raise BadCooking('F derivative but not electric field for {}'.format(name))
         else:

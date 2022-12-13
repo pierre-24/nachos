@@ -297,37 +297,6 @@ class CookTestCase(NachosTestCase):
                     places=10
                 )
 
-    def test_log_and_FCHK_energies_almost_equals(self):
-        self.unzip_it(self.zip_F_scs_mp2, self.working_directory)
-        directory = os.path.join(self.working_directory, 'numdiff_F_SCS-MP2')
-        path = os.path.join(directory, 'nachos_recipe.yml')
-
-        r = files.Recipe(directory=directory)
-
-        with open(path) as f:
-            r.read(f)
-
-        fields = preparing.fields_needed_by_recipe(r)
-
-        for m in ['HF', 'MP2', 'MP3', 'CCSD', 'CCSD(T)']:
-            r['method'] = m
-
-            c = cooking.Cooker(r, directory)
-
-            storage_from_fchk = c.cook([directory])
-            storage_from_log = c.cook([directory], use_gaussian_logs=True)
-
-            # check data randomly
-            for _ in range(5):
-                n = random.randrange(1, len(fields) + 1)
-                t_fields = tuple(fields[n - 1][0])
-
-                self.assertAlmostEqual(
-                    storage_from_log.results[t_fields][''].components[0],
-                    storage_from_fchk.results[t_fields][''].components[0],
-                    places=10
-                )
-
     def test_nachos_cook(self):
         """Test the cooker program"""
 
