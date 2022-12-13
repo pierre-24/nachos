@@ -91,7 +91,7 @@ pytz==2022.6
     #   pandas
 pyyaml==6.0
     # via nachos
-qcip-tools @ git+https://github.com/pierre-24/qcip_tools.git@v0.6.10
+qcip-tools @ git+https://github.com/pierre-24/qcip_tools.git@v0.7.0
     # via nachos
 requests==2.28.1
     # via

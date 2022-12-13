@@ -21,7 +21,7 @@ classifiers = [
 dependencies = [
     'pyyaml>=5.0',
     'h5py',
-    'qcip-tools @ git+https://github.com/pierre-24/qcip_tools.git@v0.6.10',
+    'qcip-tools @ git+https://github.com/pierre-24/qcip_tools.git@v0.7.0',
     'prompt_toolkit==1.0.15',
     'pandas>=1.2',
     'scipy>=1.7',
