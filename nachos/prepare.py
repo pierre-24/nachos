@@ -87,6 +87,10 @@ def main():
     if args.verbose >= 1:
         print('prepared {} calculation(s) to run'.format(len(n)))
 
+        if recipe['flavor'] == 'gaussian' and recipe['type'] == 'F':
+            print('!! note: Gaussian computes the property for the field in an opposite direction '
+                  'to what is expected by Nachos, there is no sign mistake in the input files!')
+
 
 if __name__ == '__main__':
     main()
