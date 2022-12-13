@@ -376,7 +376,7 @@ class ComputationalResults:
                     self.results[t_fields] = chemistry_datafile.ChemistryDataFile.read_derivatives_from_group(
                         fields_group[i], dof)
 
-    def tensor_element_access(self, fields, min_field, basis, inverse, component, frequency, recipe):
+    def tensor_element_access(self, fields, min_field, basis, component, frequency, recipe):
         t_fields = tuple(fields)
         if t_fields not in self.results:
             raise BadResult('fields {} is not available'.format(fields))
@@ -398,7 +398,7 @@ class ComputationalResults:
             if len(component) != results.representation.order():
                 raise BadResult('shape does not match for {}'.format(b_repr))
 
-        return (-1. if inverse else 1.) * results.components[component]
+        return results.components[component]
 
     @staticmethod
     def get_recipe_check_data(recipe):
