@@ -240,6 +240,9 @@ class Preparer:
                 fi.title = 'field({})='.format(level) + \
                     ','.join(Preparer.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
 
+                if self.recipe['type'] == 'F':
+                    fi.title += '\nNote: E-field in the opposite direction is used.'
+
             fi.options['nprocshared'] = self.recipe['flavor_extra']['procs']
             fi.options['mem'] = self.recipe['flavor_extra']['memory']
             fi.options['chk'] = 'xxx'
