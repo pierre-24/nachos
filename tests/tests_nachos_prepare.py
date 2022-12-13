@@ -183,7 +183,7 @@ class PrepareTestCase(NachosTestCase):
 
                 self.assertEqual(fi.other_blocks[-2][0], 'O     0')
                 self.assertEqual(
-                    [float(a) for a in fi.other_blocks[-1][0].split()],
+                    [-float(a) for a in fi.other_blocks[-1][0].split()],  # Gaussian compute reverse field!!
                     numerical_differentiation.real_fields(fields_n, min_field, 2.))
 
     def test_preparer_for_G(self):

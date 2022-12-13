@@ -281,7 +281,7 @@ class Preparer:
                 fi.other_blocks.extend(extra_sections_before)
 
             if self.recipe['type'] == 'F':
-                fi.other_blocks.append(['\t'.join(['{: .10f}'.format(a) for a in real_fields])])
+                fi.other_blocks.append(['\t'.join(['{: .10f}'.format(-a) for a in real_fields])])
 
             if extra_sections:
                 fi.other_blocks.extend(extra_sections)
