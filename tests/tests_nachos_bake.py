@@ -88,6 +88,17 @@ class BakeTestCase(NachosTestCase):
             electrical_derivatives['FFF']['static'],
             cf_with_alpha.derivatives['FFF']['static'])
 
+        # dynamic
+        cf_with_alpha = baker.bake(only=[(derivatives.Derivative('dD'), 1)])
+
+        self.assertIn('dDF', cf_with_alpha.derivatives)
+        self.assertEqual(len(cf_with_alpha.derivatives), 1)
+
+        self.assertTensorsAlmostEqual(
+            electrical_derivatives['dDF'][0.0428226997],
+            cf_with_alpha.derivatives['dDF']['1064nm'],
+            skip_frequency_test=True)
+
         # fire some errors:
         with self.assertRaises(baking.BadBaking):
             baker.bake(only=[(derivatives.Derivative(), 4)])
