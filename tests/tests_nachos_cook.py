@@ -97,8 +97,9 @@ class CookTestCase(NachosTestCase):
                     if level <= 1:
                         self.assertTensorsAlmostEqual(
                             electrical_derivatives['FF']['static'], results['FF']['static'])
+
                         self.assertTensorsAlmostEqual(
-                            electrical_derivatives['dD'][0.0428227067],
+                            electrical_derivatives['dD'][0.0428226997],
                             results['dD']['1064nm'],
                             skip_frequency_test=True)
 
@@ -254,6 +255,9 @@ class CookTestCase(NachosTestCase):
 
     def test_cook_F_scs_mp2(self):
         """Check that using SCS-MP2 is ok"""
+
+        # TODO: relaunch calculation with the inverse E-fields
+
         self.unzip_it(self.zip_F_scs_mp2, self.working_directory)
         directory = os.path.join(self.working_directory, 'numdiff_F_SCS-MP2')
         path = os.path.join(directory, 'nachos_recipe.yml')
@@ -273,7 +277,7 @@ class CookTestCase(NachosTestCase):
         for _ in range(10):
             n = random.randrange(1, len(fields) + 1)
             fields_n, level = fields[n - 1]
-            t_fields = tuple(fields_n)
+            t_fields = tuple(-x for x in fields_n)
             path = os.path.join(directory, r['name'] + '_{:04d}.log').format(n)
             self.assertTrue(os.path.exists(path), msg=path)
             with open(path) as f:
