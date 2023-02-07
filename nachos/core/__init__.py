@@ -86,6 +86,13 @@ CONFIG = {
     }
 }
 
+GAUSSIAN_DOUBLE_HYBRIDS = [
+    'B2PLYP', 'B2PLYPD', 'B2PLYPD3',
+    'mPW2PLYP', 'mPW2PLYPD',
+    'DSDPBEP86',
+    'PBE0DH', 'PBEQIDH'
+]
+
 
 def compute_numerical_derivative_of_tensor(
         recipe, basis, derivative_repr, tensor_func, frequency=None, dry_run=False, force_choice=None, **kwargs):
