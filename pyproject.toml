@@ -1,0 +1,51 @@
+[project]
+name = "nachos"
+dynamic = ["version"]
+authors = [
+    {name = "Pierre Beaujean", email = "pierre.beaujean@unamur.be"},
+]
+description = "NACHOS: numerical differentiation code"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+]
+dependencies = [
+    'pyyaml>=5.0',
+    'h5py',
+    'qcip-tools @ git+https://github.com/pierre-24/qcip_tools.git@v0.7.1',
+    'prompt_toolkit==1.0.15',
+    'pandas>=1.2',
+    'scipy>=1.7',
+    'numpy>=1.20'
+]
+
+
+[project.urls]
+documentation = "https://pierre-24.github.io/nachos/"
+repository = "https://github.com/pierre-24/nachos.git"
+
+[project.scripts]
+
+# keep that alphabetical
+nachos_make = 'nachos.make:main'
+nachos_prepare = 'nachos.prepare:main'
+nachos_cook = 'nachos.cook:main'
+nachos_bake = 'nachos.bake:main'
+nachos_shake = 'nachos.shake:main'
+nachos_analyze = 'nachos.analyze:main'
+nachos_peek = 'nachos.peek:main'
+
+[tool.setuptools]
+packages = ['nachos', 'nachos.core', 'nachos.qcip_tools_ext']
+
+[tool.setuptools.dynamic]
+version = {attr = "nachos.__version__"}

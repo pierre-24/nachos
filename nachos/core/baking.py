@@ -261,10 +261,10 @@ class Baker:
                                 basis_name))
 
                         out.write('\n------------------------------------------------------\n')
-                        out.write(' F          V(F)              V(F)-V(0)\n')
+                        out.write(' F          V(F)                  V(F)-V(0)\n')
                         out.write('------------------------------------------------------\n')
                         zero_field_val = tensor_access(
-                            [0] * len(field), 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
+                            [0] * len(field), 0, initial_derivative, b_coo, final_result.frequency, recipe)
 
                         for i, c in enumerate(all_fields):
                             k = i - recipe['k_max']
@@ -274,7 +274,7 @@ class Baker:
                                 field_val = recipe['min_field'] * recipe['ratio'] ** (abs(k) - 1) * (-1 if k < 0 else 1)
 
                             val = tensor_access(
-                                c, 0, initial_derivative, False, b_coo, final_result.frequency, recipe)
+                                c, 0, initial_derivative, b_coo, final_result.frequency, recipe)
                             dV = val - zero_field_val
                             out.write(
                                 '{: .7f} {: .14e} {: .14e}\n'.format(

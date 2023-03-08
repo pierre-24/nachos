@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import shutil
 import zipfile
+import pathlib
 
 from qcip_tools import derivatives
 
@@ -109,7 +110,6 @@ class NachosTestCase(unittest.TestCase):
             self,
             path,
             args=None,
-            cwd='.',
             in_pipe=subprocess.DEVNULL,
             out_pipe=subprocess.DEVNULL,
             err_pipe=subprocess.DEVNULL):
@@ -128,8 +128,10 @@ class NachosTestCase(unittest.TestCase):
         :rtype: subprocess.Popen
         """
 
-        real_path = os.path.join(cwd, path)
-        if not os.path.isfile(real_path):
+        cwd = pathlib.Path(__file__).parent.parent
+
+        real_path = cwd / path
+        if not real_path.is_file():
             raise FileNotFoundError(real_path)
 
         cmd = ['python', path]

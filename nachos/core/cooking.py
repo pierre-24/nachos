@@ -7,7 +7,7 @@ import sys
 from qcip_tools import quantities, derivatives, derivatives_e
 from qcip_tools.chemistry_files import helpers, PropertyNotPresent, PropertyNotDefined
 
-from nachos.core import files, preparing
+from nachos.core import files, preparing, GAUSSIAN_DOUBLE_HYBRIDS
 from nachos.qcip_tools_ext import gaussian, qchem  # noqa
 
 
@@ -110,6 +110,11 @@ class Cooker:
         if self.recipe['type'] == 'F':
             try:
                 real_fields = f.property('n:input_electric_field')[1:4]
+
+                if f.file_type in ['GAUSSIAN_FCHK', 'GAUSSIAN_LOG']:
+                    # Gaussian computes actually for the opposite field!
+                    real_fields = list(-x for x in real_fields)
+
             except PropertyNotPresent:
                 raise BadCooking('F derivative but not electric field for {}'.format(name))
         else:
@@ -143,6 +148,8 @@ class Cooker:
                         key = self.recipe['method']
                         if key == 'DFT':
                             key = 'SCF/DFT'
+                            if self.recipe['flavor_extra']['XC'] in GAUSSIAN_DOUBLE_HYBRIDS:
+                                key = 'MP2'  # Gaussian puts the result in the MP2 field instead of SCF/DFT.
                         energy = energies[key]  # tries to catch the energy for the correct method
                     obtained.append('energy:' + self.recipe['method'])
                 else:  # ?!?

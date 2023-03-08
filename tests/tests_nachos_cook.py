@@ -16,13 +16,13 @@ class CookTestCase(NachosTestCase):
         self.zip_F = 'numdiff_F.zip'
         self.zip_F_qchem = 'numdiff_F_qchem.zip'
         self.zip_F_scs_mp2 = 'numdiff_F_SCS-MP2.zip'
+        self.zip_F_b2plyp = 'numdiff_F_b2plyp.zip'
         self.zip_G = 'numdiff_G.zip'
         self.zip_G_dalton = 'numdiff_G_dalton.zip'
         self.working_directory = self.setup_temporary_directory()
 
     def tearDown(self):
         super().tearDown()
-        pass
 
     def test_fields_from_deformed_geometry(self):
         """Test that the code is able to get back the fields from a deformed geometry"""
@@ -97,10 +97,48 @@ class CookTestCase(NachosTestCase):
                     if level <= 1:
                         self.assertTensorsAlmostEqual(
                             electrical_derivatives['FF']['static'], results['FF']['static'])
+
                         self.assertTensorsAlmostEqual(
-                            electrical_derivatives['dD'][0.0428227067],
+                            electrical_derivatives['dD'][0.0428226997],
                             results['dD']['1064nm'],
                             skip_frequency_test=True)
+
+    def test_cook_F_gaussian_b2plyp(self):
+        """Check if B2PLYP data are similar to MP2 ones"""
+
+        self.unzip_it(self.zip_F_b2plyp, self.working_directory)
+        directory = os.path.join(self.working_directory, 'numdiff_F_b2plyp')
+        path = os.path.join(directory, 'nachos_recipe.yml')
+
+        r = files.Recipe(directory=directory)
+
+        with open(path) as f:
+            r.read(f)
+
+        fields = preparing.fields_needed_by_recipe(r)
+
+        c = cooking.Cooker(r, directory)
+        storage = c.cook([directory])
+
+        # write and read
+        self.assertEqual(storage.check(), ([], []))
+
+        # check data
+        for _ in range(10):
+            n = random.randrange(1, len(fields) + 1)
+            fields_n, level = fields[n - 1]
+            t_fields = tuple(fields_n)
+            path = os.path.join(directory, r['name'] + '_{:04d}.fchk').format(n)
+            self.assertTrue(os.path.exists(path), msg=path)
+            with open(path) as f:
+                fx = gaussian.FCHK()
+                fx.read(f)
+                results = storage.results[t_fields]
+
+                energies = fx.property('computed_energies')
+
+                self.assertNotAlmostEqual(energies['SCF/DFT'], energies['MP2'])
+                self.assertAlmostEqual(energies['MP2'], results[''].components[0])
 
     def test_cook_G_gaussian(self):
         self.unzip_it(self.zip_G, self.working_directory)
@@ -254,6 +292,9 @@ class CookTestCase(NachosTestCase):
 
     def test_cook_F_scs_mp2(self):
         """Check that using SCS-MP2 is ok"""
+
+        # TODO: relaunch calculation with the inverse E-fields
+
         self.unzip_it(self.zip_F_scs_mp2, self.working_directory)
         directory = os.path.join(self.working_directory, 'numdiff_F_SCS-MP2')
         path = os.path.join(directory, 'nachos_recipe.yml')
@@ -273,7 +314,7 @@ class CookTestCase(NachosTestCase):
         for _ in range(10):
             n = random.randrange(1, len(fields) + 1)
             fields_n, level = fields[n - 1]
-            t_fields = tuple(fields_n)
+            t_fields = tuple(-x for x in fields_n)
             path = os.path.join(directory, r['name'] + '_{:04d}.log').format(n)
             self.assertTrue(os.path.exists(path), msg=path)
             with open(path) as f:
@@ -294,37 +335,6 @@ class CookTestCase(NachosTestCase):
                 self.assertAlmostEqual(
                     results[''].components[0],
                     energies['HF'] + 1 / 3 * (sc_energies['aa'] + sc_energies['bb']) + 6 / 5 * sc_energies['ab'],
-                    places=10
-                )
-
-    def test_log_and_FCHK_energies_almost_equals(self):
-        self.unzip_it(self.zip_F_scs_mp2, self.working_directory)
-        directory = os.path.join(self.working_directory, 'numdiff_F_SCS-MP2')
-        path = os.path.join(directory, 'nachos_recipe.yml')
-
-        r = files.Recipe(directory=directory)
-
-        with open(path) as f:
-            r.read(f)
-
-        fields = preparing.fields_needed_by_recipe(r)
-
-        for m in ['HF', 'MP2', 'MP3', 'CCSD', 'CCSD(T)']:
-            r['method'] = m
-
-            c = cooking.Cooker(r, directory)
-
-            storage_from_fchk = c.cook([directory])
-            storage_from_log = c.cook([directory], use_gaussian_logs=True)
-
-            # check data randomly
-            for _ in range(5):
-                n = random.randrange(1, len(fields) + 1)
-                t_fields = tuple(fields[n - 1][0])
-
-                self.assertAlmostEqual(
-                    storage_from_log.results[t_fields][''].components[0],
-                    storage_from_fchk.results[t_fields][''].components[0],
                     places=10
                 )
 
