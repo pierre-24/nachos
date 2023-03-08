@@ -14,7 +14,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -66,8 +68,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Installing nachos</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Installing nachos</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/install.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -78,9 +80,9 @@
            <div itemprop="articleBody">
              
   <section id="installing-nachos">
-<h1>Installing nachos<a class="headerlink" href="#installing-nachos" title="Permalink to this headline"></a></h1>
+<h1>Installing nachos<a class="headerlink" href="#installing-nachos" title="Permalink to this heading"></a></h1>
 <section id="normal-install">
-<h2>Normal install<a class="headerlink" href="#normal-install" title="Permalink to this headline"></a></h2>
+<h2>Normal install<a class="headerlink" href="#normal-install" title="Permalink to this heading"></a></h2>
 <p>To install the latest version of nachos:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip3 install --user --upgrade git+https://github.com/pierre-24/nachos.git
 </pre></div>
@@ -93,7 +95,7 @@ You will probably need to add <code class="docutils literal notranslate"><span c
 <p>On the other hand, you can install it in a <em>virtualenv</em> (see below).</p>
 </section>
 <section id="optional-patching-dalton">
-<h2>(<em>optional</em>) Patching Dalton<a class="headerlink" href="#optional-patching-dalton" title="Permalink to this headline"></a></h2>
+<h2>(<em>optional</em>) Patching Dalton<a class="headerlink" href="#optional-patching-dalton" title="Permalink to this heading"></a></h2>
 <p>By default, it is possible to perform numerical differentiation with Dalton, but the following patch will improve different stuffs:</p>
 <ul class="simple">
 <li><p>Increase values of some constants, so that more frequencies and responses functions can be computed in the same input ;</p></li>
@@ -103,7 +105,7 @@ You will probably need to add <code class="docutils literal notranslate"><span c
 <p>You can find the patch and instructions <a class="reference external" href="https://pierre-24.github.io/qcip_tools/install.html#optional-patching-dalton">there</a>.</p>
 </section>
 <section id="installation-for-contributors">
-<h2>Installation for contributors<a class="headerlink" href="#installation-for-contributors" title="Permalink to this headline"></a></h2>
+<h2>Installation for contributors<a class="headerlink" href="#installation-for-contributors" title="Permalink to this heading"></a></h2>
 <p>To contribute to the project,</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.github.com/en/get-started/quickstart/fork-a-repo">Fork it</a>.</p></li>
@@ -111,7 +113,7 @@ You will probably need to add <code class="docutils literal notranslate"><span c
 <li><p>Go in it: <code class="docutils literal notranslate"><span class="pre">cd</span> <span class="pre">nachos</span></code></p></li>
 <li><p>Install pip-tools: <code class="docutils literal notranslate"><span class="pre">pip3</span> <span class="pre">install</span> <span class="pre">pip-tools</span></code></p></li>
 <li><p>Install virtualenv <code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv;</span> <span class="pre">source</span> <span class="pre">venv/bin/activate</span></code></p></li>
-<li><p>Install dependencies: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">init</span></code>.</p></li>
+<li><p>Install dependencies: <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install-dev</span></code>.</p></li>
 <li><p>Add upstream: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">remote</span> <span class="pre">add</span> <span class="pre">upstream</span> <span class="pre">https://github.com/pierre-24/nachos.git</span></code></p></li>
 <li><p>Don’t forget to create a separate branch to implement your changes: <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">checkout</span> <span class="pre">-b</span> <span class="pre">my_branch</span> <span class="pre">upstream/dev</span></code>.</p></li>
 </ul>

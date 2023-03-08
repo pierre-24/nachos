@@ -521,6 +521,12 @@ By using ``-d``, you can decide where the input files should be generated, but k
 
 The ``-V 1`` option allows you to know how much files where generated.
 
+
+.. warning::
+
+    When using electric fields, Gaussian compute the fields in an opposite direction to what is expected by Nachos.
+    So, e.g., if the title card say that the field is computed in the +x direction it is the **normal behavior** that the x component of the electric field has a negative sign.
+
 .. note::
 
     To helps the dalton program, a file called ``inputs_matching.txt`` is created for this *flavor*, where each lines contains the combination of dal and mol file to launch (because there may be different dal files).

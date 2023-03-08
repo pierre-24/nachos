@@ -14,7 +14,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -45,14 +47,186 @@
 <li class="toctree-l1"><a class="reference internal" href="use.html">How to use nachos</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Code documentation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core">Core (<code class="docutils literal notranslate"><span class="pre">nachos.core</span></code>)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.files">Files (<code class="docutils literal notranslate"><span class="pre">nachos.core.files</span></code>)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.making">Making (<code class="docutils literal notranslate"><span class="pre">nachos.core.making</span></code>)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.preparing">Preparing (<code class="docutils literal notranslate"><span class="pre">nachos.core.preparing</span></code>)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.cooking">Cooking (<code class="docutils literal notranslate"><span class="pre">nachos.core.cooking</span></code>)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.baking">Baking (<code class="docutils literal notranslate"><span class="pre">nachos.core.baking</span></code>)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#shaking-nachos-core-shaking">Shaking (<code class="docutils literal notranslate"><span class="pre">nachos.core.shaking</span></code>)</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.analyzing">Analyzing (<code class="docutils literal notranslate"><span class="pre">nachos.core.analyzing</span></code>)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core">Core (<code class="docutils literal notranslate"><span class="pre">nachos.core</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.compute_numerical_derivative_of_tensor"><code class="docutils literal notranslate"><span class="pre">compute_numerical_derivative_of_tensor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.fancy_output_component_of_derivative"><code class="docutils literal notranslate"><span class="pre">fancy_output_component_of_derivative()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.fancy_output_derivative"><code class="docutils literal notranslate"><span class="pre">fancy_output_derivative()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.files">Files (<code class="docutils literal notranslate"><span class="pre">nachos.core.files</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.files.BadRecipe"><code class="docutils literal notranslate"><span class="pre">BadRecipe</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.files.BadResult"><code class="docutils literal notranslate"><span class="pre">BadResult</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.files.ComputationalResults"><code class="docutils literal notranslate"><span class="pre">ComputationalResults</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.ComputationalResults.add_result"><code class="docutils literal notranslate"><span class="pre">ComputationalResults.add_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.ComputationalResults.check"><code class="docutils literal notranslate"><span class="pre">ComputationalResults.check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.ComputationalResults.read"><code class="docutils literal notranslate"><span class="pre">ComputationalResults.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.ComputationalResults.write"><code class="docutils literal notranslate"><span class="pre">ComputationalResults.write()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.files.DerivativeAlreadyDefined"><code class="docutils literal notranslate"><span class="pre">DerivativeAlreadyDefined</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.files.FieldsNotNeeded"><code class="docutils literal notranslate"><span class="pre">FieldsNotNeeded</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.files.Recipe"><code class="docutils literal notranslate"><span class="pre">Recipe</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.Recipe.bases"><code class="docutils literal notranslate"><span class="pre">Recipe.bases()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.Recipe.check_data"><code class="docutils literal notranslate"><span class="pre">Recipe.check_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.Recipe.maximum_derivatives"><code class="docutils literal notranslate"><span class="pre">Recipe.maximum_derivatives()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.Recipe.read"><code class="docutils literal notranslate"><span class="pre">Recipe.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.files.Recipe.write"><code class="docutils literal notranslate"><span class="pre">Recipe.write()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.making">Making (<code class="docutils literal notranslate"><span class="pre">nachos.core.making</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.BadMaking"><code class="docutils literal notranslate"><span class="pre">BadMaking</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.BasisCompleter"><code class="docutils literal notranslate"><span class="pre">BasisCompleter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.BasisCompleter.get_completions"><code class="docutils literal notranslate"><span class="pre">BasisCompleter.get_completions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.BasisValidator"><code class="docutils literal notranslate"><span class="pre">BasisValidator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.BasisValidator.validate"><code class="docutils literal notranslate"><span class="pre">BasisValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.ChemistryFileValidator"><code class="docutils literal notranslate"><span class="pre">ChemistryFileValidator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.ChemistryFileValidator.validate"><code class="docutils literal notranslate"><span class="pre">ChemistryFileValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.ExtraFlavorCompleter"><code class="docutils literal notranslate"><span class="pre">ExtraFlavorCompleter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.ExtraFlavorCompleter.get_completions"><code class="docutils literal notranslate"><span class="pre">ExtraFlavorCompleter.get_completions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.ExtraFlavorValidator"><code class="docutils literal notranslate"><span class="pre">ExtraFlavorValidator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.ExtraFlavorValidator.validate"><code class="docutils literal notranslate"><span class="pre">ExtraFlavorValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.FrequenciesValidator"><code class="docutils literal notranslate"><span class="pre">FrequenciesValidator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.FrequenciesValidator.validate"><code class="docutils literal notranslate"><span class="pre">FrequenciesValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.GenBasisValidator"><code class="docutils literal notranslate"><span class="pre">GenBasisValidator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.GenBasisValidator.validate"><code class="docutils literal notranslate"><span class="pre">GenBasisValidator.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.Maker"><code class="docutils literal notranslate"><span class="pre">Maker</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.Maker.make"><code class="docutils literal notranslate"><span class="pre">Maker.make()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.SentenceValidatorWithDefault"><code class="docutils literal notranslate"><span class="pre">SentenceValidatorWithDefault</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.SentenceValidatorWithDefault.validate"><code class="docutils literal notranslate"><span class="pre">SentenceValidatorWithDefault.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.TypeFloatValidator"><code class="docutils literal notranslate"><span class="pre">TypeFloatValidator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.TypeIntValidator"><code class="docutils literal notranslate"><span class="pre">TypeIntValidator</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.making.TypeValidator"><code class="docutils literal notranslate"><span class="pre">TypeValidator</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.making.TypeValidator.validate"><code class="docutils literal notranslate"><span class="pre">TypeValidator.validate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.preparing">Preparing (<code class="docutils literal notranslate"><span class="pre">nachos.core.preparing</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.preparing.BadPreparation"><code class="docutils literal notranslate"><span class="pre">BadPreparation</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.preparing.Preparer"><code class="docutils literal notranslate"><span class="pre">Preparer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.preparing.Preparer.deform_geometry"><code class="docutils literal notranslate"><span class="pre">Preparer.deform_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.preparing.Preparer.prepare"><code class="docutils literal notranslate"><span class="pre">Preparer.prepare()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.preparing.Preparer.prepare_dalton_inputs"><code class="docutils literal notranslate"><span class="pre">Preparer.prepare_dalton_inputs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.preparing.Preparer.prepare_gaussian_inputs"><code class="docutils literal notranslate"><span class="pre">Preparer.prepare_gaussian_inputs()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.preparing.Preparer.prepare_qchem_inputs"><code class="docutils literal notranslate"><span class="pre">Preparer.prepare_qchem_inputs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.preparing.fields_needed_by_recipe"><code class="docutils literal notranslate"><span class="pre">fields_needed_by_recipe()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.cooking">Cooking (<code class="docutils literal notranslate"><span class="pre">nachos.core.cooking</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.cooking.BadCooking"><code class="docutils literal notranslate"><span class="pre">BadCooking</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.cooking.Cooker"><code class="docutils literal notranslate"><span class="pre">Cooker</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.cooking.Cooker.cook"><code class="docutils literal notranslate"><span class="pre">Cooker.cook()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.cooking.Cooker.cook_from_file"><code class="docutils literal notranslate"><span class="pre">Cooker.cook_from_file()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.baking">Baking (<code class="docutils literal notranslate"><span class="pre">nachos.core.baking</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.baking.BadBaking"><code class="docutils literal notranslate"><span class="pre">BadBaking</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.baking.Baker"><code class="docutils literal notranslate"><span class="pre">Baker</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.baking.Baker.bake"><code class="docutils literal notranslate"><span class="pre">Baker.bake()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.baking.Baker.make_uncertainty_tensor"><code class="docutils literal notranslate"><span class="pre">Baker.make_uncertainty_tensor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.baking.Baker.output_information"><code class="docutils literal notranslate"><span class="pre">Baker.output_information()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.baking.project_geometrical_derivatives"><code class="docutils literal notranslate"><span class="pre">project_geometrical_derivatives()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shaking-nachos-core-shaking">Shaking (<code class="docutils literal notranslate"><span class="pre">nachos.core.shaking</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking.BadShaking"><code class="docutils literal notranslate"><span class="pre">BadShaking</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking.DerivativeNotAvailable"><code class="docutils literal notranslate"><span class="pre">DerivativeNotAvailable</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking.Shaker"><code class="docutils literal notranslate"><span class="pre">Shaker</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.__make_availability"><code class="docutils literal notranslate"><span class="pre">Shaker.__make_availability()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_FF_FF__0_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_FF_FF__0_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_FF_FF__0_2_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_FF_FF__0_2_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_FF_FF__1_1_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_FF_FF__1_1_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_FF_FF__2_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_FF_FF__2_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FFF__0_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FFF__0_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FFF__0_2_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FFF__0_2_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FFF__1_1_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FFF__1_1_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FFF__2_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FFF__2_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FF__0_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FF__0_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FF__0_2_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FF__0_2_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FF__1_1_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FF__1_1_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_FF__2_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_FF__2_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F_FF__0_1_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F_FF__0_1_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F_FF__1_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F_FF__1_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F_F_F__0_2_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F_F_F__0_2_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F_F_F__1_1_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F_F_F__1_1_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F_F_F__2_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F_F_F__2_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F_F__0_1_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F_F__0_1_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F_F__1_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F_F__1_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F__0_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F__0_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F__0_2_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F__0_2_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F__1_1_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F__1_1_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_F_F__2_0_component"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_F_F__2_0_component()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_zpva_01"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_zpva_01()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._compute_zpva_10"><code class="docutils literal notranslate"><span class="pre">Shaker._compute_zpva_10()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker._create_tensors"><code class="docutils literal notranslate"><span class="pre">Shaker._create_tensors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.check_availability"><code class="docutils literal notranslate"><span class="pre">Shaker.check_availability()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.compute_pv"><code class="docutils literal notranslate"><span class="pre">Shaker.compute_pv()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.compute_zpva"><code class="docutils literal notranslate"><span class="pre">Shaker.compute_zpva()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.display_message"><code class="docutils literal notranslate"><span class="pre">Shaker.display_message()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.get_iterator"><code class="docutils literal notranslate"><span class="pre">Shaker.get_iterator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.lambda_"><code class="docutils literal notranslate"><span class="pre">Shaker.lambda_()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.output_tensors"><code class="docutils literal notranslate"><span class="pre">Shaker.output_tensors()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.Shaker.shake"><code class="docutils literal notranslate"><span class="pre">Shaker.shake()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking.VibrationalContribution"><code class="docutils literal notranslate"><span class="pre">VibrationalContribution</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.VibrationalContribution.derivatives_needed"><code class="docutils literal notranslate"><span class="pre">VibrationalContribution.derivatives_needed()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.VibrationalContribution.from_representation"><code class="docutils literal notranslate"><span class="pre">VibrationalContribution.from_representation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking.VibrationalContributionsData"><code class="docutils literal notranslate"><span class="pre">VibrationalContributionsData</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.VibrationalContributionsData.add_contribution"><code class="docutils literal notranslate"><span class="pre">VibrationalContributionsData.add_contribution()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.VibrationalContributionsData.sort_per_type_and_order"><code class="docutils literal notranslate"><span class="pre">VibrationalContributionsData.sort_per_type_and_order()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.shaking.VibrationalContributionsData.write_in_group"><code class="docutils literal notranslate"><span class="pre">VibrationalContributionsData.write_in_group()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking._merge_dict_of_tensors"><code class="docutils literal notranslate"><span class="pre">_merge_dict_of_tensors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking.load_vibrational_contributions"><code class="docutils literal notranslate"><span class="pre">load_vibrational_contributions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.shaking.save_vibrational_contributions"><code class="docutils literal notranslate"><span class="pre">save_vibrational_contributions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nachos.core.analyzing">Analyzing (<code class="docutils literal notranslate"><span class="pre">nachos.core.analyzing</span></code>)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.analyzing.Analyzer"><code class="docutils literal notranslate"><span class="pre">Analyzer</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.analyzing.Analyzer.analyze"><code class="docutils literal notranslate"><span class="pre">Analyzer.analyze()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.analyzing.BadAnalysis"><code class="docutils literal notranslate"><span class="pre">BadAnalysis</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.analyzing.GetPropertyOfTensor"><code class="docutils literal notranslate"><span class="pre">GetPropertyOfTensor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#nachos.core.analyzing.GetPropertyOfTensor.execute"><code class="docutils literal notranslate"><span class="pre">GetPropertyOfTensor.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.analyzing.component_access"><code class="docutils literal notranslate"><span class="pre">component_access()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.analyzing.get_tensor_converter"><code class="docutils literal notranslate"><span class="pre">get_tensor_converter()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.analyzing.get_vibrational_contributions"><code class="docutils literal notranslate"><span class="pre">get_vibrational_contributions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nachos.core.analyzing.property_access"><code class="docutils literal notranslate"><span class="pre">property_access()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -70,8 +244,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Code documentation</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">Code documentation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -82,10 +256,10 @@
            <div itemprop="articleBody">
              
   <section id="code-documentation">
-<h1>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this headline"></a></h1>
+<h1>Code documentation<a class="headerlink" href="#code-documentation" title="Permalink to this heading"></a></h1>
 <p>Documentation for the different part of the “core” nachos package</p>
 <section id="module-nachos.core">
-<span id="core-nachos-core"></span><h2>Core (<code class="docutils literal notranslate"><span class="pre">nachos.core</span></code>)<a class="headerlink" href="#module-nachos.core" title="Permalink to this headline"></a></h2>
+<span id="core-nachos-core"></span><h2>Core (<code class="docutils literal notranslate"><span class="pre">nachos.core</span></code>)<a class="headerlink" href="#module-nachos.core" title="Permalink to this heading"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="nachos.core.compute_numerical_derivative_of_tensor">
 <span class="sig-prename descclassname"><span class="pre">nachos.core.</span></span><span class="sig-name descname"><span class="pre">compute_numerical_derivative_of_tensor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">derivative_repr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tensor_func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequency</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dry_run</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">force_choice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.compute_numerical_derivative_of_tensor" title="Permalink to this definition"></a></dt>
@@ -147,7 +321,7 @@
 
 </section>
 <section id="module-nachos.core.files">
-<span id="files-nachos-core-files"></span><h2>Files (<code class="docutils literal notranslate"><span class="pre">nachos.core.files</span></code>)<a class="headerlink" href="#module-nachos.core.files" title="Permalink to this headline"></a></h2>
+<span id="files-nachos-core-files"></span><h2>Files (<code class="docutils literal notranslate"><span class="pre">nachos.core.files</span></code>)<a class="headerlink" href="#module-nachos.core.files" title="Permalink to this heading"></a></h2>
 <dl class="py exception">
 <dt class="sig sig-object py" id="nachos.core.files.BadRecipe">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.files.</span></span><span class="sig-name descname"><span class="pre">BadRecipe</span></span><a class="headerlink" href="#nachos.core.files.BadRecipe" title="Permalink to this definition"></a></dt>
@@ -234,7 +408,7 @@
 <dd><p>Class that handle the parameters to perform numerical differentiation</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="nachos.core.files.Recipe.bases">
-<span class="sig-name descname"><span class="pre">bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.files.Recipe.bases" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">bases</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">level_min</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.files.Recipe.bases" title="Permalink to this definition"></a></dt>
 <dd><p>Get basis in the form of Derivatives objects, plus the level of differentiation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -297,7 +471,7 @@
 
 </section>
 <section id="module-nachos.core.making">
-<span id="making-nachos-core-making"></span><h2>Making (<code class="docutils literal notranslate"><span class="pre">nachos.core.making</span></code>)<a class="headerlink" href="#module-nachos.core.making" title="Permalink to this headline"></a></h2>
+<span id="making-nachos-core-making"></span><h2>Making (<code class="docutils literal notranslate"><span class="pre">nachos.core.making</span></code>)<a class="headerlink" href="#module-nachos.core.making" title="Permalink to this heading"></a></h2>
 <dl class="py exception">
 <dt class="sig sig-object py" id="nachos.core.making.BadMaking">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.making.</span></span><span class="sig-name descname"><span class="pre">BadMaking</span></span><a class="headerlink" href="#nachos.core.making.BadMaking" title="Permalink to this definition"></a></dt>
@@ -492,7 +666,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 
 </section>
 <section id="module-nachos.core.preparing">
-<span id="preparing-nachos-core-preparing"></span><h2>Preparing (<code class="docutils literal notranslate"><span class="pre">nachos.core.preparing</span></code>)<a class="headerlink" href="#module-nachos.core.preparing" title="Permalink to this headline"></a></h2>
+<span id="preparing-nachos-core-preparing"></span><h2>Preparing (<code class="docutils literal notranslate"><span class="pre">nachos.core.preparing</span></code>)<a class="headerlink" href="#module-nachos.core.preparing" title="Permalink to this heading"></a></h2>
 <dl class="py exception">
 <dt class="sig sig-object py" id="nachos.core.preparing.BadPreparation">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.preparing.</span></span><span class="sig-name descname"><span class="pre">BadPreparation</span></span><a class="headerlink" href="#nachos.core.preparing.BadPreparation" title="Permalink to this definition"></a></dt>
@@ -598,7 +772,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 
 </section>
 <section id="module-nachos.core.cooking">
-<span id="cooking-nachos-core-cooking"></span><h2>Cooking (<code class="docutils literal notranslate"><span class="pre">nachos.core.cooking</span></code>)<a class="headerlink" href="#module-nachos.core.cooking" title="Permalink to this headline"></a></h2>
+<span id="cooking-nachos-core-cooking"></span><h2>Cooking (<code class="docutils literal notranslate"><span class="pre">nachos.core.cooking</span></code>)<a class="headerlink" href="#module-nachos.core.cooking" title="Permalink to this heading"></a></h2>
 <dl class="py exception">
 <dt class="sig sig-object py" id="nachos.core.cooking.BadCooking">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.cooking.</span></span><span class="sig-name descname"><span class="pre">BadCooking</span></span><a class="headerlink" href="#nachos.core.cooking.BadCooking" title="Permalink to this definition"></a></dt>
@@ -623,7 +797,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>directories</strong> (<em>list of str</em>) – directories where QM results should be looked for</p></li>
+<li><p><strong>directories</strong> (<em>list</em><em> of </em><em>str</em>) – directories where QM results should be looked for</p></li>
 <li><p><strong>out</strong> (<em>file</em>) – output of eventual information</p></li>
 <li><p><strong>verbosity_level</strong> (<em>bool</em>) – wetter to write information or not</p></li>
 <li><p><strong>use_gaussian_logs</strong> (<em>bool</em>) – use Gaussian LOGs instead of FCHKs. But don’t ;)</p></li>
@@ -659,7 +833,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 
 </section>
 <section id="module-nachos.core.baking">
-<span id="baking-nachos-core-baking"></span><h2>Baking (<code class="docutils literal notranslate"><span class="pre">nachos.core.baking</span></code>)<a class="headerlink" href="#module-nachos.core.baking" title="Permalink to this headline"></a></h2>
+<span id="baking-nachos-core-baking"></span><h2>Baking (<code class="docutils literal notranslate"><span class="pre">nachos.core.baking</span></code>)<a class="headerlink" href="#module-nachos.core.baking" title="Permalink to this heading"></a></h2>
 <dl class="py exception">
 <dt class="sig sig-object py" id="nachos.core.baking.BadBaking">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.baking.</span></span><span class="sig-name descname"><span class="pre">BadBaking</span></span><a class="headerlink" href="#nachos.core.baking.BadBaking" title="Permalink to this definition"></a></dt>
@@ -767,7 +941,7 @@ if verbosity_level is &gt; 2.</p>
 
 </section>
 <section id="shaking-nachos-core-shaking">
-<h2>Shaking (<code class="docutils literal notranslate"><span class="pre">nachos.core.shaking</span></code>)<a class="headerlink" href="#shaking-nachos-core-shaking" title="Permalink to this headline"></a></h2>
+<h2>Shaking (<code class="docutils literal notranslate"><span class="pre">nachos.core.shaking</span></code>)<a class="headerlink" href="#shaking-nachos-core-shaking" title="Permalink to this heading"></a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <div class="math notranslate nohighlight">
@@ -922,7 +1096,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFF</span></code> components</p></li>
 </ul>
 </dd>
@@ -948,7 +1122,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
 </ul>
@@ -976,7 +1150,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFF</span></code> components</p></li>
 <li><p><strong>t_nnff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNFF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
@@ -1003,7 +1177,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nnff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNFF</span></code> components</p></li>
 </ul>
 </dd>
@@ -1025,7 +1199,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nfff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFFF</span></code> components</p></li>
 </ul>
@@ -1052,7 +1226,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nfff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFFF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
@@ -1083,7 +1257,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nnfff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNFFF</span></code> components</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
@@ -1112,7 +1286,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nnfff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNFFF</span></code> components</p></li>
 </ul>
@@ -1137,7 +1311,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFF</span></code> components</p></li>
 </ul>
@@ -1164,7 +1338,7 @@ The ZPVA contributions are written the same way, except that it is only <code cl
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
@@ -1196,7 +1370,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nnff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNFF</span></code> components</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
@@ -1225,7 +1399,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nnff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNFF</span></code> components</p></li>
 </ul>
@@ -1249,7 +1423,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFF</span></code> components</p></li>
 <li><p><strong>t_nfff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFFF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
@@ -1278,7 +1452,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFF</span></code> components</p></li>
 <li><p><strong>t_nfff</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NFFF</span></code> components</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
@@ -1307,7 +1481,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
 </ul>
@@ -1331,7 +1505,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
@@ -1359,7 +1533,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 </ul>
@@ -1385,7 +1559,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
 </ul>
@@ -1411,7 +1585,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 </ul>
@@ -1434,7 +1608,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 </ul>
 </dd>
@@ -1460,7 +1634,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
 </ul>
@@ -1488,7 +1662,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NF</span></code> components</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 <li><p><strong>t_nnn</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNN</span></code> components</p></li>
@@ -1515,7 +1689,7 @@ F_{abc}\times\\
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>coo</strong> (<em>tuple</em><em>|</em><em>list</em>) – coordinates</p></li>
 <li><p><strong>input_fields</strong> (<em>tuple</em><em>|</em><em>list</em>) – input fields</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 <li><p><strong>t_nnf</strong> (<em>numpy.ndarray</em>) – <code class="docutils literal notranslate"><span class="pre">NNF</span></code> components</p></li>
 </ul>
 </dd>
@@ -1535,7 +1709,7 @@ F_{abc}\times\\
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>derivative</strong> (<em>qcip_tools.derivatives.Derivative</em>) – the derivative</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -1554,7 +1728,7 @@ F_{abc}\times\\
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>derivative</strong> (<em>qcip_tools.derivatives.Derivative</em>) – the derivative</p></li>
-<li><p><strong>frequencies</strong> (<em>list of float</em><em>|</em><em>str</em>) – the frequencies</p></li>
+<li><p><strong>frequencies</strong> (<em>list</em><em> of </em><em>float</em><em>|</em><em>str</em>) – the frequencies</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -1738,7 +1912,7 @@ to go along without permutations (and therefore, work with the all tensor as one
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>only</strong> (<em>list</em><em>|</em><em>tuple of qcip_tools.derivatives.Derivative</em><em>, </em><em>int</em>) – restrict to the vibrational contribution to certain derivatives</p></li>
+<li><p><strong>only</strong> (<em>list</em><em>|</em><em>tuple</em><em> of </em><em>qcip_tools.derivatives.Derivative</em><em>, </em><em>int</em>) – restrict to the vibrational contribution to certain derivatives</p></li>
 <li><p><strong>frequencies</strong> (<em>list</em>) – frequencies (if not available, ZPVA will not be computed for those ones)</p></li>
 <li><p><strong>out</strong> (<em>file</em>) – output if information is needed to be outputed</p></li>
 <li><p><strong>verbosity_level</strong> (<em>int</em>) – how far should we print information</p></li>
@@ -1885,7 +2059,7 @@ to go along without permutations (and therefore, work with the all tensor as one
 
 </section>
 <section id="module-nachos.core.analyzing">
-<span id="analyzing-nachos-core-analyzing"></span><h2>Analyzing (<code class="docutils literal notranslate"><span class="pre">nachos.core.analyzing</span></code>)<a class="headerlink" href="#module-nachos.core.analyzing" title="Permalink to this headline"></a></h2>
+<span id="analyzing-nachos-core-analyzing"></span><h2>Analyzing (<code class="docutils literal notranslate"><span class="pre">nachos.core.analyzing</span></code>)<a class="headerlink" href="#module-nachos.core.analyzing" title="Permalink to this heading"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="nachos.core.analyzing.Analyzer">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.analyzing.</span></span><span class="sig-name descname"><span class="pre">Analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datafile</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vibrational_contributions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.analyzing.Analyzer" title="Permalink to this definition"></a></dt>
@@ -1894,7 +2068,7 @@ to go along without permutations (and therefore, work with the all tensor as one
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>datafile</strong> (<em>qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile</em>) – input for derivatives</p></li>
-<li><p><strong>vibrational_contributions</strong> (<em>dict of nachos.core.shaking.VibrationalContributionsData</em>) – eventual vibrational contributions</p></li>
+<li><p><strong>vibrational_contributions</strong> (<em>dict</em><em> of </em><a class="reference internal" href="#nachos.core.shaking.VibrationalContributionsData" title="nachos.core.shaking.VibrationalContributionsData"><em>nachos.core.shaking.VibrationalContributionsData</em></a>) – eventual vibrational contributions</p></li>
 </ul>
 </dd>
 </dl>
@@ -1907,7 +2081,7 @@ to go along without permutations (and therefore, work with the all tensor as one
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>properties</strong> (<em>dict</em>) – different properties</p></li>
 <li><p><strong>out</strong> (<em>file</em>) – output</p></li>
-<li><p><strong>only</strong> (<em>list of qcip_tools.derivatives.Derivative</em>) – derivatives for which properties must be shown</p></li>
+<li><p><strong>only</strong> (<em>list</em><em> of </em><em>qcip_tools.derivatives.Derivative</em>) – derivatives for which properties must be shown</p></li>
 <li><p><strong>frequencies_to_show</strong> (<em>list</em>) – only show given frequencies</p></li>
 <li><p><strong>inverse_vibs</strong> (<em>bool</em>) – for vibrational, show <code class="docutils literal notranslate"><span class="pre">value(total</span> <span class="pre">-</span> <span class="pre">current)</span></code> rather than <code class="docutils literal notranslate"><span class="pre">value(current)</span></code></p></li>
 <li><p><strong>group_vibs</strong> (<em>bool</em>) – for vibrational, group by perturbation order rather than detailed</p></li>

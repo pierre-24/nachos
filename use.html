@@ -14,7 +14,9 @@
         <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -78,8 +80,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>How to use nachos</li>
+      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li class="breadcrumb-item active">How to use nachos</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/use.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -90,9 +92,9 @@
            <div itemprop="articleBody">
              
   <section id="how-to-use-nachos">
-<h1>How to use nachos<a class="headerlink" href="#how-to-use-nachos" title="Permalink to this headline"></a></h1>
+<h1>How to use nachos<a class="headerlink" href="#how-to-use-nachos" title="Permalink to this heading"></a></h1>
 <section id="concepts">
-<h2>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline"></a></h2>
+<h2>Concepts<a class="headerlink" href="#concepts" title="Permalink to this heading"></a></h2>
 <ul>
 <li><p>The numerical differentiation is used to obtain (static) derivatives to different quantities.
 It exploits the following identity, given <span class="math notranslate nohighlight">\(f(x)\)</span> a given function expanded in Taylor series,</p>
@@ -132,7 +134,7 @@ Given the cartesian hessian, <code class="docutils literal notranslate"><span cl
 </ul>
 </section>
 <section id="general-workflow">
-<h2>General workflow<a class="headerlink" href="#general-workflow" title="Permalink to this headline"></a></h2>
+<h2>General workflow<a class="headerlink" href="#general-workflow" title="Permalink to this heading"></a></h2>
 <p>Here is the schematic of the workflow with the nachos package:</p>
 <figure class="align-center" id="id8">
 <img alt="_images/workflow.png" src="_images/workflow.png" />
@@ -174,7 +176,7 @@ nachos_peek molecule_nd.h5
 </div>
 <p>See below for more details on every command.</p>
 <section id="id1">
-<h3>nachos_make<a class="headerlink" href="#id1" title="Permalink to this headline"></a></h3>
+<h3>nachos_make<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
 <p>Make a recipe</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_make [-h] [-v] [-N] [-S] [--flavor FLAVOR] [--type TYPE]</span>
 <span class="go">                   [--method METHOD] [--basis-set BASIS_SET]</span>
@@ -810,7 +812,7 @@ Also, <code class="docutils literal notranslate"><span class="pre">XC</span></co
 </li>
 </ul>
 <section id="id2">
-<h3>nachos_prepare<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
+<h3>nachos_prepare<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
 <p>Create the input files for the quantum chemistry programs out of a given recipe</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_prepare [-h] [-v] [-V VERBOSE] [-d DIRECTORY] [-r RECIPE] [-c]</span>
 <span class="go">                      [-D]</span>
@@ -862,6 +864,11 @@ Also, <code class="docutils literal notranslate"><span class="pre">XC</span></co
 <p>The program will prepare as many input files as needed.
 By using <code class="docutils literal notranslate"><span class="pre">-d</span></code>, you can decide where the input files should be generated, but keep in mind that they should be in the same directory as the recipe for the next step (use <code class="docutils literal notranslate"><span class="pre">-c</span></code> if needed).</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> option allows you to know how much files where generated.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using electric fields, Gaussian compute the fields in an opposite direction to what is expected by Nachos.
+So, e.g., if the title card say that the field is computed in the +x direction it is the <strong>normal behavior</strong> that the x component of the electric field has a negative sign.</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>To helps the dalton program, a file called <code class="docutils literal notranslate"><span class="pre">inputs_matching.txt</span></code> is created for this <em>flavor</em>, where each lines contains the combination of dal and mol file to launch (because there may be different dal files).</p>
@@ -877,7 +884,7 @@ dalton <span class="nv">$INPUT_FILES</span>
 <p>Note that the program tries to optimize things as much as possible and request the computation of things that are needed at a given level (no need to do a gradient calculation for second order if not requested, for example, which explains the multiple dal files, and why some calculations may be faster than other).</p>
 </div>
 <section id="id3">
-<h3>nachos_cook<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
+<h3>nachos_cook<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
 <p>Out of the results of calculation, create a h5 file to store them</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_cook [-h] [-v] [-V VERBOSE] [-r RECIPE] [-o OUTPUT]</span>
 <span class="go">                   [--gaussian-logs]</span>
@@ -932,7 +939,7 @@ dalton <span class="nv">$INPUT_FILES</span>
 <p>The <code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> option allows you to know which files the program actually discovered and used.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">--gaussian-logs</span></code> is experimental, and is only tested for HF, MP2 and SCS-MP2 (that is the <strong>only</strong> way to get this one).</p>
 <section id="id4">
-<h3>nachos_bake<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<h3>nachos_bake<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
 <p>From h5 file, perform numerical differentiation</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_bake [-h] [-v] [-r RECIPE] [-d DATA] [-o OUTPUT] [-V VERBOSE]</span>
 <span class="go">                   [-S] [-O ONLY] [-p] [-H HESSIAN] [-R ROMBERG]</span>
@@ -1039,7 +1046,7 @@ The <code class="docutils literal notranslate"><span class="pre">-S</span></code
 </ul>
 </div>
 <section id="id5">
-<h3>nachos_shake<a class="headerlink" href="#id5" title="Permalink to this headline"></a></h3>
+<h3>nachos_shake<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
 <p>Shake it! (compute the vibrational contributions)</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_shake [-h] [-v] [-d DATA] [-V VERBOSE] [-O ONLY]</span>
 <span class="go">                    [-f FREQUENCIES] [-A] [-m MODIFY_MODES]</span>
@@ -1266,7 +1273,7 @@ Therefore, the ZPVA part is only computed for available frequencies, and the pv 
 </ul>
 </div>
 <section id="id6">
-<h3>nachos_analyze<a class="headerlink" href="#id6" title="Permalink to this headline"></a></h3>
+<h3>nachos_analyze<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
 <p>Analyze the results stored in data file</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_analyze [-h] [-v] [-d DATA] [-O ONLY] [-f FREQUENCIES] -p</span>
 <span class="go">                      PROPERTIES [-I] [-g]</span>
@@ -1356,7 +1363,7 @@ The <code class="docutils literal notranslate"><span class="pre">-g</span></code
 </ul>
 </div>
 <section id="id7">
-<h3>nachos_peek<a class="headerlink" href="#id7" title="Permalink to this headline"></a></h3>
+<h3>nachos_peek<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
 <p>Peek into an output file (LOG, FCHK, H5, …)</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_peek [-h] [-v] [infile]</span>
 </pre></div>
@@ -1384,9 +1391,9 @@ The <code class="docutils literal notranslate"><span class="pre">-g</span></code
 This program is less advance than <code class="docutils literal notranslate"><span class="pre">nachos_analyze</span></code>, since it <strong>does not</strong> include vibrational corrections.</p>
 </section>
 <section id="appendix">
-<h2>Appendix<a class="headerlink" href="#appendix" title="Permalink to this headline"></a></h2>
+<h2>Appendix<a class="headerlink" href="#appendix" title="Permalink to this heading"></a></h2>
 <section id="list-of-the-derivatives">
-<h3>List of the derivatives<a class="headerlink" href="#list-of-the-derivatives" title="Permalink to this headline"></a></h3>
+<h3>List of the derivatives<a class="headerlink" href="#list-of-the-derivatives" title="Permalink to this heading"></a></h3>
 <p>Note that it would be better to respect the order for the different derivatives (<code class="docutils literal notranslate"><span class="pre">dDF</span></code>, not <code class="docutils literal notranslate"><span class="pre">FdD</span></code>, for example).</p>
 <table class="colwidths-given docutils align-default">
 <colgroup>
