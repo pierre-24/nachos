@@ -1,32 +1,30 @@
 import os
 
 from prompt_toolkit import document as pt_document, prompt as prompt_pt
-from prompt_toolkit.completion import Completer, Completion
-from prompt_toolkit.contrib.completers import WordCompleter, PathCompleter
+from prompt_toolkit.completion import WordCompleter, PathCompleter, Completer, Completion
 from prompt_toolkit.validation import Validator, ValidationError
-from prompt_toolkit.contrib.validators.base import SentenceValidator
 
 from qcip_tools.chemistry_files import helpers, PropertyNotPresent, PropertyNotDefined, gaussian
 
 from nachos.core import files, CONFIG
 
 
-class SentenceValidatorWithDefault(SentenceValidator):
+class ChoicesValidator(Validator):
 
-    def __init__(self, default=None, **kwargs):
+    def __init__(self, choices=None, default=None, **kwargs):
         super().__init__(**kwargs)
 
-        self.default_sentence = default
-
-        if default is not None and default not in self.sentences:
+        if default is not None and default not in choices:
             raise ValueError('default value {} not in list'.format(default))
 
-    def validate(self, document):
+        self.choices = [] if choices is None else choices
+        self.default = default
 
-        if document.text == '' and self.default_sentence is not None:
-            document.text = self.default_sentence
-        else:
-            super().validate(document)
+    def validate(self, document):
+        if document.text == '' and self.default is not None:
+            document.text = self.default
+        elif document.text not in self.choices:
+            raise ValidationError(message='Invalid choice: {}'.format(document.text))
 
 
 class ChemistryFileValidator(Validator):
@@ -403,7 +401,7 @@ class Maker:
             'What flavor for you, today?',
             SetRecipeAction(recipe),
             completer=WordCompleter(words=CONFIG.keys()),
-            validator=SentenceValidatorWithDefault(sentences=CONFIG.keys())
+            validator=ChoicesValidator(choices=CONFIG.keys())
         )
 
         config = CONFIG[recipe['flavor']]
@@ -413,7 +411,7 @@ class Maker:
             'What type of differentiation?',
             SetRecipeAction(recipe),
             completer=WordCompleter(words=config['types']),
-            validator=SentenceValidatorWithDefault(sentences=config['types']))
+            validator=ChoicesValidator(choices=config['types']))
 
         methods = [a[0] for a in config['methods']]
         self._make_var(
@@ -422,7 +420,7 @@ class Maker:
             'With which method?',
             SetRecipeAction(recipe),
             completer=WordCompleter(words=methods),
-            validator=SentenceValidatorWithDefault(sentences=methods))
+            validator=ChoicesValidator(choices=methods))
 
         if recipe['method'] == 'DFT':
             self._make_var(
@@ -495,13 +493,20 @@ class Maker:
             SetRecipeAction(recipe),
             default=files.DEFAULT_RECIPE['name'])
 
+        # change default for type='G'
+        min_field = files.DEFAULT_RECIPE['min_field']
+        k_max = files.DEFAULT_RECIPE['k_max']
+        if recipe['type'] == 'G':
+            min_field = 0.01
+            k_max = 3
+
         self._make_var(
             args,
             'min_field',
             'Minimum field (F0)?',
             SetRecipeWithConversionAction(recipe),
-            validator=TypeFloatValidator(default=files.DEFAULT_RECIPE['min_field']),
-            default=files.DEFAULT_RECIPE['min_field'])
+            validator=TypeFloatValidator(default=min_field),
+            default=min_field)
 
         self._make_var(
             args,
@@ -516,8 +521,8 @@ class Maker:
             'k_max',
             'Maximum k?',
             SetRecipeWithConversionAction(recipe),
-            validator=TypeIntValidator(default=files.DEFAULT_RECIPE['k_max']),
-            default=files.DEFAULT_RECIPE['k_max'])
+            validator=TypeIntValidator(default=k_max),
+            default=k_max)
 
         self._make_var(
             args,
@@ -599,7 +604,8 @@ class Maker:
         v = prompt_pt(
             message='{}{} '.format(message, ' [{}]'.format(default) if default is not None else ''),
             validator=validator,
-            completer=completer
+            completer=completer,
+            validate_while_typing=False
         )
 
         if default is not None and validator is None and v == '':
