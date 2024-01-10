@@ -13,6 +13,14 @@ class BadBaking(Exception):
     pass
 
 
+def _equal_molecules_or_raise(mol1, mol2):
+    """Compare two geometries
+    """
+
+    if [a.symbol for a in mol1] != [a.symbol for a in mol2]:
+        raise BadBaking('not the same geometries: atomic symbols are different')
+
+
 class Baker:
     """Baker class to finally perform the numerical differentiation
 
@@ -22,9 +30,11 @@ class Baker:
     :type storage: nachos.core.files.ComputationalResults
     :param directory: working directory
     :type directory: str
+    :param original_cf: Originak chemistry file to append to
+    :type original_cf: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
     """
 
-    def __init__(self, recipe, storage, directory='.'):
+    def __init__(self, recipe, storage, directory='.', original_cf=None):
         self.recipe = recipe
 
         if not os.path.isdir(directory):
@@ -32,6 +42,14 @@ class Baker:
 
         self.directory = directory
         self.storage = storage
+
+        if original_cf is not None:
+            _equal_molecules_or_raise(self.recipe.geometry, original_cf.molecule)
+            self.original_cf = original_cf
+        else:
+            self.original_cf = chemistry_datafile.ChemistryDataFile.from_molecule(
+                self.recipe.geometry, 'nachos ND result'
+            )
 
         if self.storage.check() != ([], []):
             raise BadBaking('The storage (h5 file) does not fulfill the recipe!')
@@ -73,7 +91,7 @@ class Baker:
             raise BadBaking('no differentiation requested!')
 
         bases.sort(key=lambda a: a[1], reverse=True)
-        f = chemistry_datafile.ChemistryDataFile.from_molecule(self.recipe.geometry, 'nachos ND result')
+        f = self.original_cf
         dof = 3 * len(self.recipe.geometry)
 
         if copy_zero_field_basis:

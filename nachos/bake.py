@@ -7,6 +7,7 @@ import argparse
 
 from qcip_tools import derivatives_g, derivatives
 from qcip_tools.chemistry_files import helpers, PropertyNotDefined, PropertyNotPresent
+from qcip_tools.chemistry_files.chemistry_datafile import ChemistryDataFile, BadChemistryDataFile
 
 import nachos
 from nachos.core import files, baking
@@ -110,6 +111,9 @@ def get_arguments_parser():
         type=treat_romberg_arg,
         help='Bypass detection and force a value in the triangle. Must be of the form `k;m`.')
 
+    arguments_parser.add_argument(
+        '-a', '--append', action='store_true', help='Append to existing H5 file')
+
     return arguments_parser
 
 
@@ -144,8 +148,16 @@ def main():
     storage = files.ComputationalResults(recipe, directory=recipe_directory)
     storage.read(args.data)
 
+    original_cf = ChemistryDataFile()
+    if args.append:
+        with open(args.output) as f:
+            try:
+                original_cf.read(f)
+            except BadChemistryDataFile as e:
+                return exit_failure('Cannot append data to `{}`: {}'.format(args.output, e))
+
     # go and bake
-    baker = baking.Baker(recipe, storage, directory=recipe_directory)
+    baker = baking.Baker(recipe, storage, directory=recipe_directory, original_cf=original_cf)
     only = None
 
     if args.only:
