@@ -947,7 +947,7 @@ dalton<span class="w"> </span><span class="nv">$INPUT_FILES</span>
 <h3>nachos_bake<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <p>From h5 file, perform numerical differentiation</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_bake [-h] [-v] [-r RECIPE] [-d DATA] [-o OUTPUT] [-V VERBOSE]</span>
-<span class="go">                   [-S] [-O ONLY] [-p] [-H HESSIAN] [-R ROMBERG]</span>
+<span class="go">                   [-S] [-O ONLY] [-p] [-H HESSIAN] [-R ROMBERG] [-a]</span>
 </pre></div>
 </div>
 <dl class="std option">
@@ -1016,6 +1016,12 @@ dalton<span class="w"> </span><span class="nv">$INPUT_FILES</span>
 <dd><p>Bypass detection and force a value in the triangle. Must be of the form <cite>k;m</cite>.</p>
 </dd></dl>
 
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-a">
+<span id="cmdoption-nachos_bake-append"></span><span class="sig-name descname"><span class="pre">-a</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--append</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-a" title="Link to this definition"></a></dt>
+<dd><p>Append to existing H5 file</p>
+</dd></dl>
+
 </section>
 <p>The <code class="docutils literal notranslate"><span class="pre">-O</span></code> option to control what is actually differentiated.
 It expects a semicolon list like the <code class="docutils literal notranslate"><span class="pre">--differentiation</span></code> option of <code class="docutils literal notranslate"><span class="pre">nachos_make</span></code> (<a class="reference internal" href="#nachos-make-note-2"><span class="std std-ref">see above</span></a>), but you don’t have to provide the number of time if you want the number in the recipe to be used.</p>
@@ -1047,6 +1053,7 @@ In both cases, dynamic polarizability is not differentiated.</p>
 There is no way to change this behavior.</p></li>
 <li><p>By default, the program also include the base tensors calculated in the process.
 The <code class="docutils literal notranslate"><span class="pre">-S</span></code> option prevents this (that may be useful in the case of electric field differentiation)</p></li>
+<li><p>If you want to add results to existing <code class="docutils literal notranslate"><span class="pre">molecule_nd.h5</span></code> file, you can use the <code class="docutils literal notranslate"><span class="pre">`--append</span></code> option.</p></li>
 <li><p>Projection over normal mode of all the geometrical derivatives is requested via the <code class="docutils literal notranslate"><span class="pre">-p</span></code> option, but you can also request that the cartesian hessian used to do so is different, with the <code class="docutils literal notranslate"><span class="pre">-H</span></code> option (which accepts FCHK and dalton archives with cartesian hessian in it as argument).</p></li>
 </ul>
 </div>

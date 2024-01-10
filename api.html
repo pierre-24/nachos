@@ -856,7 +856,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 
 <dl class="py class">
 <dt class="sig sig-object py" id="nachos.core.baking.Baker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.baking.</span></span><span class="sig-name descname"><span class="pre">Baker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.baking.Baker" title="Link to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nachos.core.baking.</span></span><span class="sig-name descname"><span class="pre">Baker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">recipe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">original_cf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nachos.core.baking.Baker" title="Link to this definition"></a></dt>
 <dd><p>Baker class to finally perform the numerical differentiation</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -864,6 +864,7 @@ If invalid, this should raise a <code class="xref py py-class docutils literal n
 <li><p><strong>recipe</strong> (<a class="reference internal" href="#nachos.core.files.Recipe" title="nachos.core.files.Recipe"><em>nachos.core.files.Recipe</em></a>) – a recipe</p></li>
 <li><p><strong>storage</strong> (<a class="reference internal" href="#nachos.core.files.ComputationalResults" title="nachos.core.files.ComputationalResults"><em>nachos.core.files.ComputationalResults</em></a>) – storage of results</p></li>
 <li><p><strong>directory</strong> (<em>str</em>) – working directory</p></li>
+<li><p><strong>original_cf</strong> (<em>qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile</em>) – Originak chemistry file to append to</p></li>
 </ul>
 </dd>
 </dl>
