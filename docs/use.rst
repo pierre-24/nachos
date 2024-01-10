@@ -596,6 +596,7 @@ The output depends on the value of ``-V``, which can be:
       There is no way to change this behavior.
     + By default, the program also include the base tensors calculated in the process.
       The ``-S`` option prevents this (that may be useful in the case of electric field differentiation)
+    + If you want to add results to existing ``molecule_nd.h5`` file, you can use the ```--append`` option.
     + Projection over normal mode of all the geometrical derivatives is requested via the ``-p`` option, but you can also request that the cartesian hessian used to do so is different, with the ``-H`` option (which accepts FCHK and dalton archives with cartesian hessian in it as argument).
 
 
