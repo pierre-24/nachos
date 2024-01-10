@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>How to use nachos &mdash; nachos 0.3.9 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
-        <script src="_static/doctools.js"></script>
-        <script src="_static/sphinx_highlight.js"></script>
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=65b26183"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -30,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html" class="icon icon-home"> nachos
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            nachos
           </a>
               <div class="version">
                 0.3.9
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -80,7 +85,7 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home"></a></li>
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
       <li class="breadcrumb-item active">How to use nachos</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/use.rst.txt" rel="nofollow"> View page source</a>
@@ -92,9 +97,9 @@
            <div itemprop="articleBody">
              
   <section id="how-to-use-nachos">
-<h1>How to use nachos<a class="headerlink" href="#how-to-use-nachos" title="Permalink to this heading"></a></h1>
+<h1>How to use nachos<a class="headerlink" href="#how-to-use-nachos" title="Link to this heading"></a></h1>
 <section id="concepts">
-<h2>Concepts<a class="headerlink" href="#concepts" title="Permalink to this heading"></a></h2>
+<h2>Concepts<a class="headerlink" href="#concepts" title="Link to this heading"></a></h2>
 <ul>
 <li><p>The numerical differentiation is used to obtain (static) derivatives to different quantities.
 It exploits the following identity, given <span class="math notranslate nohighlight">\(f(x)\)</span> a given function expanded in Taylor series,</p>
@@ -134,12 +139,12 @@ Given the cartesian hessian, <code class="docutils literal notranslate"><span cl
 </ul>
 </section>
 <section id="general-workflow">
-<h2>General workflow<a class="headerlink" href="#general-workflow" title="Permalink to this heading"></a></h2>
+<h2>General workflow<a class="headerlink" href="#general-workflow" title="Link to this heading"></a></h2>
 <p>Here is the schematic of the workflow with the nachos package:</p>
 <figure class="align-center" id="id8">
 <img alt="_images/workflow.png" src="_images/workflow.png" />
 <figcaption>
-<p><span class="caption-text">Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).</span><a class="headerlink" href="#id8" title="Permalink to this image"></a></p>
+<p><span class="caption-text">Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).</span><a class="headerlink" href="#id8" title="Link to this image"></a></p>
 </figcaption>
 </figure>
 <p>In short,</p>
@@ -154,29 +159,29 @@ Given the cartesian hessian, <code class="docutils literal notranslate"><span cl
 </ol>
 <p>Therefore, it should looks like:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># create subdirectory:</span>
-mkdir new_directory
-<span class="nb">cd</span> new_directory
+mkdir<span class="w"> </span>new_directory
+<span class="nb">cd</span><span class="w"> </span>new_directory
 
 <span class="c1"># create recipe and inputs:</span>
-nachos_make <span class="o">&amp;&amp;</span> nachos_prepare
+nachos_make<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>nachos_prepare
 
 <span class="c1"># ... run all the inputs ...</span>
 
 <span class="c1"># carry out and perform numerical differentiation:</span>
-nachos_cook <span class="o">&amp;&amp;</span> nachos_bake <span class="c1"># or nachos_bake -P</span>
+nachos_cook<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>nachos_bake<span class="w"> </span><span class="c1"># or nachos_bake -P</span>
 
 <span class="c1"># ... eventually, add vibrational contributions:</span>
 nachos_shake
 
 <span class="c1"># ... eventually, post-analyze:</span>
-nachos_analyze -p <span class="s2">&quot;xxxx&quot;</span> &gt; nachos.log
+nachos_analyze<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;xxxx&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>nachos.log
 <span class="c1"># ... and/or ...</span>
-nachos_peek molecule_nd.h5
+nachos_peek<span class="w"> </span>molecule_nd.h5
 </pre></div>
 </div>
 <p>See below for more details on every command.</p>
 <section id="id1">
-<h3>nachos_make<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<h3>nachos_make<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
 <p>Make a recipe</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_make [-h] [-v] [-N] [-S] [--flavor FLAVOR] [--type TYPE]</span>
 <span class="go">                   [--method METHOD] [--basis-set BASIS_SET]</span>
@@ -189,121 +194,121 @@ nachos_peek molecule_nd.h5
 </div>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-h">
-<span id="cmdoption-nachos-make-h"></span><span id="cmdoption-nachos_make-help"></span><span id="cmdoption-nachos-make-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-h" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_make-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-h" title="Link to this definition"></a></dt>
 <dd><p>show this help message and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-v">
-<span id="cmdoption-nachos-make-v"></span><span id="cmdoption-nachos_make-version"></span><span id="cmdoption-nachos-make-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-v" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_make-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-v" title="Link to this definition"></a></dt>
 <dd><p>show program’s version number and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-N">
-<span id="cmdoption-nachos-make-n"></span><span id="cmdoption-nachos_make-fallback-prompt"></span><span id="cmdoption-nachos-make-fallback-prompt"></span><span class="sig-name descname"><span class="pre">-N</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--fallback-prompt</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-N" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_make-fallback-prompt"></span><span class="sig-name descname"><span class="pre">-N</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--fallback-prompt</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-N" title="Link to this definition"></a></dt>
 <dd><p>do not use prompt_toolkit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-S">
-<span id="cmdoption-nachos-make-s"></span><span id="cmdoption-nachos_make-stop-when-fail"></span><span id="cmdoption-nachos-make-stop-when-fail"></span><span class="sig-name descname"><span class="pre">-S</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--stop-when-fail</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-S" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_make-stop-when-fail"></span><span class="sig-name descname"><span class="pre">-S</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--stop-when-fail</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-S" title="Link to this definition"></a></dt>
 <dd><p>fail when argument input is wrong</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-flavor">
-<span id="cmdoption-nachos-make-flavor"></span><span class="sig-name descname"><span class="pre">--flavor</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;flavor&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-flavor" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--flavor</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;flavor&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-flavor" title="Link to this definition"></a></dt>
 <dd><p>flavor for the recipe</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-type">
-<span id="cmdoption-nachos-make-type"></span><span class="sig-name descname"><span class="pre">--type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;type&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-type" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;type&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-type" title="Link to this definition"></a></dt>
 <dd><p>type of differentiation</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-method">
-<span id="cmdoption-nachos-make-method"></span><span class="sig-name descname"><span class="pre">--method</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;method&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-method" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--method</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;method&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-method" title="Link to this definition"></a></dt>
 <dd><p>computational method</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-basis-set">
-<span id="cmdoption-nachos-make-basis-set"></span><span class="sig-name descname"><span class="pre">--basis-set</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;basis_set&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-basis-set" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--basis-set</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;basis_set&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-basis-set" title="Link to this definition"></a></dt>
 <dd><p>basis set</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-geometry">
-<span id="cmdoption-nachos-make-geometry"></span><span class="sig-name descname"><span class="pre">--geometry</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;geometry&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-geometry" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--geometry</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;geometry&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-geometry" title="Link to this definition"></a></dt>
 <dd><p>geometry of the molecule</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-differentiation">
-<span id="cmdoption-nachos-make-differentiation"></span><span class="sig-name descname"><span class="pre">--differentiation</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;differentiation&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-differentiation" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--differentiation</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;differentiation&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-differentiation" title="Link to this definition"></a></dt>
 <dd><p>quantities to differentiate</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-frequencies">
-<span id="cmdoption-nachos-make-frequencies"></span><span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-frequencies" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-frequencies" title="Link to this definition"></a></dt>
 <dd><p>frequencies (if dynamic quantities)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-name">
-<span id="cmdoption-nachos-make-name"></span><span class="sig-name descname"><span class="pre">--name</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;name&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-name" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--name</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;name&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-name" title="Link to this definition"></a></dt>
 <dd><p>Name of the files</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-min-field">
-<span id="cmdoption-nachos-make-min-field"></span><span class="sig-name descname"><span class="pre">--min-field</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;min_field&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-min-field" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--min-field</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;min_field&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-min-field" title="Link to this definition"></a></dt>
 <dd><p>Minimum field (F_0)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-ratio">
-<span id="cmdoption-nachos-make-ratio"></span><span class="sig-name descname"><span class="pre">--ratio</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ratio&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-ratio" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--ratio</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ratio&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-ratio" title="Link to this definition"></a></dt>
 <dd><p>ratio (a)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-k-max">
-<span id="cmdoption-nachos-make-k-max"></span><span class="sig-name descname"><span class="pre">--k-max</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;k_max&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-k-max" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--k-max</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;k_max&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-k-max" title="Link to this definition"></a></dt>
 <dd><p>Maximum k (k_max)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-flavor-extra">
-<span id="cmdoption-nachos-make-flavor-extra"></span><span class="sig-name descname"><span class="pre">--flavor-extra</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;flavor_extra&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-flavor-extra" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--flavor-extra</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;flavor_extra&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-flavor-extra" title="Link to this definition"></a></dt>
 <dd><p>Update the values of flavor extra</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-XC">
-<span id="cmdoption-nachos-make-xc"></span><span class="sig-name descname"><span class="pre">--XC</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;xc&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-XC" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--XC</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;xc&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-XC" title="Link to this definition"></a></dt>
 <dd><p>XC functional (if DFT)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-CC">
-<span id="cmdoption-nachos-make-cc"></span><span class="sig-name descname"><span class="pre">--CC</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;cc&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-CC" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--CC</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;cc&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-CC" title="Link to this definition"></a></dt>
 <dd><p>CC level (if CC)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-gen-basis">
-<span id="cmdoption-nachos-make-gen-basis"></span><span class="sig-name descname"><span class="pre">--gen-basis</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;gen_basis&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-gen-basis" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--gen-basis</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;gen_basis&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-gen-basis" title="Link to this definition"></a></dt>
 <dd><p>gaussian basis function file (if gen)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_make-o">
-<span id="cmdoption-nachos-make-o"></span><span id="cmdoption-nachos_make-output"></span><span id="cmdoption-nachos-make-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-o" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_make-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-o" title="Link to this definition"></a></dt>
 <dd><p>Output recipe file</p>
 </dd></dl>
 
@@ -319,12 +324,12 @@ If you just want the program to fail (because you are using it in a script), use
 </ul>
 </div>
 <p>The program prompts for different information in order to create a <em>recipe file</em>, if not given in command line, and generate a recipe in output (<code class="docutils literal notranslate"><span class="pre">-o</span></code> option, default is <code class="docutils literal notranslate"><span class="pre">nachos_recipe.yml</span></code>).</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 35%" />
-<col style="width: 35%" />
-<col style="width: 10%" />
+<col style="width: 20.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+<col style="width: 10.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
@@ -413,35 +418,35 @@ If you just want the program to fail (because you are using it in a script), use
 </table>
 <p>When everything is done, you end up with a <code class="docutils literal notranslate"><span class="pre">.yml</span></code> file that contains all the information you input.
 For example, this is an input to compute vibrational contribution to the polariability:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># flavor</span><span class="w"></span>
-<span class="nt">flavor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gaussian</span><span class="w"></span>
-<span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HF</span><span class="w"></span>
-<span class="nt">basis_set</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gen</span><span class="w"></span>
-<span class="nt">geometry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water.xyz</span><span class="w"></span>
-<span class="nt">flavor_extra</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">convergence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">11</span><span class="w"></span>
-<span class="w">  </span><span class="nt">cphf_convergence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span><span class="w"></span>
-<span class="w">  </span><span class="nt">gen_basis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sto-3g.gbs</span><span class="w"></span>
-<span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3Gb</span><span class="w"></span>
-<span class="w">  </span><span class="nt">procs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w"></span>
-<span class="c1"># differentiation (the label is the number of time</span><span class="w"></span>
-<span class="c1"># you want to differentiate each item of the list)</span><span class="w"></span>
-<span class="nt">differentiation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">2</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FF</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dD</span><span class="w"></span>
-<span class="w">  </span><span class="nt">1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GG</span><span class="w"></span>
-<span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">G</span><span class="w"></span>
-<span class="nt">min_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
-<span class="nt">ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
-<span class="nt">k_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
-<span class="nt">frequencies</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1064nm</span><span class="w"></span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">694.3nm</span><span class="w"></span>
-<span class="c1"># others:</span><span class="w"></span>
-<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_test</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># flavor</span>
+<span class="nt">flavor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gaussian</span>
+<span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HF</span>
+<span class="nt">basis_set</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gen</span>
+<span class="nt">geometry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water.xyz</span>
+<span class="nt">flavor_extra</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">convergence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">11</span>
+<span class="w">  </span><span class="nt">cphf_convergence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+<span class="w">  </span><span class="nt">gen_basis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sto-3g.gbs</span>
+<span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3Gb</span>
+<span class="w">  </span><span class="nt">procs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+<span class="c1"># differentiation (the label is the number of time</span>
+<span class="c1"># you want to differentiate each item of the list)</span>
+<span class="nt">differentiation</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">2</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FF</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dD</span>
+<span class="w">  </span><span class="nt">1</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GG</span>
+<span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">G</span>
+<span class="nt">min_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+<span class="nt">ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="nt">k_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+<span class="nt">frequencies</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1064nm</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">694.3nm</span>
+<span class="c1"># others:</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_test</span>
 </pre></div>
 </div>
 <p>Obviously, nothing prevents you from writing your own <em>recipe file</em> from scratch. Actually, you just need to define</p>
@@ -461,12 +466,12 @@ For example, this is an input to compute vibrational contribution to the polaria
 This also determine the maximum properties available at this level i.e. what you can request in <code class="docutils literal notranslate"><span class="pre">--differentiation</span></code> (<a class="reference internal" href="#nachos-make-note-2"><span class="std std-ref">see below</span></a>).</p>
 <ul>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">gaussian</span></code> (chosen according to the <a class="reference external" href="http://gaussian.com/force/">force page</a>, the <a class="reference external" href="http://gaussian.com/freq/">freq page</a> and the <a class="reference external" href="http://gaussian.com/polar/">polar page</a>):</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 30%" />
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Method</p></th>
@@ -512,12 +517,12 @@ This also determine the maximum properties available at this level i.e. what you
 <p><code class="docutils literal notranslate"><span class="pre">SCS-MP2</span></code> is computed according to <a class="reference external" href="https://dx.doi.org/10.1063/1.1569242">S. Grimme. J. Chem. Phys. 118, 9095 (2003).</a> with the default parameters of 1/3 and 6/5.</p>
 </li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">dalton</span></code>:</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 30%" />
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Method</p></th>
@@ -567,12 +572,12 @@ This also determine the maximum properties available at this level i.e. what you
 </ul>
 </li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">qchem</span></code>, only the methods supported by <a class="reference external" href="http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html">CCMAN2</a> are available (that’s the only methods for which the number of digits available for the energy can be increased to fit the required precision, otherwise you get at most 9-10 digits). Thus,</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 30%" />
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Method</p></th>
@@ -651,11 +656,11 @@ The options depends on the <em>flavor</em>, and are given in a semicolon separat
 Note that you don’t have to redefine every variable, since they have a default value which is correct for most cases.</p>
 <ul>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>, the options are</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
@@ -710,11 +715,11 @@ Note that you don’t have to redefine every variable, since they have a default
 Also, <code class="docutils literal notranslate"><span class="pre">XC</span></code> and <code class="docutils literal notranslate"><span class="pre">gen_basis</span></code> are available, but that would modify their previous values.</p>
 </li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">dalton</span></code>, the options are</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
@@ -774,11 +779,11 @@ Also, <code class="docutils literal notranslate"><span class="pre">XC</span></co
 <p>Splitting and merging modify the number of calculation, but also the times it takes (because Dalton tries to solve all response functions at the same time, therefore you may need to increase <code class="docutils literal notranslate"><span class="pre">response_max_it</span></code>).</p>
 </li>
 <li><p>For <code class="docutils literal notranslate"><span class="pre">qchem</span></code>, the options are</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 20%" />
-<col style="width: 20%" />
-<col style="width: 60%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Option</p></th>
@@ -812,7 +817,7 @@ Also, <code class="docutils literal notranslate"><span class="pre">XC</span></co
 </li>
 </ul>
 <section id="id2">
-<h3>nachos_prepare<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h3>
+<h3>nachos_prepare<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
 <p>Create the input files for the quantum chemistry programs out of a given recipe</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_prepare [-h] [-v] [-V VERBOSE] [-d DIRECTORY] [-r RECIPE] [-c]</span>
 <span class="go">                      [-D]</span>
@@ -820,43 +825,43 @@ Also, <code class="docutils literal notranslate"><span class="pre">XC</span></co
 </div>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_prepare-h">
-<span id="cmdoption-nachos-prepare-h"></span><span id="cmdoption-nachos_prepare-help"></span><span id="cmdoption-nachos-prepare-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-h" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_prepare-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-h" title="Link to this definition"></a></dt>
 <dd><p>show this help message and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_prepare-v">
-<span id="cmdoption-nachos-prepare-v"></span><span id="cmdoption-nachos_prepare-version"></span><span id="cmdoption-nachos-prepare-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-v" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_prepare-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-v" title="Link to this definition"></a></dt>
 <dd><p>show program’s version number and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_prepare-V">
-<span id="cmdoption-nachos_prepare-verbose"></span><span id="cmdoption-nachos-prepare-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-V" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_prepare-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-V" title="Link to this definition"></a></dt>
 <dd><p>Level of details (0 or 1)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_prepare-d">
-<span id="cmdoption-nachos-prepare-d"></span><span id="cmdoption-nachos_prepare-directory"></span><span id="cmdoption-nachos-prepare-directory"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;directory&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--directory</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;directory&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-d" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_prepare-directory"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;directory&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--directory</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;directory&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-d" title="Link to this definition"></a></dt>
 <dd><p>output directory</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_prepare-r">
-<span id="cmdoption-nachos-prepare-r"></span><span id="cmdoption-nachos_prepare-recipe"></span><span id="cmdoption-nachos-prepare-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-r" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_prepare-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-r" title="Link to this definition"></a></dt>
 <dd><p>Recipe file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_prepare-c">
-<span id="cmdoption-nachos-prepare-c"></span><span id="cmdoption-nachos_prepare-copy-files"></span><span id="cmdoption-nachos-prepare-copy-files"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--copy-files</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-c" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_prepare-copy-files"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--copy-files</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-c" title="Link to this definition"></a></dt>
 <dd><p>copy geometry, extra files, and recipe into destination directory</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_prepare-D">
-<span id="cmdoption-nachos_prepare-dry-run"></span><span id="cmdoption-nachos-prepare-dry-run"></span><span class="sig-name descname"><span class="pre">-D</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--dry-run</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-D" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_prepare-dry-run"></span><span class="sig-name descname"><span class="pre">-D</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--dry-run</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-D" title="Link to this definition"></a></dt>
 <dd><p>dry run (do not create the files)</p>
 </dd></dl>
 
@@ -874,9 +879,9 @@ So, e.g., if the title card say that the field is computed in the +x direction i
 <p>To helps the dalton program, a file called <code class="docutils literal notranslate"><span class="pre">inputs_matching.txt</span></code> is created for this <em>flavor</em>, where each lines contains the combination of dal and mol file to launch (because there may be different dal files).</p>
 <p>If you use job arrays, you may therefor use a job file that contains the following lines (here with  <a class="reference external" href="https://slurm.schedmd.com/">slurm</a>, but it is the same with other schedulers):</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># get the files from the line:</span>
-<span class="nv">INPUT_FILES</span><span class="o">=</span><span class="k">$(</span>sed -n <span class="s2">&quot;</span><span class="si">${</span><span class="nv">SLURM_ARRAY_TASK_ID</span><span class="si">}</span><span class="s2">p&quot;</span> inputs_matching.txt<span class="k">)</span>
+<span class="nv">INPUT_FILES</span><span class="o">=</span><span class="k">$(</span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SLURM_ARRAY_TASK_ID</span><span class="si">}</span><span class="s2">p&quot;</span><span class="w"> </span>inputs_matching.txt<span class="k">)</span>
 <span class="c1"># launch dalton:</span>
-dalton <span class="nv">$INPUT_FILES</span>
+dalton<span class="w"> </span><span class="nv">$INPUT_FILES</span>
 </pre></div>
 </div>
 <p>You need to launch as many calculations as there is lines in this file.</p>
@@ -884,52 +889,52 @@ dalton <span class="nv">$INPUT_FILES</span>
 <p>Note that the program tries to optimize things as much as possible and request the computation of things that are needed at a given level (no need to do a gradient calculation for second order if not requested, for example, which explains the multiple dal files, and why some calculations may be faster than other).</p>
 </div>
 <section id="id3">
-<h3>nachos_cook<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h3>
+<h3>nachos_cook<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
 <p>Out of the results of calculation, create a h5 file to store them</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_cook [-h] [-v] [-V VERBOSE] [-r RECIPE] [-o OUTPUT]</span>
 <span class="go">                   [--gaussian-logs]</span>
-<span class="go">                   [directories [directories ...]]</span>
+<span class="go">                   [directories ...]</span>
 </pre></div>
 </div>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_cook-arg-directories">
-<span id="cmdoption-nachos-cook-arg-directories"></span><span class="sig-name descname"><span class="pre">directories</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-arg-directories" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">directories</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-arg-directories" title="Link to this definition"></a></dt>
 <dd><p>directory where to look for QM results</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_cook-h">
-<span id="cmdoption-nachos-cook-h"></span><span id="cmdoption-nachos_cook-help"></span><span id="cmdoption-nachos-cook-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-h" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_cook-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-h" title="Link to this definition"></a></dt>
 <dd><p>show this help message and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_cook-v">
-<span id="cmdoption-nachos-cook-v"></span><span id="cmdoption-nachos_cook-version"></span><span id="cmdoption-nachos-cook-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-v" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_cook-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-v" title="Link to this definition"></a></dt>
 <dd><p>show program’s version number and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_cook-V">
-<span id="cmdoption-nachos_cook-verbose"></span><span id="cmdoption-nachos-cook-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-V" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_cook-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-V" title="Link to this definition"></a></dt>
 <dd><p>Level of details (0 to 1)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_cook-r">
-<span id="cmdoption-nachos-cook-r"></span><span id="cmdoption-nachos_cook-recipe"></span><span id="cmdoption-nachos-cook-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-r" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_cook-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-r" title="Link to this definition"></a></dt>
 <dd><p>Recipe file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_cook-o">
-<span id="cmdoption-nachos-cook-o"></span><span id="cmdoption-nachos_cook-output"></span><span id="cmdoption-nachos-cook-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-o" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_cook-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-o" title="Link to this definition"></a></dt>
 <dd><p>Output h5 file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_cook-gaussian-logs">
-<span id="cmdoption-nachos-cook-gaussian-logs"></span><span class="sig-name descname"><span class="pre">--gaussian-logs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-gaussian-logs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">--gaussian-logs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-gaussian-logs" title="Link to this definition"></a></dt>
 <dd><p>Use Gaussian LOGs instead of FCHKs (… but why in the world?!?)</p>
 </dd></dl>
 
@@ -939,7 +944,7 @@ dalton <span class="nv">$INPUT_FILES</span>
 <p>The <code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> option allows you to know which files the program actually discovered and used.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">--gaussian-logs</span></code> is experimental, and is only tested for HF, MP2 and SCS-MP2 (that is the <strong>only</strong> way to get this one).</p>
 <section id="id4">
-<h3>nachos_bake<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h3>
+<h3>nachos_bake<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
 <p>From h5 file, perform numerical differentiation</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_bake [-h] [-v] [-r RECIPE] [-d DATA] [-o OUTPUT] [-V VERBOSE]</span>
 <span class="go">                   [-S] [-O ONLY] [-p] [-H HESSIAN] [-R ROMBERG]</span>
@@ -947,67 +952,67 @@ dalton <span class="nv">$INPUT_FILES</span>
 </div>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-h">
-<span id="cmdoption-nachos-bake-h"></span><span id="cmdoption-nachos_bake-help"></span><span id="cmdoption-nachos-bake-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-h" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-h" title="Link to this definition"></a></dt>
 <dd><p>show this help message and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-v">
-<span id="cmdoption-nachos-bake-v"></span><span id="cmdoption-nachos_bake-version"></span><span id="cmdoption-nachos-bake-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-v" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-v" title="Link to this definition"></a></dt>
 <dd><p>show program’s version number and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-r">
-<span id="cmdoption-nachos-bake-r"></span><span id="cmdoption-nachos_bake-recipe"></span><span id="cmdoption-nachos-bake-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-r" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-r" title="Link to this definition"></a></dt>
 <dd><p>Recipe file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-d">
-<span id="cmdoption-nachos-bake-d"></span><span id="cmdoption-nachos_bake-data"></span><span id="cmdoption-nachos-bake-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-d" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-d" title="Link to this definition"></a></dt>
 <dd><p>H5 data file (output of nachos_cook)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-o">
-<span id="cmdoption-nachos-bake-o"></span><span id="cmdoption-nachos_bake-output"></span><span id="cmdoption-nachos-bake-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-o" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-o" title="Link to this definition"></a></dt>
 <dd><p>Output h5 file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-V">
-<span id="cmdoption-nachos_bake-verbose"></span><span id="cmdoption-nachos-bake-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-V" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-V" title="Link to this definition"></a></dt>
 <dd><p>Level of details (0 to 3)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-S">
-<span id="cmdoption-nachos-bake-s"></span><span id="cmdoption-nachos_bake-do-not-steal"></span><span id="cmdoption-nachos-bake-do-not-steal"></span><span class="sig-name descname"><span class="pre">-S</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--do-not-steal</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-S" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-do-not-steal"></span><span class="sig-name descname"><span class="pre">-S</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--do-not-steal</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-S" title="Link to this definition"></a></dt>
 <dd><p>do not add base derivatives to output file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-O">
-<span id="cmdoption-nachos_bake-only"></span><span id="cmdoption-nachos-bake-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-O" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-O" title="Link to this definition"></a></dt>
 <dd><p>only differentiate a subset of the original recipe</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-p">
-<span id="cmdoption-nachos-bake-p"></span><span id="cmdoption-nachos_bake-project"></span><span id="cmdoption-nachos-bake-project"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--project</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-p" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-project"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--project</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-p" title="Link to this definition"></a></dt>
 <dd><p>project geometrical derivatives over normal mode (if hessian)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-H">
-<span id="cmdoption-nachos_bake-hessian"></span><span id="cmdoption-nachos-bake-hessian"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--hessian</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-H" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-hessian"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--hessian</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-H" title="Link to this definition"></a></dt>
 <dd><p>consume hessian from an other file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_bake-R">
-<span id="cmdoption-nachos_bake-romberg"></span><span id="cmdoption-nachos-bake-romberg"></span><span class="sig-name descname"><span class="pre">-R</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--romberg</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-R" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_bake-romberg"></span><span class="sig-name descname"><span class="pre">-R</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--romberg</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-R" title="Link to this definition"></a></dt>
 <dd><p>Bypass detection and force a value in the triangle. Must be of the form <cite>k;m</cite>.</p>
 </dd></dl>
 
@@ -1015,15 +1020,15 @@ dalton <span class="nv">$INPUT_FILES</span>
 <p>The <code class="docutils literal notranslate"><span class="pre">-O</span></code> option to control what is actually differentiated.
 It expects a semicolon list like the <code class="docutils literal notranslate"><span class="pre">--differentiation</span></code> option of <code class="docutils literal notranslate"><span class="pre">nachos_make</span></code> (<a class="reference internal" href="#nachos-make-note-2"><span class="std std-ref">see above</span></a>), but you don’t have to provide the number of time if you want the number in the recipe to be used.</p>
 <p>So, for example, if you have a recipe that contains:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">G</span><span class="w"></span>
-<span class="c1"># ... other stuffs ...</span><span class="w"></span>
-<span class="nt">differentiation</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">2</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FF</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FD</span><span class="w"></span>
-<span class="w">  </span><span class="nt">1</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GG</span><span class="w"></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">G</span>
+<span class="c1"># ... other stuffs ...</span>
+<span class="nt">differentiation</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">2</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FF</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FD</span>
+<span class="w">  </span><span class="nt">1</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GG</span>
 </pre></div>
 </div>
 <p>Using <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F:1;FF:1&quot;</span></code> will request to perform the first order geometrical derivatives <strong>only</strong> for the dipole moment and static polarizability, while <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F;FF:1&quot;</span></code> will request the same for static hyperpolarizability, but adds the second order for the dipole moment (as written in the recipe).
@@ -1046,7 +1051,7 @@ The <code class="docutils literal notranslate"><span class="pre">-S</span></code
 </ul>
 </div>
 <section id="id5">
-<h3>nachos_shake<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h3>
+<h3>nachos_shake<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
 <p>Shake it! (compute the vibrational contributions)</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_shake [-h] [-v] [-d DATA] [-V VERBOSE] [-O ONLY]</span>
 <span class="go">                    [-f FREQUENCIES] [-A] [-m MODIFY_MODES]</span>
@@ -1054,49 +1059,49 @@ The <code class="docutils literal notranslate"><span class="pre">-S</span></code
 </div>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-h">
-<span id="cmdoption-nachos-shake-h"></span><span id="cmdoption-nachos_shake-help"></span><span id="cmdoption-nachos-shake-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-h" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-h" title="Link to this definition"></a></dt>
 <dd><p>show this help message and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-v">
-<span id="cmdoption-nachos-shake-v"></span><span id="cmdoption-nachos_shake-version"></span><span id="cmdoption-nachos-shake-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-v" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-v" title="Link to this definition"></a></dt>
 <dd><p>show program’s version number and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-d">
-<span id="cmdoption-nachos-shake-d"></span><span id="cmdoption-nachos_shake-data"></span><span id="cmdoption-nachos-shake-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-d" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-d" title="Link to this definition"></a></dt>
 <dd><p>Input/ouput h5 file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-V">
-<span id="cmdoption-nachos_shake-verbose"></span><span id="cmdoption-nachos-shake-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-V" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-V" title="Link to this definition"></a></dt>
 <dd><p>Level of details (0 to 3)</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-O">
-<span id="cmdoption-nachos-shake-o"></span><span id="cmdoption-nachos_shake-only"></span><span id="cmdoption-nachos-shake-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-O" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-O" title="Link to this definition"></a></dt>
 <dd><p>only compute the contribution of given derivatives</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-f">
-<span id="cmdoption-nachos-shake-f"></span><span id="cmdoption-nachos_shake-frequencies"></span><span id="cmdoption-nachos-shake-frequencies"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-f" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-frequencies"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-f" title="Link to this definition"></a></dt>
 <dd><p>compute vibrational contribution for set of frequencies</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-A">
-<span id="cmdoption-nachos-shake-a"></span><span id="cmdoption-nachos_shake-do-not-append"></span><span id="cmdoption-nachos-shake-do-not-append"></span><span class="sig-name descname"><span class="pre">-A</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--do-not-append</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-A" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-do-not-append"></span><span class="sig-name descname"><span class="pre">-A</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--do-not-append</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-A" title="Link to this definition"></a></dt>
 <dd><p>do not include vibrational contribution in data file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_shake-m">
-<span id="cmdoption-nachos-shake-m"></span><span id="cmdoption-nachos_shake-modify-modes"></span><span id="cmdoption-nachos-shake-modify-modes"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;modify_modes&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--modify-modes</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;modify_modes&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-m" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_shake-modify-modes"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;modify_modes&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--modify-modes</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;modify_modes&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-m" title="Link to this definition"></a></dt>
 <dd><p>Exclude or include vibrational modes</p>
 </dd></dl>
 
@@ -1118,12 +1123,12 @@ If this second part is not provided, default maximum (2) is assumed, so you can 
 For example, <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;FF;FFF:1&quot;</span></code> will compute all vibrational contribution to polarizability, but only first-order contribution to hyperpolarizability.</p>
 <p>The first order ZPVA contributions (<span class="math notranslate nohighlight">\([]^{1,0}\)</span> and <span class="math notranslate nohighlight">\([]^{0,1}\)</span>) are available for any quantities (if first and second order geometrical derivatives of these quantities and <code class="docutils literal notranslate"><span class="pre">NNN</span></code> are available).</p>
 <p>The pure vibrational (pv) contributions depends on the quantity:</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 30%" />
-<col style="width: 20%" />
-<col style="width: 10%" />
-<col style="width: 40%" />
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 10.0%" />
+<col style="width: 40.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Quantity</p></th>
@@ -1273,7 +1278,7 @@ Therefore, the ZPVA part is only computed for available frequencies, and the pv 
 </ul>
 </div>
 <section id="id6">
-<h3>nachos_analyze<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h3>
+<h3>nachos_analyze<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
 <p>Analyze the results stored in data file</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_analyze [-h] [-v] [-d DATA] [-O ONLY] [-f FREQUENCIES] -p</span>
 <span class="go">                      PROPERTIES [-I] [-g]</span>
@@ -1281,49 +1286,49 @@ Therefore, the ZPVA part is only computed for available frequencies, and the pv 
 </div>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-h">
-<span id="cmdoption-nachos-analyze-h"></span><span id="cmdoption-nachos_analyze-help"></span><span id="cmdoption-nachos-analyze-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-h" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-h" title="Link to this definition"></a></dt>
 <dd><p>show this help message and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-v">
-<span id="cmdoption-nachos-analyze-v"></span><span id="cmdoption-nachos_analyze-version"></span><span id="cmdoption-nachos-analyze-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-v" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-v" title="Link to this definition"></a></dt>
 <dd><p>show program’s version number and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-d">
-<span id="cmdoption-nachos-analyze-d"></span><span id="cmdoption-nachos_analyze-data"></span><span id="cmdoption-nachos-analyze-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-d" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-d" title="Link to this definition"></a></dt>
 <dd><p>Input h5 file</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-O">
-<span id="cmdoption-nachos-analyze-o"></span><span id="cmdoption-nachos_analyze-only"></span><span id="cmdoption-nachos-analyze-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-O" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-O" title="Link to this definition"></a></dt>
 <dd><p>only fetch the properties of given derivatives</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-f">
-<span id="cmdoption-nachos-analyze-f"></span><span id="cmdoption-nachos_analyze-frequencies"></span><span id="cmdoption-nachos-analyze-frequencies"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-f" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-frequencies"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-f" title="Link to this definition"></a></dt>
 <dd><p>only show for a given set of frequencies</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-p">
-<span id="cmdoption-nachos-analyze-p"></span><span id="cmdoption-nachos_analyze-properties"></span><span id="cmdoption-nachos-analyze-properties"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;properties&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--properties</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;properties&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-p" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-properties"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;properties&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--properties</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;properties&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-p" title="Link to this definition"></a></dt>
 <dd><p>which properties to carry out</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-I">
-<span id="cmdoption-nachos-analyze-i"></span><span id="cmdoption-nachos_analyze-inverse"></span><span id="cmdoption-nachos-analyze-inverse"></span><span class="sig-name descname"><span class="pre">-I</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--inverse</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-I" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-inverse"></span><span class="sig-name descname"><span class="pre">-I</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--inverse</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-I" title="Link to this definition"></a></dt>
 <dd><p>for vibrational contribution, show <cite>property(total - current)</cite> rather than <cite>property(current)</cite></p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_analyze-g">
-<span id="cmdoption-nachos-analyze-g"></span><span id="cmdoption-nachos_analyze-group-vibs"></span><span id="cmdoption-nachos-analyze-group-vibs"></span><span class="sig-name descname"><span class="pre">-g</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--group-vibs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-g" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_analyze-group-vibs"></span><span class="sig-name descname"><span class="pre">-g</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--group-vibs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-g" title="Link to this definition"></a></dt>
 <dd><p>Group vibrational contribution per perturbation order</p>
 </dd></dl>
 
@@ -1363,26 +1368,26 @@ The <code class="docutils literal notranslate"><span class="pre">-g</span></code
 </ul>
 </div>
 <section id="id7">
-<h3>nachos_peek<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h3>
+<h3>nachos_peek<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
 <p>Peek into an output file (LOG, FCHK, H5, …)</p>
 <div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">usage: nachos_peek [-h] [-v] [infile]</span>
 </pre></div>
 </div>
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_peek-arg-infile">
-<span id="cmdoption-nachos-peek-arg-infile"></span><span class="sig-name descname"><span class="pre">infile</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-arg-infile" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">infile</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-arg-infile" title="Link to this definition"></a></dt>
 <dd><p>source of the derivatives</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_peek-h">
-<span id="cmdoption-nachos-peek-h"></span><span id="cmdoption-nachos_peek-help"></span><span id="cmdoption-nachos-peek-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-h" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_peek-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-h" title="Link to this definition"></a></dt>
 <dd><p>show this help message and exit</p>
 </dd></dl>
 
 <dl class="std option">
 <dt class="sig sig-object std" id="cmdoption-nachos_peek-v">
-<span id="cmdoption-nachos-peek-v"></span><span id="cmdoption-nachos_peek-version"></span><span id="cmdoption-nachos-peek-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-v" title="Permalink to this definition"></a></dt>
+<span id="cmdoption-nachos_peek-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-v" title="Link to this definition"></a></dt>
 <dd><p>show program’s version number and exit</p>
 </dd></dl>
 
@@ -1391,15 +1396,15 @@ The <code class="docutils literal notranslate"><span class="pre">-g</span></code
 This program is less advance than <code class="docutils literal notranslate"><span class="pre">nachos_analyze</span></code>, since it <strong>does not</strong> include vibrational corrections.</p>
 </section>
 <section id="appendix">
-<h2>Appendix<a class="headerlink" href="#appendix" title="Permalink to this heading"></a></h2>
+<h2>Appendix<a class="headerlink" href="#appendix" title="Link to this heading"></a></h2>
 <section id="list-of-the-derivatives">
-<h3>List of the derivatives<a class="headerlink" href="#list-of-the-derivatives" title="Permalink to this heading"></a></h3>
+<h3>List of the derivatives<a class="headerlink" href="#list-of-the-derivatives" title="Link to this heading"></a></h3>
 <p>Note that it would be better to respect the order for the different derivatives (<code class="docutils literal notranslate"><span class="pre">dDF</span></code>, not <code class="docutils literal notranslate"><span class="pre">FdD</span></code>, for example).</p>
-<table class="colwidths-given docutils align-default">
+<table class="docutils align-default">
 <colgroup>
-<col style="width: 40%" />
-<col style="width: 10%" />
-<col style="width: 50%" />
+<col style="width: 40.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Derivative</p></th>
