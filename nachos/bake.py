@@ -148,10 +148,11 @@ def main():
     storage = files.ComputationalResults(recipe, directory=recipe_directory)
     storage.read(args.data)
 
-    original_cf = ChemistryDataFile()
+    original_cf = None
     if args.append:
         with open(args.output) as f:
             try:
+                original_cf = ChemistryDataFile()
                 original_cf.read(f)
             except BadChemistryDataFile as e:
                 return exit_failure('Cannot append data to `{}`: {}'.format(args.output, e))

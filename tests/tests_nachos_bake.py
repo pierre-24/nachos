@@ -44,9 +44,9 @@ class BakeTestCase(NachosTestCase):
 
         storage = files.ComputationalResults(r, directory=directory)
         storage.read(storage_path)
-        baker = baking.Baker(r, storage, directory=directory)
 
         # with energy:
+        baker = baking.Baker(r, storage, directory=directory)
         cf_with_energy = baker.bake(only=[(derivatives.Derivative(), 3)])
 
         self.assertIn('F', cf_with_energy.derivatives)
@@ -64,6 +64,7 @@ class BakeTestCase(NachosTestCase):
             electrical_derivatives['FFF']['static'], cf_with_energy.derivatives['FFF']['static'])
 
         # with mu:
+        baker = baking.Baker(r, storage, directory=directory)
         cf_with_mu = baker.bake(only=[(derivatives.Derivative('F'), 2)])
 
         self.assertIn('FF', cf_with_mu.derivatives)
@@ -79,6 +80,7 @@ class BakeTestCase(NachosTestCase):
             delta=.01)
 
         # with alpha:
+        baker = baking.Baker(r, storage, directory=directory)
         cf_with_alpha = baker.bake(only=[(derivatives.Derivative('FF'), 1)])
 
         self.assertIn('FFF', cf_with_alpha.derivatives)
@@ -89,6 +91,7 @@ class BakeTestCase(NachosTestCase):
             cf_with_alpha.derivatives['FFF']['static'])
 
         # dynamic
+        baker = baking.Baker(r, storage, directory=directory)
         cf_with_alpha = baker.bake(only=[(derivatives.Derivative('dD'), 1)])
 
         self.assertIn('dDF', cf_with_alpha.derivatives)
@@ -159,9 +162,8 @@ class BakeTestCase(NachosTestCase):
 
         geometrical_derivatives = fchk.property('geometrical_derivatives')
 
-        baker = baking.Baker(r, storage, directory=directory)
-
         # with energy:
+        baker = baking.Baker(r, storage, directory=directory)
         cf_with_energy = baker.bake(only=[(derivatives.Derivative(), 2)])
 
         self.assertIn('G', cf_with_energy.derivatives)
@@ -175,6 +177,7 @@ class BakeTestCase(NachosTestCase):
             geometrical_derivatives['GG'], cf_with_energy.derivatives['GG'])
 
         # try with all
+        baker = baking.Baker(r, storage, directory=directory)
         cf = baker.bake()
 
         self.assertIn('G', cf.derivatives)
@@ -212,6 +215,7 @@ class BakeTestCase(NachosTestCase):
                 math.fabs(ph[i, i]), mwh.frequencies[i] ** 2, places=5)
 
         # now, bake and steal results from zero field
+        baker = baking.Baker(r, storage, directory=directory)
         cf_with_copy = baker.bake(only=[(derivatives.Derivative(), 0)], copy_zero_field_basis=True)
 
         # gradient and hessian ...
