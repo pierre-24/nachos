@@ -1,3 +1,4 @@
+import io
 import os
 import random
 import subprocess
@@ -426,9 +427,9 @@ class PrepareTestCase(NachosTestCase):
 
         with open(path) as f:
             content = f.readlines()
-            self.assertNotIn('SCS-MP2', content[3])
-            self.assertNotIn('MP2=Full', content[3])
-            self.assertIn('MP2', content[3])
+            self.assertNotIn('SCS-MP2', content[1])
+            self.assertNotIn('MP2=Full', content[1])
+            self.assertIn('MP2', content[1])
 
     def test_nachos_prepare(self):
         """Test the preparer program"""

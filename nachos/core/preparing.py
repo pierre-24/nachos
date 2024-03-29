@@ -243,8 +243,12 @@ class Preparer:
                 if self.recipe['type'] == 'F':
                     fi.title += '\nNote: E-field in the opposite direction is used.'
 
-            fi.options['nprocshared'] = self.recipe['flavor_extra']['procs']
-            fi.options['mem'] = self.recipe['flavor_extra']['memory']
+            if self.recipe['flavor_extra']['procs'] is not None:
+                fi.options['nprocshared'] = self.recipe['flavor_extra']['procs']
+
+            if self.recipe['flavor_extra']['memory'] is not None:
+                fi.options['mem'] = self.recipe['flavor_extra']['memory']
+
             fi.options['chk'] = 'xxx'
 
             # input card

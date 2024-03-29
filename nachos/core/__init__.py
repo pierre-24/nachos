@@ -20,8 +20,8 @@ CONFIG = {
         ],
         'bases': ['energy', 'G', 'GG', 'F', 'FF', 'dD', 'FFF', 'dDF', 'XDD'],
         'default_for_extra_fields': {
-            'memory': '1Gb',
-            'procs': 1,
+            'memory': None,
+            'procs': None,
             'convergence': 11,
             'cc_convergence': 11,
             'cphf_convergence': 10,
