@@ -2,8 +2,7 @@ all: help
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
-	@echo "  init                        to install python dependencies through pipenv"
-	@echo "  sync                        update dependencies of pipenv"
+	@echo "  install                     to install python dependencies"
 	@echo "  lint                        to lint backend code (flake8)"
 	@echo "  test                        to run test suite"
 	@echo "  doc                         to build documentation"
@@ -13,7 +12,7 @@ init:
 	pip3 install -e .
 
 install-dev:
-	pip-sync
+	pip3 install -e .[dev]
 
 lint:
 	flake8 nachos tests --max-line-length=120 --ignore=N802

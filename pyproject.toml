@@ -28,6 +28,16 @@ dependencies = [
     'numpy>=1.20'
 ]
 
+[project.optional-dependencies]
+dev = [
+    "flake8",
+    "flake8-quotes",
+    "autopep8",
+    "bump2version",
+    "sphinxcontrib-autoprogram",
+    "Sphinx",
+    "sphinx_rtd_theme",
+]
 
 [project.urls]
 documentation = "https://pierre-24.github.io/nachos/"
