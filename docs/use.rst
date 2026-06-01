@@ -20,10 +20,10 @@ Concepts
 
    .. math::
 
-      \begin{align}
+      \begin{aligned}
       &H_{k,0} = \frac{f(a^kh_0)-f(-a^kh_0)}{2\,a^kh_0},\\
       &H_{k,m} = \frac{a^{2m}\,H_{k,m-1}-H_{k+1,m-1}}{a^{2m}-1},
-      \end{align}
+      \end{aligned}
 
    where :math:`m` is the number of iterations (or refinement steps).
    This leads to a so-called *Romberg triangle*, from which the value of the derivative is extracted.

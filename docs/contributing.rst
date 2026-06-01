@@ -28,11 +28,3 @@ Adapted from the (in)famous `Git flow <http://nvie.com/posts/a-successful-git-br
 + Theses pull requests should be unitary, and include unit test(s) and documentation if needed. The test suite must succeed for the merge request to be accepted.
 + The pull requests will be reviewed before acceptance.
 + At some (random) points, a new version will appear, with a tag of the form ``vXX``.
-
-.. note::
-
-    Since ``nachos`` now rely on `pip-tools <https://github.com/jazzband/pip-tools>`_, the workflow is currently the following :
-
-    1. Normal installation use ``pip-sync && pip install -e .`` (``make init``)
-    2. To update the dependencies from upstream, ``pip-sync``  (``make sync``).
-    3. To update the ``requirements.txt`` (and thus the actual version of the dependencies), a **specific** merge request is done, with the result of ``pipenv lock`` (followed by ``make sync`` on the dev's machine).

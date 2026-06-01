@@ -35,8 +35,8 @@ dev = [
     "autopep8",
     "bump2version",
     "sphinxcontrib-autoprogram",
-    "Sphinx",
-    "sphinx_rtd_theme",
+    "sphinx",
+    "shibuya",
 ]
 
 [project.urls]
