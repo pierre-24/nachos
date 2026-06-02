@@ -18,10 +18,14 @@ def _merge_dict_of_tensors(b, a):
 
 
 class VibrationalContributionsData:
-    """Store the different vibrational contributions for a given derivative
+    """Store vibrational contributions for a given derivative.
 
-    :param derivative: the derivative
-    :type derivative: qcip_tools.derivatives.Derivative
+    Manages the collection of zero-point vibrational and perturbative vibrational
+    contributions to electrical derivatives.
+
+    Args:
+        derivative: Derivative object to store contributions for.
+        spacial_dof: Number of spatial degrees of freedom.
     """
 
     def __init__(self, derivative, spacial_dof):
@@ -42,13 +46,12 @@ class VibrationalContributionsData:
 
         self.total_vibrational = {}
 
-    def add_contribution(self, vc, values):
-        """add a contribution
+    def add_contribution(self, vc: object, values: dict) -> None:
+        """Register a vibrational contribution with its computed values.
 
-        :param vc: vibrational contribution
-        :type vc: VibrationalContribution
-        :param values: values (per frequencies)
-        :type values: dict
+        Args:
+            vc: VibrationalContribution object to add.
+            values: Dictionary mapping frequencies to computed tensors.
         """
 
         t = 'zpva' if vc.zpva else 'pv'
@@ -79,11 +82,11 @@ class VibrationalContributionsData:
 
         _merge_dict_of_tensors(self.total_vibrational, values)
 
-    def write_in_group(self, group):
-        """Write in an h5py group
+    def write_in_group(self, group: object) -> None:
+        """Serialize contributions to an HDF5 group.
 
-        :param group: the group
-        :type group: h5py.Group
+        Args:
+            group: HDF5 group for storing derivatives.
         """
 
         zpva_contribs = \
@@ -122,10 +125,11 @@ class VibrationalContributionsData:
             values = chemistry_datafile.ChemistryDataFile.read_derivative_from_dataset(group[c], self.derivative)
             self.add_contribution(vc, values)
 
-    def sort_per_type_and_order(self):
-        """Group vibrational contributions together.
+    def sort_per_type_and_order(self) -> dict:
+        """Organize vibrational contributions by type and perturbation order.
 
-        :type: dict
+        Returns:
+            Dictionary with ZPVA and pV contributions grouped by base derivative and order.
         """
         sorted_ = {'zpva': {}, 'pv': {}}
         for t in self.per_type:
@@ -140,13 +144,12 @@ class VibrationalContributionsData:
         return sorted_
 
 
-def save_vibrational_contributions(path, contributions):
-    """Save the contributions in an h5file
+def save_vibrational_contributions(path: str, contributions: dict) -> None:
+    """Persist vibrational contributions to an HDF5 file.
 
-    :param path: path to the h5 file
-    :type path: str
-    :param contributions: the vibrational contributions
-    :type contributions: dict
+    Args:
+        path: Path to the HDF5 file.
+        contributions: Dictionary of VibrationalContributionsData objects.
     """
 
     with h5py.File(path, 'a') as f:
@@ -173,14 +176,15 @@ def save_vibrational_contributions(path, contributions):
         vib_group.attrs['derivatives_available'] = ','.join(derivatives_available)
 
 
-def load_vibrational_contributions(path, spacial_dof):
-    """Save the contributions in an h5file
+def load_vibrational_contributions(path: str, spacial_dof: int) -> dict:
+    """Load vibrational contributions from an HDF5 file.
 
-    :param path: path to the h5 file
-    :type path: str
-    :param spacial_dof: dof
-    :type spacial_dof: int
-    :rtype: dict
+    Args:
+        path: Path to the HDF5 file.
+        spacial_dof: Number of spatial degrees of freedom.
+
+    Returns:
+        Dictionary of loaded VibrationalContributionsData objects.
     """
 
     v_contributions = {}
@@ -226,14 +230,16 @@ FANCY_EXPONENTS = {0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴'}
 
 
 class VibrationalContribution:
-    """Represent a vibrational contribution
+    """Represent a single vibrational contribution term.
 
-    :param derivatives_: list of derivatives_
-    :type derivatives_: list|tuple
-    :param m: m (electrical anharmonicity)
-    :type m: int
-    :param n: n (mechanical anharmonicity)
-    :type n: int
+    Encodes the type, order, and anharmonicity of a vibrational contribution
+    to electrical derivatives (ZPVA or perturbative).
+
+    Args:
+        derivatives_: Tuple or list of Derivative objects or string representations.
+        m: Electrical anharmonicity order (default: 0).
+        n: Mechanical anharmonicity order (default: 0).
+        dof: Spatial degrees of freedom (default: 3).
     """
     def __init__(self, derivatives_, m=0, n=0, dof=3):
 
@@ -268,12 +274,15 @@ class VibrationalContribution:
                 if 'D' in d.representation():
                     raise ValueError('D derivative {} in pv contribution'.format(d))
 
-    def derivatives_needed(self, limit_anharmonicity_usage=True, dof=None):
-        """Get the list of the derivatives needed to compute this contribution
+    def derivatives_needed(self, limit_anharmonicity_usage: bool = True, dof: int | None = None) -> list:
+        """Identify all derivatives required to compute this contribution.
 
-        :param limit_anharmonicity_usage: limit the usage to first order of mechanical and electrical anharmonicity
-        :type limit_anharmonicity_usage: bool
-        :rtype: list
+        Args:
+            limit_anharmonicity_usage: Limit to first-order anharmonicity effects.
+            dof: Spatial degrees of freedom (uses instance value if None).
+
+        Returns:
+            List of Derivative objects needed for computation.
         """
 
         needed = []
@@ -336,14 +345,18 @@ class VibrationalContribution:
         return self.to_string()
 
     @staticmethod
-    def from_representation(representation, dof=3):
-        """Convert the **not fancy** representation back into class
+    def from_representation(representation: str, dof: int = 3) -> 'VibrationalContribution':
+        """Create a VibrationalContribution from its string representation.
 
-        :param representation: reprentation of the vibrational contribution (``X_Y_Z__m_n``)
-        :type representation: str
-        :param dof: dof
-        :type dof: int
-        :rtype: VibrationalContribution
+        Parses the non-fancy notation format (``X_Y_Z__m_n``) to reconstruct
+        the original object.
+
+        Args:
+            representation: String representation of vibrational contribution.
+            dof: Spatial degrees of freedom (default: 3).
+
+        Returns:
+            Reconstructed VibrationalContribution object.
         """
         if '__' not in representation:
             raise ValueError('no separator in {}'.format(representation))
@@ -378,10 +391,13 @@ class VibrationalContribution:
 
 
 class Shaker:
-    """Shaker class to compute vibrational contributions (to electrical derivatives)
+    """Compute vibrational contributions to electrical derivatives.
 
-    :param datafile: input for derivatives
-    :type datafile: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
+    This class calculates zero-point vibrational averages and perturbative vibrational
+    contributions using mass-weighted Hessian and normal mode analysis.
+
+    Args:
+        datafile: ChemistryDataFile object with computed derivatives and Hessian.
     """
 
     def __init__(self, datafile):
@@ -434,8 +450,11 @@ class Shaker:
 
         self.__make_availability()
 
-    def __make_availability(self):
-        """make the availability table, and the frequency list
+    def __make_availability(self) -> None:
+        """Build internal availability tables for derivatives and frequencies.
+
+        Populates lookup tables for available geometrical derivatives and dynamic
+        frequencies from the datafile.
         """
 
         meet_freq = False
@@ -490,15 +509,15 @@ class Shaker:
         # sort dynamic frequencies
         self.dynamic_frequencies.sort(key=lambda x: derivatives_e.convert_frequency_from_string(x))
 
-    def check_availability(self, vc, limit_anharmonicity_usage=True):
-        """Check what is available for the computation
+    def check_availability(self, vc: object, limit_anharmonicity_usage: bool = True) -> bool:
+        """Verify required derivatives are available for computation.
 
-        :param vc: vibrational contribution
-        :type vc: VibrationalContribution
-        :param limit_anharmonicity_usage: limit the usage of anharmonicity to first order
-            (so it accepts m>1, n>1 even if the corresponding derivative is not available)
-        :type limit_anharmonicity_usage: bool
-        :rtype: bool
+        Args:
+            vc: VibrationalContribution to check.
+            limit_anharmonicity_usage: Limit to first-order anharmonicity effects.
+
+        Returns:
+            True if all required derivatives are available, False otherwise.
         """
 
         needed = vc.derivatives_needed(limit_anharmonicity_usage)
@@ -529,21 +548,17 @@ class Shaker:
         raise DerivativeNotAvailable(representation, frequency)
 
     @staticmethod
-    def lambda_(up, down):
-        """Compute the lambda quantity found in the papers of Kirtman and Bishop
+    def lambda_(up: float | list | tuple, down: float | list | tuple) -> float:
+        """Compute the lambda quantity from Kirtman and Bishop papers.
 
-        .. math::
-            \\begin{align}
-            \\lambda^{\\pm ij\\ldots}_{xy\\ldots}= [(\\omega_x+\\omega_y+\\ldots)& +(\\omega_i+\\omega_j+\\ldots)]^{-1}
-            \\times\\\\
-             &[(\\omega_x+\\omega_y+\\ldots)-(\\omega_i+\\omega_j+\\ldots)]^{-1}
-            \\end{align}
+        Used in perturbative vibrational calculations.
 
-        :param up: upper argument (optical frequencies: :math:`\\omega_{i}`, ...)
-        :type up: float|list|tuple
-        :param down: down argument (vibrational frequencies: :math:`\\omega_{x}`, ...)
-        :type down: float|list|tuple
-        :rtype: float
+        Args:
+            up: Upper argument (optical frequencies: $\\omega_{i}$, ...).
+            down: Down argument (vibrational frequencies: $\\omega_{x}$, ...).
+
+        Returns:
+            Computed lambda value.
         """
         sd = down if type(down) is float else sum(down)
         su = up if type(up) is float else sum(up)
@@ -551,14 +566,15 @@ class Shaker:
         return (sd + su) ** -1 * (sd - su) ** -1
 
     @staticmethod
-    def get_iterator(coordinates, input_fields):
-        """Get the iteration over all possible permutations
+    def get_iterator(coordinates: tuple, input_fields: tuple) -> tuple:
+        """Get all possible permutations for coordinate and field combinations.
 
-        :param coordinates: coordinates
-        :type coordinates: tuple
-        :param input_fields: the input fields
-        :type input_fields: tuple
-        :rtype: (int, list)
+        Args:
+            coordinates: Tuple of coordinate labels.
+            input_fields: Tuple of input fields.
+
+        Returns:
+            Tuple of (permutation_count, set of permutations).
         """
 
         shuflable = [(coordinates[0], -sum(input_fields))]
@@ -569,17 +585,21 @@ class Shaker:
         return math.factorial(len(coordinates)) / len(unique_elements), unique_elements
         # return 1, itertools.permutations(shuflable)
 
-    def compute_zpva(self, vc, derivative, frequencies):
-        """Compute a ZPVA contribution to a given derivative. It does not uses _create_tensors() since it is possible
-        to go along without permutations (and therefore, work with the all tensor as one).
+    def compute_zpva(self, vc: object, derivative: object, frequencies: list) -> dict:
+        """Compute a zero-point vibrational average (ZPVA) contribution.
 
-        :param vc: what to compute
-        :type vc: VibrationalContribution
-        :param derivative: representation
-        :type derivative: qcip_tools.derivatives.Derivative
-        :param frequencies: list of frequencies
-        :type frequencies: list
-        :rtype: dict
+        Computes ZPVA without permutations, working with the entire tensor as one.
+
+        Args:
+            vc: VibrationalContribution to compute.
+            derivative: Derivative object or representation.
+            frequencies: List of frequencies for evaluation.
+
+        Returns:
+            Dictionary of computed tensors.
+
+        Raises:
+            BadShaking: If derivative is geometrical or vc specifications are invalid.
         """
 
         if derivatives.is_geometrical(derivative):
@@ -590,23 +610,21 @@ class Shaker:
 
         return getattr(self, '_compute_zpva_{}{}'.format(vc.m, vc.n))(derivative, frequencies)
 
-    def compute_pv(self, vc, derivative, frequencies, limit_anharmonicity_usage=True):
-        """Compute a pure vibrational contribution.
+    def compute_pv(
+            self, vc: object, derivative: object, frequencies: list, limit_anharmonicity_usage: bool = True) -> dict:
+        """Compute a perturbative vibrational contribution.
 
-        .. note::
+        Args:
+            vc: VibrationalContribution to compute.
+            derivative: Derivative object or representation.
+            frequencies: List of frequencies for evaluation.
+            limit_anharmonicity_usage: Limit to first-order anharmonicity effects.
 
-            Expect the callback function to be ``'_compute_' + what + '_component'``,
-            and kwargs to looks like ``'t_' + repr``.
+        Returns:
+            Dictionary of computed tensors.
 
-        :param vc: what to compute
-        :type vc: VibrationalContribution
-        :param derivative: representation
-        :type derivative: qcip_tools.derivatives.Derivative
-        :param frequencies: list of frequencies
-        :type frequencies: list
-        :param limit_anharmonicity_usage: limit the usage of anharmonicity to first order
-        :type limit_anharmonicity_usage: bool
-        :rtype: dict
+        Raises:
+            BadShaking: If derivative is geometrical, order mismatch, or derivatives unavailable.
         """
 
         if derivatives.is_geometrical(derivative):
@@ -626,21 +644,22 @@ class Shaker:
         return self._create_tensors(
             derivative, frequencies, '_compute_{}_component'.format(vc.to_string()), **kwargs)
 
-    def shake(self, only=None, frequencies=None, out=sys.stdout, verbosity_level=0,
-              limit_anharmonicity_usage=True):
-        """Compute the vibrational contributions
+    def shake(self, only: list | tuple | None = None, frequencies: list | None = None, out: object = sys.stdout,
+              verbosity_level: int = 0, limit_anharmonicity_usage: bool = True) -> dict:
+        """Compute vibrational contributions to electrical derivatives.
 
-        :param only: restrict to the vibrational contribution to certain derivatives
-        :type only: list|tuple of qcip_tools.derivatives.Derivative, int
-        :param frequencies: frequencies (if not available, ZPVA will not be computed for those ones)
-        :type frequencies: list
-        :param out: output if information is needed to be outputed
-        :type out: file
-        :param verbosity_level: how far should we print information
-        :type verbosity_level: int
-        :param limit_anharmonicity_usage: limit the usage of anharmonicity to first order
-        :type limit_anharmonicity_usage: bool
-        :rtype: dict
+        Args:
+            only: Restrict computation to specific derivatives with max perturbation order.
+            frequencies: List of frequencies (if not provided, ZPVA won't be computed).
+            out: Output file object for printing information.
+            verbosity_level: Verbosity level for output (0=none, 1=standard, 2+=detailed).
+            limit_anharmonicity_usage: Limit to first-order anharmonicity effects.
+
+        Returns:
+            Dictionary mapping derivatives to VibrationalContributionsData objects.
+
+        Raises:
+            BadShaking: If requested derivatives cannot be computed.
         """
 
         # select bases:
@@ -739,15 +758,13 @@ class Shaker:
         return vibrational_contributions
 
     @staticmethod
-    def display_message(message, out=sys.stdout, verbosity_level=0):
-        """Output a message, if requested
+    def display_message(message: str, out: object = sys.stdout, verbosity_level: int = 0) -> None:
+        """Output a message if verbosity level permits.
 
-        :param message: the message
-        :type message: str
-        :param out: output if information is needed to be outputed
-        :type out: file
-        :param verbosity_level: how far should we print information
-        :type verbosity_level: int
+        Args:
+            message: The message text to output.
+            out: Output file object for printing (default: stdout).
+            verbosity_level: Verbosity level (0=silent, 1=normal, 2+=verbose).
         """
 
         if verbosity_level >= 1:
@@ -755,23 +772,19 @@ class Shaker:
             out.flush()
 
     @staticmethod
-    def output_tensors(base, vc, tensors, frequencies, out=sys.stdout, verbosity_level=0, what=''):
-        """Output a bit of information if requested
+    def output_tensors(
+            base: object, vc: object | None, tensors: dict, frequencies: list, out: object = sys.stdout,
+            verbosity_level: int = 0, what: str = '') -> None:
+        """Output computed tensor information if verbosity level permits.
 
-        :param base: base electrical derivative for which the vibrational contribution is computed
-        :type base: qcip_tools.derivatives.Derivative
-        :param vc: vibrational contribution
-        :type vc: VibrationalContribution|None
-        :param tensors: list of tensors
-        :type tensors: dict
-        :param frequencies: frequencies
-        :type frequencies: list
-        :param out: output if information is needed to be outputed
-        :type out: file
-        :param verbosity_level: how far should we print information
-        :type verbosity_level: int
-        :param what: used when no vc is given
-        :type what: str
+        Args:
+            base: Base electrical derivative.
+            vc: VibrationalContribution (None if displaying total).
+            tensors: Dictionary of computed tensors.
+            frequencies: List of frequencies to output.
+            out: Output file object for printing (default: stdout).
+            verbosity_level: Verbosity level (0=silent, 1=normal, 3+=verbose).
+            what: Label to use when no vc is given (default: empty).
         """
 
         if (verbosity_level >= 1 and vc is None) or verbosity_level >= 3:
@@ -792,31 +805,20 @@ class Shaker:
     #           (so, internal stuffs)
     # --------------------------------------------
 
-    def _create_tensors(self, derivative, frequencies, callback, **kwargs):
-        """Create a list of tensor, by taking advantage of the fact that it may (?) be easier to compute the same
-        contribution for many frequencies.
+    def _create_tensors(self, derivative: object, frequencies: list, callback: str, **kwargs: dict) -> dict:
+        """Create tensors by computing contributions for many frequencies efficiently.
 
-        The ``callback`` function must be a function of this class, and receive:
+        Leverages the fact that contributions for multiple frequencies can be computed together.
+        The callback function must accept input_fields, frequencies, and **kwargs.
 
-        + `input_fields`` as first argument,
-        + then ``frequencies``` (as a list of float, sorted),
-        + and finally ``**kwargs``.
+        Args:
+            derivative: Derivative for which tensors are computed.
+            frequencies: List of frequencies for computation.
+            callback: Name of callback method in this class.
+            **kwargs: Additional arguments passed to callback.
 
-        .. note::
-
-            + It is more efficient to compute the static version separately (because of permutations)
-            + Permutation of the full tensor is not used: the first coordinate is separated from the rest.
-
-
-        :param derivative: the derivative of the tensor for which the contribution should be computed
-        :type derivative: qcip_tools.derivatives.Derivative
-        :param frequencies: the frequencies
-        :type frequencies: list
-        :param callback: callback func
-        :type callback: str
-        :param kwargs: kwargs
-        :type kwargs: dict
-        :rtype: dict
+        Returns:
+            Dictionary mapping frequencies to computed tensors.
         """
 
         if derivative.representation() not in derivatives_e.DERIVATIVES:
@@ -845,18 +847,15 @@ class Shaker:
 
         return tensors
 
-    def _compute_zpva_10(self, derivative, frequencies):
-        """Compute the ZPVA contribution from electrical anharmonicity:
+    def _compute_zpva_10(self, derivative: object, frequencies: list) -> object:
+        """Compute ZPVA contribution from electrical anharmonicity.
 
-        .. math::
+        Args:
+            derivative: Derivative for which contribution is computed.
+            frequencies: List of frequencies for evaluation.
 
-            [p]^{1,0} = \\frac{1}{4}\\,\\sum_a \\tdiff{^2p}{Q_a^2}\\,\\omega_a^{-1}
-
-        :param derivative: the derivative
-        :type derivative: qcip_tools.derivatives.Derivative
-        :param frequencies: the frequencies
-        :type frequencies: list of float|str
-        :rtype: qcip_tools.derivatives.Tensor
+        Returns:
+            Dictionary mapping frequencies to computed tensors.
         """
         tensors = {}
         b_repr = derivative.representation()
@@ -873,18 +872,15 @@ class Shaker:
 
         return tensors
 
-    def _compute_zpva_01(self, derivative, frequencies):
-        """Compute the ZPVA contribution from mechanical anharmonicity:
+    def _compute_zpva_01(self, derivative: object, frequencies: list) -> dict:
+        """Compute ZPVA contribution from mechanical anharmonicity.
 
-        .. math::
+        Args:
+            derivative: Derivative for which contribution is computed.
+            frequencies: List of frequencies for evaluation.
 
-            [p]^{0,1} = -\\frac{1}{4}\\,\\sum_{ab} F_{abb}\\,\\tdiff{p}{Q_a}\\,\\omega_a^{-2}\\,\\omega_b^{-1}
-
-        :param derivative: the derivative
-        :type derivative: qcip_tools.derivatives.Derivative
-        :param frequencies: the frequencies
-        :type frequencies: list of float|str
-        :rtype: qcip_tools.derivatives.Tensor
+        Returns:
+            Dictionary mapping frequencies to computed tensors.
         """
 
         tensors = {}
@@ -949,13 +945,13 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^2]^{1,1} &= -\\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abc} F_{abc}\\,
             \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_j}{Q_c}\\,
             \\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,(\\omega_a^{-1}+\\omega_b^{-1})\\\\
             &+ F_{bcc}\\,\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_j}{Q_a}\\,
             \\lb{\\sigma}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1007,11 +1003,11 @@ class Shaker:
 
          .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^2]^{2,0} &= \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{ab}
             \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,
             \\lb{\\sigma}{ab}\\,\\omega_a^{-1}
-            \\end{align}
+            \\end{aligned}
 
          :param coo: coordinates
          :type coo: tuple|list
@@ -1050,12 +1046,12 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^2]^{0,2} &= -\\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abcd}
             \\tdiff{\\mu_i}{Q_c}\\tdiff{\\mu_j}{Q_d}\\times\\\\
             &\\left[F_{aab}\\,F_{bcd}\\,\\lb{\\sigma}{c}\\lb{\\sigma}{d}\\,\\omega_b^{-2}
             +2\\,F_{abc}\\,F_{abd}\\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\right]
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1112,10 +1108,10 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu\\alpha]^{0,0} &= \\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_a
             \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\alpha_{jk}}{Q_a}\\,\\lb{\\sigma}{a}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1152,11 +1148,11 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu\\alpha]^{2,0} &= \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{ab}
             \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\,
             \\lb{\\sigma}{ab}\\,\\omega_a^{-1}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1197,12 +1193,12 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu\\alpha]^{0,2} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{abcd}
             \\tdiff{\\mu_i}{Q_c}\\tdiff{\\alpha_{jk}}{Q_d}\\times\\\\
             &\\left[ F_{aab}\\,F_{bcd}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\,\\omega_b^{-2}
             +2\\,F_{abc}\\,F_{abd}\\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\right]
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1261,7 +1257,7 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu\\alpha]^{1,1} &= -\\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ij}} \\sum_{abc}
             F_{abc}\\times\\\\
             &\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{jk}}{Q_c}+
@@ -1270,7 +1266,7 @@ class Shaker:
             &+ F_{bcc}\\,\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{jk}}{Q_a}
             +\\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_i}{Q_a}\\right]\\times\\\\
             &\\lb{\\sigma}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1333,11 +1329,11 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^3]^{1,0} &= \\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{ab}
             \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,
             \\tdiff{\\mu_k}{Q_b}\\,\\lb{\\sigma}{a}\\,\\lb{2}{b}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1380,11 +1376,11 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^3]^{0,1} &= -\\frac{1}{6}\\,\\sum_{\\mathcal{P}_{ijk}} \\sum_{abc} F_{abc}
             \\tdiff{\\mu_i}{Q_a}\\,\\tdiff{\\mu_j}{Q_b}\\,\\tdiff{\\mu_k}{Q_c}\\,
             \\lb{\\sigma}{a}\\,\\lb{1}{b}\\,\\lb{2}{c}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1508,13 +1504,13 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^2\\alpha]^{1,0} &= \\frac{1}{4}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{ab}
             \\left\\{\\tdiff{\\mu_i}{Q_a}\\,\\tdiff{^2\\alpha_{jk}}{Q_a\\partial Q_b}\\tdiff{\\mu_l}{Q_b}
             \\lb{\\sigma}{a}\\,\\lb{3}{b}\\right.\\nonumber\\\\
             &+\\left.2\\,\\tdiff{\\mu_i}{Q_a}\\,\\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{kl}}{Q_b}
             \\lb{\\sigma}{a}\\,\\lb{23}{b}\\right\\}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1670,12 +1666,12 @@ class Shaker:
 
          .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^4]^{2,0} &= \\frac{1}{2}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abc}
             \\,F_{abc}\\,\\tdiff{\\mu_i}{Q_a}\\, \\tdiff{^2\\mu_j}{Q_a\\partial Q_b}\\,
             \\tdiff{^2\\mu_k}{Q_b\\partial Q_c}\\,\\tdiff{\\mu_l}{Q_c}
             \\,\\lb{\\sigma}{a}\\,\\lb{23}{b}\\,\\lb{\\sigma}{3}
-            \\end{align}
+            \\end{aligned}
 
          :param coo: coordinates
          :type coo: tuple|list
@@ -1720,12 +1716,12 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu^4]^{0,2} &= \\frac{1}{8}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abcde}
             \\,F_{abc}\\,F_{cde}\\,\\tdiff{\\mu_i}{Q_a}\\, \\tdiff{\\mu_j}{Q_b}\\,
             \\tdiff{\\mu_k}{Q_d}\\,\\tdiff{\\mu_l}{Q_e}
             \\,\\lb{\\sigma}{a}\\,\\lb{1}{b}\\,\\lb{23}{c}\\,\\lb{2}{d}\\,\\lb{3}{e}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1779,13 +1775,13 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\alpha^2]^{1,1} &= -\\frac{1}{16}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abc} F_{abc}\\,
             \\tdiff{^2\\alpha_{ij}}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{kl}}{Q_c}\\,
             \\lb{23}{ab}\\,\\lb{23}{c}\\,(\\omega_a^{-1}+\\omega_b^{-1})\\\\
             &+ F_{bcc}\\,\\tdiff{^2\\alpha_{ij}}{Q_a\\partial Q_b}\\,\\tdiff{\\alpha_{kl}}{Q_a}\\,
             \\lb{23}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1839,11 +1835,11 @@ class Shaker:
 
          .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\alpha^2]^{2,0} &= \\frac{1}{16}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{ab}
             \\tdiff{^2\\alpha_{ij}}{Q_a\\partial Q_b}\\tdiff{^2\\alpha_{kl}}{Q_a\\partial Q_b}
             \\,\\lb{23}{ab}\\,\\omega_a^{-1}
-            \\end{align}
+            \\end{aligned}
 
          :param coo: coordinates
          :type coo: tuple|list
@@ -1883,12 +1879,12 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\alpha^2]^{0,2} &= \\frac{1}{32}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abcd}
             \\tdiff{\\alpha_{ij}}{Q_c}\\tdiff{\\alpha_{kl}}{Q_d}\\,
             \\left[F_{aab}\\,F_{bcd}\\,\\lb{23}{c}\\lb{\\sigma}{d}\\,\\omega_b^{-2}
             +2\\,F_{abc}\\,F_{abd}\\,\\lb{23}{ab}\\,\\lb{23}{c}\\,\\lb{\\sigma}{d}\\right]
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -1946,7 +1942,7 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu\\beta]^{1,1} &= -\\frac{1}{24}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abc}
             \\left\\{ F_{abc}\\,\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\beta_{jkl}}{Q_c}
             +\\tdiff{^2\\beta_{jkl}}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_i}{Q_c}\\right]
@@ -1954,7 +1950,7 @@ class Shaker:
             &\\left.+ F_{bcc}\\,\\left[\\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\,\\tdiff{\\beta_{jkl}}{Q_a}
             +\\tdiff{^2\\beta_{jkl}}{Q_a\\partial Q_b}\\,\\tdiff{\\mu_i}{Q_a}\\right]
             \\,\\lb{\\sigma}{a}\\,\\omega_b^{-2}\\,\\omega_c^{-1}\\right\\}
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list
@@ -2018,11 +2014,11 @@ class Shaker:
 
          .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu\\beta]^{2,0} &= \\frac{1}{12}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{ab}
             \\tdiff{^2\\mu_i}{Q_a\\partial Q_b}\\tdiff{^2\\beta_{jkl}}{Q_a\\partial Q_b}\\,
             \\lb{\\sigma}{ab}\\,\\omega_a^{-1}
-            \\end{align}
+            \\end{aligned}
 
          :param coo: coordinates
          :type coo: tuple|list
@@ -2064,12 +2060,12 @@ class Shaker:
 
         .. math::
 
-            \\begin{align}
+            \\begin{aligned}
             [\\mu\\beta]^{0,2} &= \\frac{1}{24}\\,\\sum_{\\mathcal{P}_{ijkl}} \\sum_{abcd}
             \\tdiff{\\mu_i}{Q_c}\\tdiff{\\beta_{jkl}}{Q_d}\\times\\\\
             &\\left[F_{aab}\\,F_{bcd}\\,\\lb{\\sigma}{c}\\lb{\\sigma}{d}\\,\\omega_b^{-2}
             +2\\,F_{abc}\\,F_{abd}\\,\\lb{\\sigma}{ab}\\,\\lb{\\sigma}{c}\\,\\lb{\\sigma}{d}\\right]
-            \\end{align}
+            \\end{aligned}
 
         :param coo: coordinates
         :type coo: tuple|list

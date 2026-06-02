@@ -8,6 +8,8 @@ from qcip_tools.chemistry_files import helpers, PropertyNotPresent, PropertyNotD
 
 from nachos.core import files, CONFIG
 
+from nachos.core.files import Recipe
+
 
 class ChoicesValidator(Validator):
 
@@ -379,18 +381,27 @@ class SetRecipeFrequenciesAction(SetRecipeAction):
 
 
 class Maker:
-    """Make a recipe out of prompting question or arguments"""
+    """Build a recipe through interactive prompts or command-line arguments.
+
+    Guides users through creating a numerical differentiation recipe by prompting
+    for configuration parameters or accepting them from arguments.
+    """
 
     def __init__(self, use_fallback_prompt=False, raise_when_arg_wrong=False):
         self.use_fallback_prompt = use_fallback_prompt
         self.raise_when_arg_wrong = raise_when_arg_wrong
 
-    def make(self, args):
-        """make the recipe
+    def make(self, args: dict) -> 'Recipe':
+        """Create a recipe from user input or arguments.
 
-        :param args: input arguments
-        :type args: dict
-        :rtype: nachos.core.files.Recipe
+        Interactively prompts for or accepts recipe configuration parameters
+        and returns a validated Recipe object.
+
+        Args:
+            args: Dictionary of command-line arguments (attribute access compatible).
+
+        Returns:
+            Configured Recipe object ready for numerical differentiation.
         """
 
         recipe = files.Recipe()
@@ -534,23 +545,22 @@ class Maker:
 
         return recipe
 
-    def _make_var(self, args, variable, message, action, validator=None, completer=None, default=None):
-        """Make the action for a give variable
+    def _make_var(self, args: dict, variable: str, message: str, action: 'MakingAction',
+                  validator: Validator | None = None, completer: Completer | None = None,
+                  default: str | None = None) -> None:
+        """Process a single recipe variable through validation and prompting.
 
-        :param args: input args
-        :type args: dict
-        :param variable: variable
-        :type variable: str
-        :param message: prompt message:
-        :type message: str
-        :param validator: the validator, if any
-        :type validator: prompt_toolkit.validation.Validator
-        :param completer: completer, if any (relevant for prompt_toolkit)
-        :type completer: prompt_toolkit.completion.Completer
-        :param action: the action to perform
-        :type action: MakingAction
-        :param default: default value, if any
-        :type default: str
+        Retrieves a value for a recipe variable from arguments or prompts the user,
+        validates it, and applies the corresponding action.
+
+        Args:
+            args: Input arguments dictionary or object with attribute access.
+            variable: Variable name to process.
+            message: Prompt message displayed to the user.
+            action: MakingAction instance that processes the validated value.
+            validator: Optional Validator to validate user input.
+            completer: Optional Completer for prompt_toolkit auto-completion.
+            default: Default value if user provides empty input.
         """
 
         value = None

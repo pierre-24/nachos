@@ -2,19 +2,30 @@ import os
 import sys
 import numpy
 
+from typing import Optional, TextIO
+
 from qcip_tools import derivatives
 from qcip_tools.chemistry_files import chemistry_datafile
 
 from nachos.core import compute_numerical_derivative_of_tensor, fancy_output_derivative, \
     fancy_output_component_of_derivative
 
+from nachos.core.files import Recipe
+
 
 class BadBaking(Exception):
     pass
 
 
-def _equal_molecules_or_raise(mol1, mol2):
-    """Compare two geometries
+def _equal_molecules_or_raise(mol1: object, mol2: object) -> None:
+    """Verify two molecular geometries have identical atomic structure.
+
+    Args:
+        mol1: First molecular geometry.
+        mol2: Second molecular geometry.
+
+    Raises:
+        BadBaking: If atomic symbols differ between geometries.
     """
 
     if [a.symbol for a in mol1] != [a.symbol for a in mol2]:
@@ -22,19 +33,22 @@ def _equal_molecules_or_raise(mol1, mol2):
 
 
 class Baker:
-    """Baker class to finally perform the numerical differentiation
+    """Perform numerical differentiation on quantum chemistry results.
 
-    :param recipe: a recipe
-    :type recipe: nachos.core.files.Recipe
-    :param storage: storage of results
-    :type storage: nachos.core.files.ComputationalResults
-    :param directory: working directory
-    :type directory: str
-    :param original_cf: Originak chemistry file to append to
-    :type original_cf: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
+    This class computes finite-difference derivatives from computed molecular properties
+    using Romberg extrapolation for improved accuracy.
+
+    Args:
+        recipe: Recipe object defining differentiation parameters.
+        storage: ComputationalResults object containing computed values.
+        directory: Working directory for file operations.
+        original_cf: Optional existing chemistry datafile to append derivatives to.
     """
 
-    def __init__(self, recipe, storage, directory='.', original_cf=None):
+    def __init__(
+            self, recipe: Recipe, storage, directory: str = '.',
+            original_cf: Optional[chemistry_datafile.ChemistryDataFile] = None
+    ):
         self.recipe = recipe
 
         if not os.path.isdir(directory):
@@ -54,20 +68,24 @@ class Baker:
         if self.storage.check() != ([], []):
             raise BadBaking('The storage (h5 file) does not fulfill the recipe!')
 
-    def bake(self, only=None, out=sys.stdout, verbosity_level=0, copy_zero_field_basis=False, force_choice=None):
-        """Perform the numerical differentiation
+    def bake(
+            self, only: list | None = None, out: TextIO = sys.stdout, verbosity_level: int = 0,
+            copy_zero_field_basis: bool = False, force_choice: tuple | None = None
+    ):
+        """Compute numerical derivatives from stored quantum chemistry results.
 
-        :param only: list of derivatives to perform (None = all of them)
-        :type only: list
-        :param out: output if information is needed to be outputed
-        :type out: file
-        :param verbosity_level: how far should we print information
-        :type verbosity_level: int
-        :param copy_zero_field_basis: copy the basis found in zero field
-        :type copy_zero_field_basis: bool
-        :param force_choice: force the choice in the Romberg triangle
-        :type force_choice: tuple
-        :rtype: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
+        Performs finite-difference numerical differentiation using Romberg extrapolation
+        on computed derivatives, with optional filtering and customization.
+
+        Args:
+            only: List of (derivative, level) tuples to compute (None = all).
+            out: File-like object for output messages (default: sys.stdout).
+            verbosity_level: Verbosity level (0=silent, 1+=verbose with increasing detail).
+            copy_zero_field_basis: Copy zero-field results to all field configurations.
+            force_choice: Force specific Romberg triangle choice (advanced).
+
+        Returns:
+            ChemistryDataFile object with computed derivatives appended.
         """
 
         if not only:
@@ -167,18 +185,23 @@ class Baker:
         return f
 
     @staticmethod
-    def make_uncertainty_tensor(romberg_triangles, initial_derivative, diff_derivative, frequency):
-        """
+    def make_uncertainty_tensor(
+            romberg_triangles: dict, initial_derivative: derivatives.Derivative,
+            diff_derivative: derivatives.Derivative, frequency: str | float
+    ) -> derivatives.Tensor:
+        """Compute error estimates from Romberg extrapolation triangles.
 
-        :param romberg_triangles: the different Romberg triangles
-        :type romberg_triangles: collections.OrderedDict
-        :param initial_derivative: starting point
-        :type initial_derivative: qcip_tools.derivatives.Derivative
-        :param diff_derivative: differentialtion
-        :type diff_derivative: qcip_tools.derivatives.Derivative
-        :param frequency: the frequency
-        :type frequency: str|float
-        :rtype: qcip_tools.derivatives.Tensor
+        Creates a tensor of uncertainties by extracting convergence error estimates
+        from Romberg triangles used in numerical differentiation.
+
+        Args:
+            romberg_triangles: Dictionary mapping component indices to Romberg triangles.
+            initial_derivative: Starting derivative before differentiation.
+            diff_derivative: Differentiation derivative to apply.
+            frequency: Frequency value (for frequency-dependent properties).
+
+        Returns:
+            Tensor object containing uncertainty estimates.
         """
 
         final_derivative = initial_derivative.differentiate(diff_derivative.representation())
@@ -206,40 +229,34 @@ class Baker:
 
     @staticmethod
     def output_information(
-            recipe,
-            initial_derivative,
-            diff_derivative,
-            final_result,
-            romberg_triangles,
+            recipe: 'Recipe',
+            initial_derivative: derivatives.Derivative,
+            diff_derivative: derivatives.Derivative,
+            final_result: derivatives.Tensor,
+            romberg_triangles: dict,
             tensor_access,
-            out=sys.stdout,
-            verbosity_level=0):
-        """Output information about what was computed
+            out: TextIO = sys.stdout,
+            verbosity_level: int = 0) -> None:
+        """Display detailed computation information and validation statistics.
 
-        .. note::
+        Outputs information about the numerical differentiation computation at various
+        verbosity levels, including Romberg triangles, Kleinman conditions, and uncertainty estimates.
 
-            If verbosity level is:
+        Verbosity levels:
+            0: Silent
+            1: Output final tensor
+            2: Include Romberg triangles and best value selection
+            3+: Include decision process and convergence details
 
-            - **<=0:** nothing happen ;
-            - **>0:** output final tensor ;
-            - **>1:** output Romberg triangle and best value ;
-            - **>2:** output decision process to find best value in Romberg triangle.
-
-            Therefore, it triggers once again the computation of the best value in Romberg triangle
-            if verbosity_level is > 2.
-
-        :param recipe: the corresponding recipe
-        :type recipe: nachos.core.files.Recipe
-        :param initial_derivative: starting point
-        :type initial_derivative: qcip_tools.derivatives.Derivative
-        :param final_result: what was computed
-        :type final_result: qcip_tools.derivatives.Tensor
-        :param romberg_triangles: the different Romberg triangles
-        :type romberg_triangles: collections.OrderedDict
-        :param out: output
-        :type out: file
-        :param verbosity_level: how far should we print information
-        :type verbosity_level: int
+        Args:
+            recipe: Recipe defining differentiation parameters.
+            initial_derivative: Starting derivative.
+            diff_derivative: Applied differentiation.
+            final_result: Computed final derivative tensor.
+            romberg_triangles: Romberg extrapolation triangles for each component.
+            tensor_access: Function to access tensor components from storage.
+            out: File-like object for output (default: sys.stdout).
+            verbosity_level: Verbosity level (0-3+).
         """
 
         if verbosity_level >= 1:
@@ -348,19 +365,24 @@ class Baker:
                 out.write('\n')
 
 
-def project_geometrical_derivatives(recipe, datafile, mass_weighted_hessian, out=sys.stdout, verbosity_level=0):
-    """Project geometrical derivatives, if any
+def project_geometrical_derivatives(
+        recipe: 'Recipe', datafile: object, mass_weighted_hessian: object, out: TextIO = sys.stdout,
+        verbosity_level: int = 0
+) -> None:
+    """Project geometrical derivatives onto normal modes.
 
-    :param recipe: the recipe
-    :type recipe: nachos.core.files.Recipe
-    :param datafile: the data file with derivatives
-    :type datafile: qcip_tools.chemistry_files.chemistry_datafile.ChemistryDataFile
-    :param mass_weighted_hessian: the mass weighted hessian
-    :type mass_weighted_hessian: qcip_tools.derivatives_g.MassWeightedHessian
-    :param out: output
-    :type out: file
-    :param verbosity_level: how far should we print information
-    :type verbosity_level: int
+    Converts geometrical derivatives from Cartesian to normal mode coordinates using
+    mass-weighted Hessian transformation, useful for vibrational analysis.
+
+    Args:
+        recipe: Recipe defining differentiation parameters.
+        datafile: ChemistryDataFile containing computed derivatives.
+        mass_weighted_hessian: Mass-weighted Hessian for coordinate transformation.
+        out: File-like object for output messages (default: sys.stdout).
+        verbosity_level: Verbosity level for informational output.
+
+    Raises:
+        ValueError: If Hessian dimensions don't match recipe degrees of freedom.
     """
 
     if mass_weighted_hessian.dof != recipe.dof:
@@ -393,20 +415,33 @@ def project_geometrical_derivatives(recipe, datafile, mass_weighted_hessian, out
                     datafile.derivatives[n_repr] = x
 
 
-def __project_tensor(data, mwh):
-    """Project tensor over displacements to get their normal derivative equivalent
+def __project_tensor(data: object, mwh: object) -> object:
+    """Project derivative tensor onto normal mode coordinates.
 
-    :param data: the data
-    :type data: qcip_tools.derivatives.Tensor
-    :param mwh: mass weighted hessian
-    :type mwh: qcip_tools.derivatives_g.MassWeightedHessian
-    :rtype: qcip_tools.derivatives.Tensor
+    Args:
+        data: Derivative tensor in Cartesian coordinates.
+        mwh: Mass-weighted Hessian for transformation.
+
+    Returns:
+        Derivative tensor projected onto normal modes.
     """
 
     return data.project_over_normal_modes(mwh)
 
 
-def __output_nm_derivatives(recipe, final_result, out, verbosity_level=0, trans_plus_rot_dof=0):
+def __output_nm_derivatives(
+        recipe: 'Recipe', final_result: object, out: TextIO = sys.stdout, verbosity_level: int = 0,
+        trans_plus_rot_dof: int = 0
+) -> None:
+    """Display normal mode projected derivatives with formatting.
+
+    Args:
+        recipe: Recipe defining parameters.
+        final_result: Projected derivative tensor to display.
+        out: File-like object for output (default: sys.stdout).
+        verbosity_level: Verbosity level for output.
+        trans_plus_rot_dof: Number of translational/rotational degrees of freedom to skip.
+    """
     if verbosity_level >= 1:
         out.write('\n*** projected ')
         out.write(fancy_output_derivative(final_result.representation, final_result.frequency))

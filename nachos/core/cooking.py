@@ -1,14 +1,18 @@
 import os
 import glob
 import math
+from typing import TextIO
+
 import numpy
 import sys
 
 from qcip_tools import quantities, derivatives, derivatives_e
+from qcip_tools.molecule import Molecule
 from qcip_tools.chemistry_files import helpers, PropertyNotPresent, PropertyNotDefined
 
 from nachos.core import files, preparing, GAUSSIAN_DOUBLE_HYBRIDS
 from nachos.qcip_tools_ext import gaussian, qchem  # noqa
+from nachos.core.files import ComputationalResults
 
 
 class BadCooking(Exception):
@@ -16,12 +20,14 @@ class BadCooking(Exception):
 
 
 class Cooker:
-    """Cooker class to retrieve the information out of the calculation results
+    """Extract computed properties from quantum chemistry calculation results.
 
-    :param recipe: a recipe
-    :type recipe: nachos.core.files.Recipe
-    :param directory: working directory, where storage will be written
-    :type directory: str
+    This class processes output files from quantum chemistry packages and collects
+    computed derivatives for storage in a computational results file.
+
+    Args:
+        recipe: Recipe object defining the differentiation parameters.
+        directory: Working directory where storage will be written.
     """
 
     def __init__(self, recipe, directory='.'):
@@ -34,18 +40,23 @@ class Cooker:
         self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
-    def cook(self, directories, out=sys.stdout, verbosity_level=0, use_gaussian_logs=False):
-        """Cook files in directories, all together in a storage file
+    def cook(
+            self, directories: list[str], out: TextIO = sys.stdout, verbosity_level: int = 0,
+            use_gaussian_logs: bool = False
+    ) -> 'ComputationalResults':
+        """Process quantum chemistry output files and collect computed derivatives.
 
-        :param directories: directories where QM results should be looked for
-        :type directories: list of str
-        :param out: output of eventual information
-        :type out: file
-        :param verbosity_level: wetter to write information or not
-        :type verbosity_level: bool
-        :param use_gaussian_logs: use Gaussian LOGs instead of FCHKs. But don't ;)
-        :type use_gaussian_logs: bool
-        :rtype: nachos.core.files.ComputationalResults
+        Searches directories for calculation output files, extracts computed properties
+        (energies, derivatives), and stores them in a ComputationalResults object.
+
+        Args:
+            directories: List of directories to search for QM results.
+            out: File-like object for output messages (default: sys.stdout).
+            verbosity_level: Verbosity level (0=silent, 1=verbose).
+            use_gaussian_logs: Use Gaussian LOG files instead of FCHK (not recommended).
+
+        Returns:
+            ComputationalResults object containing all extracted derivatives.
         """
 
         storage = files.ComputationalResults(self.recipe, directory=self.directory)
@@ -88,17 +99,19 @@ class Cooker:
 
         return storage
 
-    def cook_from_file(self, f, name, storage):
-        """
+    def cook_from_file(self, f: object, name: str, storage: 'ComputationalResults') -> list[str]:
+        """Extract derivatives from a single quantum chemistry output file.
 
-        :param f: file
-        :type f: qcip_tools.chemistry_files.ChemistryFile
-        :param name: path to the file
-        :type name: str
-        :param storage: storage object
-        :type storage: nachos.core.files.ComputationalResults
-        :return: what was obtained
-        :rtype: list
+        Processes a chemistry file to extract computed energies, electrical derivatives,
+        and geometrical derivatives, storing results in the provided storage object.
+
+        Args:
+            f: Chemistry file object opened for reading.
+            name: Path to the file being processed.
+            storage: ComputationalResults object to store extracted data.
+
+        Returns:
+            List of derivative identifiers that were successfully extracted.
         """
 
         def almost_the_same(a, b, threshold=1e-3):
@@ -203,7 +216,20 @@ class Cooker:
         return obtained
 
     @staticmethod
-    def real_fields_to_fields(real_field, min_field, ratio):
+    def real_fields_to_fields(real_field: list, min_field: float, ratio: float) -> list[int]:
+        """Convert real field values to discretized field indices.
+
+        Transforms continuous field values into discrete indices based on geometric
+        progression with specified minimum field and ratio.
+
+        Args:
+            real_field: List of real-valued field strengths.
+            min_field: Minimum field value (first non-zero index).
+            ratio: Geometric progression ratio for field discretization.
+
+        Returns:
+            List of integer field indices (0 for zero values).
+        """
         fields = []
         for val in real_field:
             if val == .0:
@@ -216,7 +242,24 @@ class Cooker:
         return fields
 
     @staticmethod
-    def real_fields_from_geometry(geometry, deformed_geometry, threshold=1e-4):
+    def real_fields_from_geometry(
+            geometry: Molecule, deformed_geometry: Molecule, threshold: float = 1e-4) -> list[float]:
+        """Calculate real-valued field displacements from geometry deformation.
+
+        Compares two molecular geometries to extract field-dependent atomic displacements,
+        useful for identifying field values from geometrically distorted structures.
+
+        Args:
+            geometry: Reference molecular geometry.
+            deformed_geometry: Deformed molecular geometry.
+            threshold: Minimum displacement magnitude to consider non-zero (default: 1e-4).
+
+        Returns:
+            List of real-valued field displacements in atomic units.
+
+        Raises:
+            ValueError: If geometries have different atoms or structures.
+        """
         if len(geometry) != len(deformed_geometry) or str(geometry) != str(deformed_geometry):
             raise ValueError('geometries does not contain the same number of atoms')
 
