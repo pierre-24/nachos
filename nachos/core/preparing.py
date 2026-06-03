@@ -662,13 +662,17 @@ class Preparer:
 
                     if self.recipe['type'] == 'F':
                         if fields != [0] * len(fields):
-                            card = '**WAVE FUNCTIONS\n*HAMILTONIAN'
-
-                            for direction, field in zip(['XDIPLEN', 'YDIPLEN', 'ZDIPLEN'], real_fields):
-                                if field != 0:
-                                    card += '\n.FIELD\n{}\n{}'.format(field, direction)
+                            card = '**WAVE FUNCTIONS\n*HAMILTONIAN\n.FIELD'
 
                             dal.update(card)
+
+                            params = []
+                            for direction, field in zip(['XDIPLEN', 'YDIPLEN', 'ZDIPLEN'], real_fields):
+                                if field != 0:
+                                    params.extend(['.FIELD', str(field), direction])
+
+                            # nasty hack to handle the fact that qcip_tools do not deal with multi-defs!
+                            dal.modules['WAVE '].submodules['HAMILT'].input_cards['FIELD'].parameters = params[1:]
 
                         dal_path = '{}_{}_{:04d}.dal'.format(
                             self.recipe['flavor_extra']['dal_name'],
