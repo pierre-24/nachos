@@ -7,7 +7,7 @@ import numpy
 from tests import NachosTestCase
 
 from qcip_tools import derivatives, derivatives_g
-from qcip_tools.chemistry_files import gaussian, chemistry_datafile
+from qcip_tools.chemistry_files import gaussian, chemistry_datafile, dalton
 
 from nachos.core import files, baking
 
@@ -17,6 +17,7 @@ class BakeTestCase(NachosTestCase):
     def setUp(self):
         self.zip_F = 'numdiff_F.zip'
         self.zip_G = 'numdiff_G.zip'
+        self.zip_F_dalton = 'numdiff_F_dalton.zip'
         self.zip_G_dalton = 'numdiff_G_dalton.zip'
         self.working_directory = self.setup_temporary_directory()
 
@@ -140,6 +141,37 @@ class BakeTestCase(NachosTestCase):
 
         diffs = cf_free.derivatives['FF']['static'].components - cf_force.derivatives['FF']['static'].components
         self.assertTrue(numpy.all(diffs < 1e-3))
+
+    def test_bake_dalton_F(self):
+        self.unzip_it(self.zip_F_dalton, self.working_directory)
+        directory = os.path.join(self.working_directory, 'numdiff_F_dalton')
+        recipe_path = os.path.join(directory, 'nachos_recipe.yml')
+        storage_path = os.path.join(directory, 'verification', 'nachos_data.h5')
+        solution_path = os.path.join(directory, 'ND_F_FF_dD_0001_molecule.tar.gz')
+
+        r = files.Recipe(directory=directory)
+
+        with open(recipe_path) as f:
+            r.read(f)
+
+        fx = dalton.ArchiveOutput()
+        with open(solution_path, 'rb') as f:
+            fx.read(f)
+
+        electrical_derivatives = fx.property('electrical_derivatives')
+
+        storage = files.ComputationalResults(r, directory=directory)
+        storage.read(storage_path)
+
+        # with mu:
+        baker = baking.Baker(r, storage, directory=directory)
+        cf_with_mu = baker.bake(only=[(derivatives.Derivative('F'), 1)])
+
+        self.assertIn('FF', cf_with_mu.derivatives)
+        self.assertEqual(len(cf_with_mu.derivatives), 1)
+
+        self.assertTensorsAlmostEqual(
+            electrical_derivatives['FF']['static'], cf_with_mu.derivatives['FF']['static'], skip_frequency_test=True)
 
     def test_bake_gaussian_G(self):
         self.unzip_it(self.zip_G, self.working_directory)
