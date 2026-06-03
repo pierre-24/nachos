@@ -3,6 +3,8 @@ import os
 import h5py
 import numpy
 
+from typing import TextIO
+
 from nachos.core import preparing
 
 from qcip_tools import derivatives
@@ -47,7 +49,9 @@ class BadRecipe(Exception):
 
 
 class Recipe:
-    """Class that handle the parameters to perform numerical differentiation"""
+    """Handle parameters for numerical differentiation.
+
+    This class manages recipe configuration for numerical differentiation calculations."""
 
     def __init__(self, directory='.', **kwargs):
 
@@ -65,9 +69,10 @@ class Recipe:
         self._update(kwargs)
 
     def check_data(self):
-        """check if data are coherent
+        """Validate recipe data coherence.
 
-        :raise BadRecipe: if there is something wrong ;)
+        Raises:
+            BadRecipe: If recipe parameters are invalid or inconsistent.
         """
 
         for key in self.recipe:
@@ -140,12 +145,14 @@ class Recipe:
         if self['k_max'] < 1:
             raise BadRecipe('k_max should be > 1')
 
-    def read(self, fp):
-        """Load a given YAML file and fill the Recipe with it.
+    def read(self, fp: TextIO) -> None:
+        """Load recipe configuration from a YAML file.
 
-        :param fp: valid file descriptor (in read mode)
-        :type fp: file
-        :raise BadRecipe: if parameters are not allowed
+        Args:
+            fp: File descriptor opened in read mode.
+
+        Raises:
+            BadRecipe: If recipe parameters are invalid or disallowed.
         """
 
         up = yaml.load(fp, Loader=yaml.Loader)
@@ -153,8 +160,15 @@ class Recipe:
         self._update(up)
         self.check_data()
 
-    def _update(self, kw):
-        """Set up the default options depending on the flavor, then update their value with what is inside ``kw``."""
+    def _update(self, kw: dict) -> None:
+        """Set default options and update with provided keyword arguments.
+
+        Configures defaults based on flavor, then updates with values from the provided
+        keyword arguments dictionary.
+
+        Args:
+            kw: Keyword arguments dictionary containing recipe updates.
+        """
 
         # flavor
         if 'flavor' in kw and self['flavor'] in CONFIG:
@@ -184,11 +198,11 @@ class Recipe:
                     if level > self.max_differentiation:
                         self.max_differentiation = level
 
-    def write(self, fp):
-        """Dump the Recipe into a YAML file
+    def write(self, fp: TextIO) -> None:
+        """Write recipe configuration to a YAML file.
 
-        :param fp: valid file descriptor (in write mode)
-        :type fp: file
+        Args:
+            fp: File descriptor opened in write mode.
         """
 
         self.check_data()
@@ -203,12 +217,14 @@ class Recipe:
     def __contains__(self, item):
         return item in self.recipe
 
-    def bases(self, level_min=-1):
-        """Get basis in the form of Derivatives objects, plus the level of differentiation
+    def bases(self, level_min: int = -1) -> list[tuple[derivatives.Derivative, int]]:
+        """Retrieve derivative bases with their differentiation levels.
 
-        :param level_min: minimum level required
-        :type level_min: int
-        :rtype: list of tuple
+        Args:
+            level_min: Minimum differentiation level required.
+
+        Returns:
+            List of tuples containing (Derivative object, level).
         """
 
         bases = []
@@ -221,10 +237,11 @@ class Recipe:
 
         return bases
 
-    def maximum_derivatives(self):
-        """Get the different derivatives performed by the recipe
+    def maximum_derivatives(self) -> list[derivatives.Derivative]:
+        """Retrieve all derivative objects up to maximum differentiation level.
 
-        :rtype: list
+        Returns:
+            List of Derivative objects for differentiation orders 1 to max_differentiation.
         """
 
         diff_repr = self['type']
@@ -250,16 +267,18 @@ class BadResult(Exception):
 
 
 class ComputationalResults:
-    """A class to store all the results obtained from the cooking process
+    """Store computational results from the cooking process.
 
-    :param recipe: a recipe
-    :type recipe: nachos.core.files.Recipe
+    This class manages derivative results computed during numerical differentiation.
+
+    Args:
+        recipe: Recipe object defining differentiation parameters.
     """
 
     file_type = 'NACHOS_CR'
     version = 1
 
-    def __init__(self, recipe, directory='.'):
+    def __init__(self, recipe: Recipe, directory='.'):
 
         if not os.path.isdir(directory):
             raise BadRecipe('{} is not a directory'.format(directory))
@@ -271,17 +290,19 @@ class ComputationalResults:
         self.fields_needed_by_recipe = preparing.fields_needed_by_recipe(self.recipe)
         self.fields_needed = [a[0] for a in self.fields_needed_by_recipe]
 
-    def add_result(self, fields, derivative, value, allow_replace=False):
-        """Add result for a given derivative in given fields
+    def add_result(
+            self, fields: list | tuple, derivative: str, value: dict | object, allow_replace: bool = False):
+        """Store a derivative result for specified field points.
 
-        :param fields: fields
-        :type fields: tuple|list
-        :param derivative: derivative
-        :type derivative: str
-        :param value: value of the derivative
-        :type value: dict|qcip_tools.derivatives.Tensor
-        :param allow_replace: allow the value to be replaced
-        :type allow_replace: bool
+        Args:
+            fields: Field strength points.
+            derivative: String representation of the derivative.
+            value: Computed derivative value.
+            allow_replace: If True, allow overwriting existing results.
+
+        Raises:
+            FieldsNotNeeded: If the specified fields are not in recipe requirements.
+            DerivativeAlreadyDefined: If derivative already exists and allow_replace is False.
         """
 
         if fields not in self.fields_needed:
@@ -297,10 +318,14 @@ class ComputationalResults:
         else:
             raise DerivativeAlreadyDefined(fields, derivative)
 
-    def check(self):
-        """Check that, according to the recipe, everything is present
+    def check(self) -> tuple[list, list]:
+        """Verify all required derivatives are present.
 
-        :rtype: tuple
+        Validates that all fields and derivatives specified by the recipe have been
+        computed and stored.
+
+        Returns:
+            Tuple of (missing_fields, missing_derivatives) lists.
         """
 
         missing_fields = []
@@ -320,11 +345,11 @@ class ComputationalResults:
 
         return missing_fields, missing_derivatives
 
-    def write(self, path):
-        """Write in h5 file
+    def write(self, path: str) -> None:
+        """Serialize results to an HDF5 file.
 
-        :param path: path to the file, relative to directory
-        :type path: str
+        Args:
+            path: Relative path to the output HDF5 file.
         """
 
         dof = 3 * len(self.recipe.geometry)
@@ -345,11 +370,14 @@ class ComputationalResults:
                 subgroup = fields_group.create_group(','.join(str(a) for a in fields))
                 chemistry_datafile.ChemistryDataFile.write_derivatives_in_group(subgroup, self.results[fields], dof)
 
-    def read(self, path):
-        """Read in h5 file
+    def read(self, path: str) -> None:
+        """Load results from an HDF5 file.
 
-        :param path: path to the file, relative to directory
-        :type path: str
+        Args:
+            path: Relative path to the HDF5 file to read.
+
+        Raises:
+            BadResult: If file format is invalid or incompatible with current recipe.
         """
 
         dof = 3 * len(self.recipe.geometry)
@@ -376,7 +404,25 @@ class ComputationalResults:
                     self.results[t_fields] = chemistry_datafile.ChemistryDataFile.read_derivatives_from_group(
                         fields_group[i], dof)
 
-    def tensor_element_access(self, fields, min_field, basis, component, frequency, recipe):
+    def tensor_element_access(
+            self, fields: list | tuple, min_field: float,
+            basis: derivatives.Derivative, component: tuple, frequency: float, recipe: Recipe) -> float:
+        """Access a specific tensor component value.
+
+        Args:
+            fields: Field strength points.
+            min_field: Minimum field value used in calculations.
+            basis: Derivative basis object.
+            component: Tuple specifying tensor component indices.
+            frequency: Frequency value (for frequency-dependent properties).
+            recipe: Recipe object.
+
+        Returns:
+            The tensor component value.
+
+        Raises:
+            BadResult: If fields, derivatives, or components are not available.
+        """
         t_fields = tuple(fields)
         if t_fields not in self.results:
             raise BadResult('fields {} is not available'.format(fields))
@@ -401,7 +447,15 @@ class ComputationalResults:
         return results.components[component]
 
     @staticmethod
-    def get_recipe_check_data(recipe):
+    def get_recipe_check_data(recipe: Recipe) -> list:
+        """Extract recipe verification data for consistency checks.
+
+        Args:
+            recipe: Recipe object to extract data from.
+
+        Returns:
+            List containing `[min_field, ratio, k_max, type_flag, num_atoms, weighted_atomic_sum]`.
+        """
         return [
             recipe['min_field'],
             recipe['ratio'],

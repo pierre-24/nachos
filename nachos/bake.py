@@ -1,6 +1,4 @@
-"""
-From h5 file, perform numerical differentiation
-"""
+"""From h5 file, perform numerical differentiation."""
 
 import os
 import argparse
@@ -19,17 +17,24 @@ __maintainer__ = 'Pierre Beaujean'
 __email__ = 'pierre.beaujean@unamur.be'
 __status__ = 'Development'
 
+from nachos.core.files import Recipe
 
-def treat_only_arg(recipe, t):
-    """Treat the --only argument (delayed because it needs the recipe to create the ``Derivative`` object)
 
-    :param recipe: the recipe
-    :type recipe: nachos.core.files.Recipe
-    :param t: the parameter
-    :type t: str
-    :rtype: list
+def treat_only_arg(recipe: Recipe, t: str) -> list:
+    """Treat the --only argument (delayed because it needs the recipe to create the Derivative object).
+
+    Args:
+        recipe (nachos.core.files.Recipe): The recipe configuration.
+        t (str): The parameter string containing the subset information.
+
+    Returns:
+        list: A list of tuples containing the Derivative object and the differentiation level.
+
+    Raises:
+        ValueError: If the input format is invalid, the differentiation level
+            associated with a derivative is not a valid integer, or the
+            derivative representation is incorrect.
     """
-
     only = []
     for x in t.split(';'):
         if not x:
@@ -60,8 +65,21 @@ def treat_only_arg(recipe, t):
     return only
 
 
-def treat_romberg_arg(a):
-    """Treat the --romberg arg
+def treat_romberg_arg(a: str) -> tuple:
+    """Treat the --romberg argument by parsing and validating coordinates.
+
+    Expects a semicolon-separated string formatted as 'k;m' representing coordinates
+    in the Romberg triangle interpolation matrix.
+
+    Args:
+        a (str): The input argument string from the CLI.
+
+    Returns:
+        tuple[int, int]: A tuple containing the verified k and m integers.
+
+    Raises:
+        argparse.ArgumentTypeError: If the format does not contain exactly two values,
+            if k or m are not integers, or if they are negative.
     """
     chunks = a.split(';')
     if len(chunks) != 2:
@@ -79,8 +97,12 @@ def treat_romberg_arg(a):
     return k, m
 
 
-# program options
-def get_arguments_parser():
+def get_arguments_parser() -> argparse.ArgumentParser:
+    """Defines and returns the argument parser for the numerical differentiation CLI.
+
+    Returns:
+        argparse.ArgumentParser: The argument parser with defined program options.
+    """
     arguments_parser = argparse.ArgumentParser(description=__doc__)
     arguments_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
     arguments_parser.add_argument(
@@ -117,8 +139,15 @@ def get_arguments_parser():
     return arguments_parser
 
 
-# main
 def main():
+    """Main execution flow for nachos_bake.
+
+    Parses command-line arguments, imports the workspace recipe, validates Romberg
+    triangle parameters, and loads the raw computational evaluations. Then, initializes
+    the Baker to perform numerical differentiation. If specified, it projects geometrical
+    derivatives over normal modes using a provided Cartesian Hessian before writing the
+    resulting data back to disk.
+    """
     args = get_arguments_parser().parse_args()
 
     if args.verbose >= 1:
@@ -132,7 +161,7 @@ def main():
     except files.BadRecipe as e:
         return exit_failure('error while opening recipe: {}'.format(str(e)))
 
-    # Romberg
+    # Romberg validation
     if args.romberg:
         if not (0 <= args.romberg[0] < recipe['k_max']):
             return exit_failure(
@@ -141,7 +170,7 @@ def main():
             return exit_failure(
                 'Error while treating --romberg: no such m={} with k={}'.format(*reversed(args.romberg)))
 
-    # Storage
+    # Storage validation
     if not os.path.exists(os.path.join(recipe_directory, args.data)):
         return exit_failure('Data file {} does not exists'.format(os.path.join(recipe_directory, args.data)))
 

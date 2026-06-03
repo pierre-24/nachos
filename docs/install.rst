@@ -31,21 +31,3 @@ By default, it is possible to perform numerical differentiation with Dalton, but
 + Allow to compute numerical differentiation of gamma (because it is otherwise not possible, since only the components that participate to :math:`\gamma_{||}` are computed).
 
 You can find the patch and instructions `there <https://pierre-24.github.io/qcip_tools/install.html#optional-patching-dalton>`_.
-
-Installation for contributors
------------------------------
-
-To contribute to the project,
-
-+ `Fork it <https://docs.github.com/en/get-started/quickstart/fork-a-repo>`_.
-+ Clone your fork: ``git clone git@github.com:<USERNAME>/nachos.git``.
-+ Go in it: ``cd nachos``
-+ Install pip-tools: ``pip3 install pip-tools``
-+ Install virtualenv ``python3 -m venv venv; source venv/bin/activate``
-+ Install dependencies: ``make install-dev``.
-+ Add upstream: ``git remote add upstream https://github.com/pierre-24/nachos.git``
-+ Don't forget to create a separate branch to implement your changes: ``git checkout -b my_branch upstream/dev``.
-
-See `the contribution part <contributing.html>`_.
-
-You can launch the tests series with ``make test``

@@ -1,8 +1,0 @@
--e file:.  #egg=nachos
-flake8
-flake8-quotes
-autopep8
-sphinxcontrib-autoprogram
-Sphinx
-sphinx_rtd_theme
-bump2version

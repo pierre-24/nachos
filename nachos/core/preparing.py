@@ -1,6 +1,7 @@
 import copy
 import math
 import os
+from typing import Any
 
 import numpy
 from qcip_tools import derivatives, derivatives_e, quantities, numerical_differentiation
@@ -9,12 +10,17 @@ from qcip_tools.chemistry_files import gaussian, dalton
 from nachos.core import compute_numerical_derivative_of_tensor
 
 
-def fields_needed_by_recipe(recipe):
-    """
+def fields_needed_by_recipe(recipe: Any) -> list:
+    """Determine field points needed according to recipe.
 
-    :param recipe: recipe
-    :type recipe: nachos.core.files.Recipe
-    :rtype: list
+    Identifies all unique field configurations required for numerical differentiation
+    based on the recipe specification.
+
+    Args:
+        recipe: Recipe object specifying differentiation parameters.
+
+    Returns:
+        List of (fields, level) tuples for required calculations.
     """
 
     diffs = recipe.maximum_derivatives()
@@ -96,10 +102,13 @@ $end
 
 
 class Preparer:
-    """Prepare the input files
+    """Prepare computation input files for supported quantum chemistry packages.
 
-    :param recipe: a recipe
-    :type recipe: nachos.core.files.Recipe
+    This class generates input files for various quantum chemistry software based on
+    a numerical differentiation recipe.
+
+    Args:
+        recipe: Recipe object defining the differentiation parameters.
     """
 
     def __init__(self, recipe, directory='.'):
@@ -111,22 +120,26 @@ class Preparer:
         self.directory = directory
         self.fields_needed_by_recipe = fields_needed_by_recipe(self.recipe)
 
-    def prepare(self, dry_run=False):
-        """Create the different input files in the directory
+    def prepare(self, dry_run: bool = False) -> list:
+        """Generate input files for all required field configurations.
 
-        :param dry_run: do not create the files
-        :type dry_run: bool
-        :rtype: list
+        Args:
+            dry_run: If True, simulate file creation without writing files.
+
+        Returns:
+            List of (fields, basis_types, file_path) tuples for created files.
         """
 
         return getattr(self, 'prepare_{}_inputs'.format(self.recipe['flavor']))(dry_run=dry_run)
 
-    def prepare_gaussian_inputs(self, dry_run=False):
-        """Create inputs for gaussian
+    def prepare_gaussian_inputs(self, dry_run: bool = False) -> list:
+        """Generate Gaussian input files for all required field configurations.
 
-        :param dry_run: do not create the files
-        :type dry_run: bool
-        :rtype: list
+        Args:
+            dry_run: If True, simulate file creation without writing files.
+
+        Returns:
+            List of (fields, basis_types, file_path) tuples for created files.
         """
 
         base_m = False
@@ -337,12 +350,19 @@ class Preparer:
 
         return files_created
 
-    def prepare_dalton_inputs(self, dry_run=False):
-        """Create inputs for dalton. Note that it assume geometrical derivatives for the moment
+    def prepare_dalton_inputs(self, dry_run: bool = False) -> list:
+        """Generate Dalton input files for geometrical derivatives.
 
-        :param dry_run: do not create the files
-        :type dry_run: bool
-        :rtype: list
+        Note: Currently only supports geometrical derivatives (type='G').
+
+        Args:
+            dry_run: If True, simulate file creation without writing files.
+
+        Returns:
+            List of (fields, basis_types, file_path) tuples for created files.
+
+        Raises:
+            BadPreparation: If recipe type is not 'G' (geometrical derivatives).
         """
 
         if self.recipe['type'] != 'G':
@@ -664,12 +684,14 @@ class Preparer:
 
         return files_created
 
-    def prepare_qchem_inputs(self, dry_run=False):
-        """
+    def prepare_qchem_inputs(self, dry_run: bool = False) -> list:
+        """Generate Q-Chem input files for all required field configurations.
 
-        :param dry_run: do not create the files
-        :type dry_run: bool
-        :rtype: list
+        Args:
+            dry_run: If True, simulate file creation without writing files.
+
+        Returns:
+            List of (fields, basis_types, file_path) tuples for created files.
         """
 
         files_created = []
@@ -717,17 +739,19 @@ class Preparer:
         return files_created
 
     @staticmethod
-    def deform_geometry(geometry, real_fields, geometry_in_angstrom=True):
-        """Create an input for gaussian
+    def deform_geometry(geometry: object, real_fields: list, geometry_in_angstrom: bool = True) -> object:
+        """Apply field-induced deformation to molecular geometry.
 
-        :param real_fields: Real differentiation field
-        :type real_fields: list
-        :param geometry: geometry do deform
-        :type geometry: qcip_tools.molecule.Molecule
-        :param geometry_in_angstrom: indicate wheter the geometry is given in Angstrom or not
-            (because the field is obviously given in atomic units)
-        :type geometry_in_angstrom: bool
-        :rtype: qcip_tools.molecule.Molecule
+        Displaces atomic positions according to field-dependent deformations,
+        accounting for unit conversions if needed.
+
+        Args:
+            geometry: Molecular geometry to deform.
+            real_fields: Field-dependent displacements in atomic units.
+            geometry_in_angstrom: If True, geometry is in Angstrom; field is in atomic units.
+
+        Returns:
+            Deformed molecule with updated atomic positions.
         """
 
         deformed = copy.deepcopy(geometry)
@@ -741,7 +765,17 @@ class Preparer:
         return deformed
 
     @staticmethod
-    def nonzero_fields(fields, geometry, t):
+    def nonzero_fields(fields: list, geometry: object, t: str) -> list:
+        """Generate labels for non-zero field components.
+
+        Args:
+            fields: List of field values.
+            geometry: Molecular geometry object.
+            t: Type of derivatives ('G' for geometrical, 'F' for field-dependent).
+
+        Returns:
+            List of formatted field component labels.
+        """
         return [
             '{}({:+g}{})'.format(
                 '{}{}'.format(
