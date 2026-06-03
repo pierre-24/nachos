@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""
-Peek into an output file (LOG, FCHK, H5, ...)
-"""
+"""Peek into an output file (LOG, FCHK, H5, ...)."""
 
 import argparse
 import sys
+from typing import Union, Any
 from scipy import constants
 
 from qcip_tools import derivatives_e, quantities, derivatives_g
@@ -19,13 +18,16 @@ __email__ = 'pierre.beaujean@unamur.be'
 __status__ = 'Development'
 
 
-def to_nanometer(val):
-    """Convert frequency to nanometer
+def to_nanometer(val: Union[str, float, int]) -> str:
+    """Convert frequency to nanometer.
 
-    :param val:
-    :return:
+    Args:
+        val (Union[str, float, int]): The frequency value to convert.
+
+    Returns:
+        str: The frequency formatted as a nanometer string, or the original
+            string if a string was passed.
     """
-
     if type(val) is str:
         return val
 
@@ -35,7 +37,13 @@ def to_nanometer(val):
     return '{:.1f}nm'.format(converted)
 
 
-def print_electric_d_tensor(electrical_derivatives, representation):
+def print_electric_d_tensor(electrical_derivatives: dict, representation: str) -> None:
+    """Print the electrical derivative tensor for a given representation.
+
+    Args:
+        electrical_derivatives (dict): Dictionary containing the electrical derivatives.
+        representation (str): The representation key to look up (e.g., 'FF', 'FFF').
+    """
     if representation in electrical_derivatives:
         freqs = [x for x in electrical_derivatives[representation].keys()]
         freqs.sort(key=lambda x: derivatives_e.convert_frequency_from_string(x))
@@ -55,7 +63,14 @@ def print_electric_d_tensor(electrical_derivatives, representation):
             print(electrical_derivatives[representation][freq].to_string(**kw))
 
 
-def print_geometric_d_tensor(geometrical_derivatives, representation, molecule):
+def print_geometric_d_tensor(geometrical_derivatives: dict, representation: str, molecule: Any) -> None:
+    """Print the geometrical derivative tensor for a given representation.
+
+    Args:
+        geometrical_derivatives (dict): Dictionary containing the geometrical derivatives.
+        representation (str): The representation key to look up (e.g., 'G', 'GG').
+        molecule (Any): The molecule object, or None if not available.
+    """
     if representation in geometrical_derivatives:
         name = derivatives_g.NAMES[representation]
         print(name)
@@ -65,7 +80,12 @@ def print_geometric_d_tensor(geometrical_derivatives, representation, molecule):
             print(geometrical_derivatives[representation].to_string())
 
 
-def get_arguments_parser():
+def get_arguments_parser() -> argparse.ArgumentParser:
+    """Defines and returns the argument parser for the peek CLI.
+
+    Returns:
+        argparse.ArgumentParser: The argument parser with defined program options.
+    """
     arguments_parser = argparse.ArgumentParser(description=__doc__)
     arguments_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
 
@@ -93,7 +113,7 @@ def main():
         'FFFF', 'dDFF', 'dFFD', 'XDDF', 'dDDd', 'XDDD',
 
         # cartesian
-        'G', 'GG', 'GGG'
+        'G', 'GG', 'GGG',
         # normal
         'N', 'NN', 'NNN'
     ]

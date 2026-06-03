@@ -134,7 +134,7 @@ class NachosTestCase(unittest.TestCase):
         if not real_path.is_file():
             raise FileNotFoundError(real_path)
 
-        cmd = ['python', path]
+        cmd = [shutil.which('python'), path]
         if args:
             cmd.extend(args)
 

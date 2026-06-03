@@ -1,7 +1,7 @@
 import copy
 import math
 import os
-from typing import TYPE_CHECKING
+from typing import Any
 
 import numpy
 from qcip_tools import derivatives, derivatives_e, quantities, numerical_differentiation
@@ -9,11 +9,8 @@ from qcip_tools.chemistry_files import gaussian, dalton
 
 from nachos.core import compute_numerical_derivative_of_tensor
 
-if TYPE_CHECKING:
-    from nachos.core.files import Recipe
 
-
-def fields_needed_by_recipe(recipe: 'Recipe') -> list:
+def fields_needed_by_recipe(recipe: Any) -> list:
     """Determine field points needed according to recipe.
 
     Identifies all unique field configurations required for numerical differentiation

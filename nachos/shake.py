@@ -1,9 +1,8 @@
-"""
-Shake it! (compute the vibrational contributions)
-"""
+"""Shake it! (compute the vibrational contributions)"""
 
 import argparse
 import os
+from typing import Any
 
 from qcip_tools import derivatives
 from qcip_tools.chemistry_files import chemistry_datafile
@@ -19,7 +18,22 @@ __email__ = 'pierre.beaujean@unamur.be'
 __status__ = 'Development'
 
 
-def treat_only_arg(only_arg):
+def treat_only_arg(only_arg: str) -> list:
+    """Parses the --only argument to define a subset of derivatives for vibrational contributions.
+
+    Args:
+        only_arg (str): Semicolon-separated string of derivatives and optional levels
+            (e.g., 'd:2;d:1').
+
+    Returns:
+        list: A list of tuples containing the Derivative object and its corresponding
+            integer level.
+
+    Raises:
+        ValueError: If the input format is invalid, if a derivative is geometrical,
+            if a derivative order is less than 1 (energy), or if the level is not
+            a positive integer.
+    """
     only = []
     for x in only_arg.split(';'):
         if not x:
@@ -56,7 +70,19 @@ def treat_only_arg(only_arg):
     return only
 
 
-def treat_frequencies_arg(frequencies_arg):
+def treat_frequencies_arg(frequencies_arg: str) -> list:
+    """Parses and validates the frequencies provided in the command-line argument.
+
+    Args:
+        frequencies_arg (str): Semicolon-separated string of frequencies
+            (e.g., 'static;532nm;1.16ev').
+
+    Returns:
+        list: A list containing valid frequencies as floats or strings.
+
+    Raises:
+        ValueError: If any provided frequency format or unit is not allowed.
+    """
     frequencies = []
     for x in frequencies_arg.split(';'):
         if not x:
@@ -90,7 +116,17 @@ def treat_frequencies_arg(frequencies_arg):
     return frequencies
 
 
-def treat_exclude_argument(x, shaker):
+def treat_exclude_argument(x: str, shaker: Any) -> None:
+    """Modifies the included vibrational modes of the shaker based on the argument provided.
+
+    Args:
+        x (str): Semicolon-separated list of mode numbers to include or exclude.
+        shaker (shaking.Shaker): The shaker object holding the MassWeightedHessian.
+
+    Raises:
+        ValueError: If a mode is not a valid number, if a negative mode number is out of range,
+            if a mode is not a valid possibility to exclude, or if a mode is already included.
+    """
     if x[0] == ':':
         x = x[1:]
 
@@ -124,8 +160,12 @@ def treat_exclude_argument(x, shaker):
     shaker.mwh.included_modes.sort()
 
 
-# program options
-def get_arguments_parser():
+def get_arguments_parser() -> argparse.ArgumentParser:
+    """Defines and returns the argument parser for the vibrational contributions CLI.
+
+    Returns:
+        argparse.ArgumentParser: The argument parser with defined program options.
+    """
     arguments_parser = argparse.ArgumentParser(description=__doc__)
     arguments_parser.add_argument('-v', '--version', action='version', version='%(prog)s ' + __version__)
 
@@ -149,8 +189,13 @@ def get_arguments_parser():
     return arguments_parser
 
 
-# main
-def main():
+def main() -> None:
+    """Main execution flow for nachos_shake.
+
+    Parses arguments, reads the chemical data file, sets up the shaker,
+    filters derivatives, frequencies, and modes if requested, computes the
+    vibrational contributions, and saves the results back to the file.
+    """
     args = get_arguments_parser().parse_args()
 
     if args.verbose >= 1:
