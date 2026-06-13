@@ -33,8 +33,9 @@ release = nachos.__version__
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
+    'sphinxcontrib.katex',
+    'sphinxcontrib.mermaid',
     'sphinx.ext.githubpages',
     'sphinxcontrib.autoprogram'
 ]
