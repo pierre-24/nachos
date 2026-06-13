@@ -15,6 +15,7 @@ class CookTestCase(NachosTestCase):
     def setUp(self):
         self.zip_F = 'numdiff_F.zip'
         self.zip_F_qchem = 'numdiff_F_qchem.zip'
+        self.zip_F_dalton = 'numdiff_F_dalton.zip'
         self.zip_F_scs_mp2 = 'numdiff_F_SCS-MP2.zip'
         self.zip_F_b2plyp = 'numdiff_F_b2plyp.zip'
         self.zip_G = 'numdiff_G.zip'
@@ -22,7 +23,8 @@ class CookTestCase(NachosTestCase):
         self.working_directory = self.setup_temporary_directory()
 
     def tearDown(self):
-        super().tearDown()
+        pass
+        # super().tearDown()
 
     def test_fields_from_deformed_geometry(self):
         """Test that the code is able to get back the fields from a deformed geometry"""
@@ -289,6 +291,49 @@ class CookTestCase(NachosTestCase):
                 results = storage.results[t_fields]
 
                 self.assertAlmostEqual(fx.property('computed_energies')['total'], results[''].components[0])
+
+    def test_cook_F_dalton(self):
+        self.unzip_it(self.zip_F_dalton, self.working_directory)
+        directory = os.path.join(self.working_directory, 'numdiff_F_dalton')
+        path = os.path.join(directory, 'nachos_recipe.yml')
+
+        r = files.Recipe(directory=directory)
+
+        with open(path) as f:
+            r.read(f)
+
+        fields = preparing.fields_needed_by_recipe(r)
+
+        c = cooking.Cooker(r, directory)
+        storage = c.cook([directory])
+        self.assertEqual(storage.check(), ([], []))
+
+        # check data
+        for _ in range(10):
+            n = random.randrange(1, len(fields) + 1)
+            fields_n, level = fields[n - 1]
+            t_fields = tuple(fields_n)
+            r_field = numerical_differentiation.real_fields(t_fields, r['min_field'], r['ratio'])
+            path = os.path.join(directory, r['name'] + '_F_FF_dD_{:04d}_molecule.tar.gz').format(n)
+            self.assertTrue(os.path.exists(path), msg=path)
+
+            fr = 0.0428227
+
+            with open(path, 'rb') as f:
+                fx = dalton.ArchiveOutput()
+                fx.read(f)
+                results = storage.results[t_fields]
+
+                field = fx.property('n:input_electric_field')
+                self.assertArraysAlmostEqual(field[1:], r_field)
+
+                electrical_derivatives = fx.property('electrical_derivatives')
+                self.assertTensorsAlmostEqual(
+                    electrical_derivatives['F']['static'], results['F']['static'], skip_frequency_test=True)
+                self.assertTensorsAlmostEqual(
+                    electrical_derivatives['FF']['static'], results['FF']['static'], skip_frequency_test=True)
+                self.assertTensorsAlmostEqual(
+                    electrical_derivatives['dD'][fr], results['dD']['1064nm'], skip_frequency_test=True)
 
     def test_cook_F_scs_mp2(self):
         """Check that using SCS-MP2 is ok"""

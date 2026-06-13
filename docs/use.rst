@@ -56,10 +56,38 @@ General workflow
 Here is the schematic of the workflow with the nachos package:
 
 
-.. figure:: ./images/workflow.png
-   :align: center
+.. mermaid::
 
-   Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).
+   flowchart
+    make[<tt>nachos_make</tt>]
+    prepare[<tt>nachos_prepare</tt>]
+    cook[<tt>nachos_cook</tt>]
+    bake[<tt>nachos_bake</tt>]
+    shake[<tt>nachos_shake</tt>]
+    analyze[<tt>nachos_analyze</tt>]
+    peek[<tt>nachos_peek</tt>]
+    QM[[QM program]]
+
+    recipe@{ shape: doc, label: "nachos_recipe.yml"}
+    inps@{ shape: docs, label: "QM input files"}
+    outs@{ shape: docs, label: "QM output files"}
+    data@{ shape: doc, label: "nachos_data.h5"}
+    molecule@{ shape: doc, label: "molecule_nd.h5"}
+
+    make --> recipe
+    recipe --> prepare
+    recipe --> cook
+    recipe --> bake
+    prepare --> inps --> QM --> outs --> cook
+    cook --> data --> bake
+    bake --> molecule
+    molecule --> shake
+    molecule --> analyze
+    molecule --> peek
+
+
+
+Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).
 
 In short,
 
@@ -107,7 +135,6 @@ See below for more details on every command.
     + For some terminal, it is not possible to use the extended prompt toolkit, use ``-N`` to get an alternative.
     + Default behavior is if there is an error in the input argument, the corresponding question is asked again.
       If you just want the program to fail (because you are using it in a script), use the ``-S`` option.
-    + ``F`` differentiation is **only possible** with gaussian and qchem.
 
 The program prompts for different information in order to create a *recipe file*, if not given in command line, and generate a recipe in output (``-o`` option, default is ``nachos_recipe.yml``).
 

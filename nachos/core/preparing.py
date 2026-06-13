@@ -360,13 +360,7 @@ class Preparer:
 
         Returns:
             List of (fields, basis_types, file_path) tuples for created files.
-
-        Raises:
-            BadPreparation: If recipe type is not 'G' (geometrical derivatives).
         """
-
-        if self.recipe['type'] != 'G':
-            raise BadPreparation('Dalton only works for G!')
 
         base_m = False
         counter = 0
@@ -386,10 +380,26 @@ class Preparer:
         thclr_card = dalton.InputCard(parameters=[
             '{:.1e}'.format(float(self.recipe['flavor_extra']['response_threshold'])).replace('e', 'D')])
 
+        # if F, create a unique geometry
+        mol_path = ''
+        if self.recipe['type'] == 'F':
+            fi = dalton.MoleculeInput()
+            fi.molecule = self.recipe.geometry
+            fi.title = 'Geometry'
+
+            fi.basis_set = self.recipe['basis_set']
+
+            mol_path = 'molecule.mol'
+
+            if not dry_run:
+                with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
+                    fi.write(f, nosym=True)
+
         for fields, level in self.fields_needed_by_recipe:
             counter += 1
 
             bases = self.recipe.bases(level_min=level)
+            real_fields = numerical_differentiation.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
 
             # separate in group
             groups = {}
@@ -400,7 +410,7 @@ class Preparer:
 
             # merge energy, eventual order 1 and 2
             m_group = []
-            x_merge = [0, 1]
+            x_merge = [0, 1, 2]
             x_split = []
 
             if int(self.recipe['flavor_extra']['split_level_3']) != 0:
@@ -448,6 +458,9 @@ class Preparer:
                 bases_reprs.append(tuple([b.representation() for b in bases]))
 
             bases_reprs.sort(key=lambda x: (len(x[0]), x[0].count('D')))  # sort by complexity
+
+            if self.recipe['type'] == 'F':  # if E-field, one dal file series per field
+                dal_files = {}
 
             # dal file, if needed
             for bases_repr in bases_reprs:
@@ -647,33 +660,57 @@ class Preparer:
                                 if 'dDDd' in bases_repr:
                                     dal.update('**RESPONSE\n*CUBIC\n.IDRI')
 
-                    dal_path = '{}_{}.dal'.format(self.recipe['flavor_extra']['dal_name'], '_'.join(
-                        a if a != '' else 'energy' for a in bases_repr))
+                    if self.recipe['type'] == 'F':
+                        if fields != [0] * len(fields):
+                            card = '**WAVE FUNCTIONS\n*HAMILTONIAN\n.FIELD'
+
+                            dal.update(card)
+
+                            params = []
+                            for direction, field in zip(['XDIPLEN', 'YDIPLEN', 'ZDIPLEN'], real_fields):
+                                if field != 0:
+                                    params.extend(['.FIELD', str(field), direction])
+
+                            # nasty hack to handle the fact that qcip_tools do not deal with multi-defs!
+                            dal.modules['WAVE '].submodules['HAMILT'].input_cards['FIELD'].parameters = params[1:]
+
+                        dal_path = '{}_{}_{:04d}.dal'.format(
+                            self.recipe['flavor_extra']['dal_name'],
+                            '_'.join(a if a != '' else 'energy' for a in bases_repr),
+                            counter
+                        )
+                    else:
+                        dal_path = '{}_{}.dal'.format(
+                            self.recipe['flavor_extra']['dal_name'],
+                            '_'.join(a if a != '' else 'energy' for a in bases_repr)
+                        )
+
                     with open('{}/{}'.format(self.directory, dal_path), 'w') as f:
                         dal.write(f)
 
                     dal_files[bases_repr] = dal_path
 
-            # molecule file
-            fi = dalton.MoleculeInput()
-            real_fields = numerical_differentiation.real_fields(fields, self.recipe['min_field'], self.recipe['ratio'])
-            fi.molecule = Preparer.deform_geometry(self.recipe.geometry, real_fields)
+            # molecule file, if needed
+            if self.recipe['type'] == 'G':
+                fi = dalton.MoleculeInput()
+                fi.molecule = Preparer.deform_geometry(self.recipe.geometry, real_fields)
 
-            if not base_m and fields == [0] * len(fields):
-                fi.title = 'base'
-                base_m = True
-            else:
-                fi.title = 'field({})='.format(level) + \
-                           ','.join(Preparer.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
+                if not base_m and fields == [0] * len(fields):
+                    fi.title = 'base'
+                    base_m = True
+                else:
+                    fi.title = 'field({})='.format(level) + \
+                        ','.join(Preparer.nonzero_fields(fields, self.recipe.geometry, self.recipe['type']))
 
-            fi.basis_set = self.recipe['basis_set']
+                fi.basis_set = self.recipe['basis_set']
 
-            mol_path = '{}_{:04d}.mol'.format(self.recipe['name'], counter)
+                mol_path = '{}_{:04d}.mol'.format(self.recipe['name'], counter)
 
-            if not dry_run:
-                with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
-                    fi.write(f, nosym=True)
+                if not dry_run:
+                    with open('{}/{}'.format(self.directory, mol_path), 'w') as f:
+                        fi.write(f, nosym=True)
 
+            # do match
             for bases_repr in bases_reprs:
                 inputs_matching += '{} {}\n'.format(dal_files[bases_repr], mol_path)
                 files_created.append((fields, bases_repr, mol_path))

@@ -36,7 +36,7 @@ CONFIG = {
         }
     },
     'dalton': {
-        'types': ['G'],
+        'types': ['F', 'G'],
         'methods': [
             ('HF', {'G': 2, 'F': 4}),
             ('DFT', {'G': 2, 'F': 4}),  # with some XC functionals only :o

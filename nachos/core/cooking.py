@@ -11,7 +11,7 @@ from qcip_tools.molecule import Molecule
 from qcip_tools.chemistry_files import helpers, PropertyNotPresent, PropertyNotDefined
 
 from nachos.core import files, preparing, GAUSSIAN_DOUBLE_HYBRIDS
-from nachos.qcip_tools_ext import gaussian, qchem  # noqa
+from nachos.qcip_tools_ext import gaussian, qchem, dalton  # noqa
 from nachos.core.files import ComputationalResults
 
 
