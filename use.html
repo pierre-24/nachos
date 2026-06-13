@@ -1,0 +1,2098 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="violet" data-content_root="./">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>How to use nachos - nachos 0.4.0 documentation</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Contributing" href="contributing.html" /><link rel="prev" title="Installing nachos" href="install.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=9454f7d5" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/katex@0.16.22/dist/katex.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/katex-math.css?v=05624691" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="How to use nachos"/>
+    <meta name="twitter:card" content="summary"/>
+  </head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="index.html">
+      
+      
+      <strong>nachos</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/pierre-24/nachos" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installing nachos</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">How to use nachos</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Code documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#concepts">Concepts</a></li>
+<li><a class="reference internal" href="#general-workflow">General workflow</a><ul>
+<li><a class="reference internal" href="#id1">nachos_make</a></li>
+<li><a class="reference internal" href="#id2">nachos_prepare</a></li>
+<li><a class="reference internal" href="#id3">nachos_cook</a></li>
+<li><a class="reference internal" href="#id4">nachos_bake</a></li>
+<li><a class="reference internal" href="#id5">nachos_shake</a></li>
+<li><a class="reference internal" href="#id6">nachos_analyze</a></li>
+<li><a class="reference internal" href="#id7">nachos_peek</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#appendix">Appendix</a><ul>
+<li><a class="reference internal" href="#list-of-the-derivatives">List of the derivatives</a></li>
+</ul>
+</li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/pierre-24/nachos"
+  data-type="github" data-user="pierre-24" data-repo="nachos">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>pierre-24/nachos</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/pierre-24/nachos/blob/dev/docs/use.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">nachos</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">How to use nachos</strong>
+        <meta itemprop="position" content="2" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="https://raw.githubusercontent.com/pierre-24/nachos/refs/heads/main/docs/use.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="https://raw.githubusercontent.com/pierre-24/nachos/refs/heads/main/docs/use.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="https://raw.githubusercontent.com/pierre-24/nachos/refs/heads/main/docs/use.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//raw.githubusercontent.com/pierre-24/nachos/refs/heads/main/docs/use.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//raw.githubusercontent.com/pierre-24/nachos/refs/heads/main/docs/use.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue" role="main">
+          <section id="how-to-use-nachos">
+<h1>How to use nachos<a class="headerlink" href="#how-to-use-nachos" title="Link to this heading">¶</a></h1>
+<section id="concepts">
+<h2>Concepts<a class="headerlink" href="#concepts" title="Link to this heading">¶</a></h2>
+<ul>
+<li><p>The numerical differentiation is used to obtain (static) derivatives to different quantities.
+It exploits the following identity, given <span class="math">\(f(x)\)</span> a given function expanded in Taylor series,</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\left.\frac{\partial f(x)}{\partial x}\right|_{x=0} = \lim_{h_0\rightarrow 0} \underbrace{\frac{f(h_0)-f(0)}{h_0}}_{\text{forward derivative}} = \lim_{h_0\rightarrow 0} \underbrace{\frac{f(h_0)-f(-h_0)}{2\,h_0}}_{\text{centered derivative}},\]</div>
+</div>
+<p>where <span class="math">\(h_0\)</span> is the minimal field (<code class="docutils literal notranslate"><span class="pre">min_field</span></code> parameter).</p>
+</li>
+<li><p>The code use the Romberg procedure to remove contamination from higher orders (see <a class="reference external" href="https://dx.doi.org/10.1002/qua.24685">this publication</a> for more details).
+The derivative is computed for different values of <span class="math">\(h=a^k\,h_0\)</span>, with <span class="math">\(k&lt;k_{max}\)</span> the field amplitude (which lead to the <code class="docutils literal notranslate"><span class="pre">k_max</span></code> parameter), and <span class="math">\(a\)</span> is the common ratio (<code class="docutils literal notranslate"><span class="pre">ratio</span></code> parameter).
+The procedure goes as follow:</p>
+<div class="math-wrapper docutils container">
+<div class="math">
+\[\begin{aligned}
+&H_{k,0} = \frac{f(a^kh_0)-f(-a^kh_0)}{2\,a^kh_0},\\
+&H_{k,m} = \frac{a^{2m}\,H_{k,m-1}-H_{k+1,m-1}}{a^{2m}-1},
+\end{aligned}\]</div>
+</div>
+<p>where <span class="math">\(m\)</span> is the number of iterations (or refinement steps).
+This leads to a so-called <em>Romberg triangle</em>, from which the value of the derivative is extracted.
+The algorithm to select the best value is described in <a class="reference external" href="https://pierre-24.github.io/qcip_tools/code-documentation/numerical_differentiation.html">qcip_tools numerical differentiation page</a>.</p>
+</li>
+<li><p>The different quantities are written <strong>as derivatives with respect to the energy</strong>.
+For example, the geometric Hessian, second order of the energy with respect to geometrical derivatives, is written <code class="docutils literal notranslate"><span class="pre">GG</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code> meaning <em>geometrical derivative with respect to cartesian coordinates</em>.
+Accordingly,</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">F</span></code> means <em>derivatives with respect to static electric field</em> ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">D</span></code> means <em>derivatives with respect to dynamic electric field</em> (with a given frequency), <code class="docutils literal notranslate"><span class="pre">d</span></code> means the same, but with inverse frequency (<span class="math">\(-\omega\)</span>) and <code class="docutils literal notranslate"><span class="pre">X</span></code> means any multiple (<span class="math">\(\pm i\omega\)</span>) ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">N</span></code> means <em>derivatives with respect to normal coordinates</em>.</p></li>
+</ul>
+<p>Therefore, the static hyperpolarizability, <span class="math">\(\beta(0;0,0)\)</span>, is written <code class="docutils literal notranslate"><span class="pre">FFF</span></code>, while the dynamic hyperpolarizability depends on the process involved: <code class="docutils literal notranslate"><span class="pre">dDF</span></code> for EOP  [<span class="math">\(\beta(-\omega;\omega,0)\)</span>] and <code class="docutils literal notranslate"><span class="pre">XDD</span></code> for SHG [<span class="math">\(\beta(-2\omega;\omega,\omega)\)</span>].
+See the list <a class="reference external" href="#list-of-the-derivatives">below</a>.</p>
+<p>Geometrical derivatives of an electrical derivative are written with the geometrical derivatives <strong>first</strong>.
+For example, the first order geometrical derivative (with respect to normal mode) of the static polarizability, <span class="math">\(\frac{\partial \alpha}{\partial Q}\)</span>, is written <code class="docutils literal notranslate"><span class="pre">NFF</span></code>, the second order one <code class="docutils literal notranslate"><span class="pre">NNFF</span></code>.</p>
+<p>Note that the number of <code class="docutils literal notranslate"><span class="pre">G</span></code> and <code class="docutils literal notranslate"><span class="pre">N</span></code> thus correspond to the level of geometric differentiation and the number of <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">D</span></code> and <code class="docutils literal notranslate"><span class="pre">d</span></code> to the level of electrical differentiation.</p>
+</li>
+<li><p>Nachos is abble to perform differentiation with respect to static electric field (<code class="docutils literal notranslate"><span class="pre">F</span></code>) and cartesian coordinate (<code class="docutils literal notranslate"><span class="pre">G</span></code>).
+Given the cartesian hessian, <code class="docutils literal notranslate"><span class="pre">nachos_bake</span></code> (see below) perform a vibrational analysis and is able to project <code class="docutils literal notranslate"><span class="pre">G</span></code> derivatives over normal mode, giving the corresponding <code class="docutils literal notranslate"><span class="pre">N</span></code> ones.</p></li>
+<li><p>Nachos (because of the underlying library, <a class="reference external" href="https://github.com/pierre-24/qcip_tools">qcip_tools</a>) takes advantage of permutation symmetry and <a class="reference external" href="https://en.wikipedia.org/wiki/Symmetry_of_second_derivatives#Schwarz.27s_theorem">Shwarz’s theorem</a> (referred as “Kleinman symmetry” in the field of nonlinear optics).</p></li>
+</ul>
+</section>
+<section id="general-workflow">
+<h2>General workflow<a class="headerlink" href="#general-workflow" title="Link to this heading">¶</a></h2>
+<p>Here is the schematic of the workflow with the nachos package:</p>
+<pre  class="mermaid">
+        flowchart
+ make[&lt;tt&gt;nachos_make&lt;/tt&gt;]
+ prepare[&lt;tt&gt;nachos_prepare&lt;/tt&gt;]
+ cook[&lt;tt&gt;nachos_cook&lt;/tt&gt;]
+ bake[&lt;tt&gt;nachos_bake&lt;/tt&gt;]
+ shake[&lt;tt&gt;nachos_shake&lt;/tt&gt;]
+ analyze[&lt;tt&gt;nachos_analyze&lt;/tt&gt;]
+ peek[&lt;tt&gt;nachos_peek&lt;/tt&gt;]
+ QM[[QM program]]
+
+ recipe&#64;{ shape: doc, label: &quot;nachos_recipe.yml&quot;}
+ inps&#64;{ shape: docs, label: &quot;QM input files&quot;}
+ outs&#64;{ shape: docs, label: &quot;QM output files&quot;}
+ data&#64;{ shape: doc, label: &quot;nachos_data.h5&quot;}
+ molecule&#64;{ shape: doc, label: &quot;molecule_nd.h5&quot;}
+
+ make --&gt; recipe
+ recipe --&gt; prepare
+ recipe --&gt; cook
+ recipe --&gt; bake
+ prepare --&gt; inps --&gt; QM --&gt; outs --&gt; cook
+ cook --&gt; data --&gt; bake
+ bake --&gt; molecule
+ molecule --&gt; shake
+ molecule --&gt; analyze
+ molecule --&gt; peek
+    </pre><p>Flowchart for the different parts of the nachos package. Arrows indicate whether a part is an input (arrows going in) of a program (rectangle) or an output (arrow going out).</p>
+<p>In short,</p>
+<ol class="arabic simple">
+<li><p><a class="reference external" href="#id1">nachos_make</a> creates a <em>recipe</em> (<code class="docutils literal notranslate"><span class="pre">nachos_recipe.yml</span></code>, but you can change that), which is the file that explains what to do and how to do it ;</p></li>
+<li><p><a class="reference external" href="#id2">nachos_prepare</a> uses the recipe to generate the different input files for the quantum chemistry program of your choice (currently Gaussian, Dalton and Q-Chem) ;</p></li>
+<li><p>The quantum chemistry program process the different input files and generate output files ;</p></li>
+<li><p><a class="reference external" href="#id3">nachos_cook</a> carry out all the information that it can get from output files (FCHK files for gaussian, TAR archives and OUT files for Dalton) and store them in a <em>data file</em> (<code class="docutils literal notranslate"><span class="pre">nachos_data.h5</span></code>, but you can change that) ;</p></li>
+<li><p><a class="reference external" href="#id4">nachos_bake</a> perform the requested numerical differentiation(s) out of the data from the <em>data file</em>, and store them in a <em>final file</em> (<code class="docutils literal notranslate"><span class="pre">molecule_nd.h5</span></code>, but you can change that) ;</p></li>
+<li><p>(<em>optional</em>) <a class="reference external" href="#id6">nachos_analyze</a> allow to quickly get a given property for each quantity stored in the <em>final file</em> (e.g. a tensor component, an average, …). <a class="reference external" href="#id8">nachos_peek</a>  also allow you to do that, but it dumps everything ;</p></li>
+<li><p>(<em>optional</em>) if possible, <a class="reference external" href="#id5">nachos_shake</a> will add the different vibrational contribution to the electrical derivatives of the energy.</p></li>
+</ol>
+<p>Therefore, it should looks like:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># create subdirectory:</span>
+</span><span data-line="2">mkdir<span class="w"> </span>new_directory
+</span><span data-line="3"><span class="nb">cd</span><span class="w"> </span>new_directory
+</span><span data-line="4">
+</span><span data-line="5"><span class="c1"># create recipe and inputs:</span>
+</span><span data-line="6">nachos_make<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>nachos_prepare
+</span><span data-line="7">
+</span><span data-line="8"><span class="c1"># ... run all the inputs ...</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="c1"># carry out and perform numerical differentiation:</span>
+</span><span data-line="11">nachos_cook<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>nachos_bake<span class="w"> </span><span class="c1"># or nachos_bake -P</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="c1"># ... eventually, add vibrational contributions:</span>
+</span><span data-line="14">nachos_shake
+</span><span data-line="15">
+</span><span data-line="16"><span class="c1"># ... eventually, post-analyze:</span>
+</span><span data-line="17">nachos_analyze<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;xxxx&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>nachos.log
+</span><span data-line="18"><span class="c1"># ... and/or ...</span>
+</span><span data-line="19">nachos_peek<span class="w"> </span>molecule_nd.h5
+</span></pre></div>
+</div>
+<p>See below for more details on every command.</p>
+<section id="id1">
+<h3>nachos_make<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h3>
+<p>Make a recipe</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="go">usage: nachos_make [-h] [-v] [-N] [-S] [--flavor FLAVOR] [--type TYPE]</span>
+</span><span data-line="2"><span class="go">                   [--method METHOD] [--basis-set BASIS_SET]</span>
+</span><span data-line="3"><span class="go">                   [--geometry GEOMETRY] [--differentiation DIFFERENTIATION]</span>
+</span><span data-line="4"><span class="go">                   [--frequencies FREQUENCIES] [--name NAME]</span>
+</span><span data-line="5"><span class="go">                   [--min-field MIN_FIELD] [--ratio RATIO] [--k-max K_MAX]</span>
+</span><span data-line="6"><span class="go">                   [--flavor-extra FLAVOR_EXTRA] [--XC XC] [--CC CC]</span>
+</span><span data-line="7"><span class="go">                   [--gen-basis GEN_BASIS] [-o OUTPUT]</span>
+</span></pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-h">
+<span id="cmdoption-nachos_make-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-h" title="Link to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-v">
+<span id="cmdoption-nachos_make-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-v" title="Link to this definition">¶</a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-N">
+<span id="cmdoption-nachos_make-fallback-prompt"></span><span class="sig-name descname"><span class="pre">-N</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--fallback-prompt</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-N" title="Link to this definition">¶</a></dt>
+<dd><p>do not use prompt_toolkit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-S">
+<span id="cmdoption-nachos_make-stop-when-fail"></span><span class="sig-name descname"><span class="pre">-S</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--stop-when-fail</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_make-S" title="Link to this definition">¶</a></dt>
+<dd><p>fail when argument input is wrong</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-flavor">
+<span class="sig-name descname"><span class="pre">--flavor</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;flavor&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-flavor" title="Link to this definition">¶</a></dt>
+<dd><p>flavor for the recipe</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-type">
+<span class="sig-name descname"><span class="pre">--type</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;type&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-type" title="Link to this definition">¶</a></dt>
+<dd><p>type of differentiation</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-method">
+<span class="sig-name descname"><span class="pre">--method</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;method&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-method" title="Link to this definition">¶</a></dt>
+<dd><p>computational method</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-basis-set">
+<span class="sig-name descname"><span class="pre">--basis-set</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;basis_set&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-basis-set" title="Link to this definition">¶</a></dt>
+<dd><p>basis set</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-geometry">
+<span class="sig-name descname"><span class="pre">--geometry</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;geometry&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-geometry" title="Link to this definition">¶</a></dt>
+<dd><p>geometry of the molecule</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-differentiation">
+<span class="sig-name descname"><span class="pre">--differentiation</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;differentiation&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-differentiation" title="Link to this definition">¶</a></dt>
+<dd><p>quantities to differentiate</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-frequencies">
+<span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-frequencies" title="Link to this definition">¶</a></dt>
+<dd><p>frequencies (if dynamic quantities)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-name">
+<span class="sig-name descname"><span class="pre">--name</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;name&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the files</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-min-field">
+<span class="sig-name descname"><span class="pre">--min-field</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;min_field&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-min-field" title="Link to this definition">¶</a></dt>
+<dd><p>Minimum field (F_0)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-ratio">
+<span class="sig-name descname"><span class="pre">--ratio</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;ratio&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-ratio" title="Link to this definition">¶</a></dt>
+<dd><p>ratio (a)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-k-max">
+<span class="sig-name descname"><span class="pre">--k-max</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;k_max&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-k-max" title="Link to this definition">¶</a></dt>
+<dd><p>Maximum k (k_max)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-flavor-extra">
+<span class="sig-name descname"><span class="pre">--flavor-extra</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;flavor_extra&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-flavor-extra" title="Link to this definition">¶</a></dt>
+<dd><p>Update the values of flavor extra</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-XC">
+<span class="sig-name descname"><span class="pre">--XC</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;xc&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-XC" title="Link to this definition">¶</a></dt>
+<dd><p>XC functional (if DFT)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-CC">
+<span class="sig-name descname"><span class="pre">--CC</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;cc&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-CC" title="Link to this definition">¶</a></dt>
+<dd><p>CC level (if CC)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-gen-basis">
+<span class="sig-name descname"><span class="pre">--gen-basis</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;gen_basis&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-gen-basis" title="Link to this definition">¶</a></dt>
+<dd><p>gaussian basis function file (if gen)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_make-o">
+<span id="cmdoption-nachos_make-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_make-o" title="Link to this definition">¶</a></dt>
+<dd><p>Output recipe file</p>
+</dd></dl>
+
+</section>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>It is easier to place the geometry file (and eventual basis set and other extra files) in the <strong>same</strong> directory as the recipe.</p></li>
+<li><p>For some terminal, it is not possible to use the extended prompt toolkit, use <code class="docutils literal notranslate"><span class="pre">-N</span></code> to get an alternative.</p></li>
+<li><p>Default behavior is if there is an error in the input argument, the corresponding question is asked again.
+If you just want the program to fail (because you are using it in a script), use the <code class="docutils literal notranslate"><span class="pre">-S</span></code> option.</p></li>
+</ul>
+</div>
+<p>The program prompts for different information in order to create a <em>recipe file</em>, if not given in command line, and generate a recipe in output (<code class="docutils literal notranslate"><span class="pre">-o</span></code> option, default is <code class="docutils literal notranslate"><span class="pre">nachos_recipe.yml</span></code>).</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 35.0%" />
+<col style="width: 35.0%" />
+<col style="width: 10.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Question</p></th>
+<th class="head"><p>Possible inputs</p></th>
+<th class="head"><p>Note</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--flavor</span></code></p></td>
+<td><p>“What flavor for you, today?”</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gaussian</span></code> | <code class="docutils literal notranslate"><span class="pre">dalton</span></code> | <code class="docutils literal notranslate"><span class="pre">qchem</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--type</span></code></p></td>
+<td><p>“What type of differentiation?”</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F</span></code> | <code class="docutils literal notranslate"><span class="pre">G</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--method</span></code></p></td>
+<td><p>“With which method?”</p></td>
+<td><p><a class="reference internal" href="#nachos-make-note-1"><span class="std std-ref">see below</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--XC</span></code></p></td>
+<td><p>“Which XC functionnal?”</p></td>
+<td><p><em>XC functional</em></p></td>
+<td><p>Only if <code class="docutils literal notranslate"><span class="pre">DFT</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--CC</span></code></p></td>
+<td><p>“Which Coupled Cluster method?”</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">CCS</span></code> | <code class="docutils literal notranslate"><span class="pre">CC2</span></code> | <code class="docutils literal notranslate"><span class="pre">CCSD</span></code> | <code class="docutils literal notranslate"><span class="pre">CC3</span></code></p></td>
+<td><p>Only if <code class="docutils literal notranslate"><span class="pre">CC</span></code> (and dalton)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--geometry</span></code></p></td>
+<td><p>“Where is the geometry? “</p></td>
+<td><p><em>path to a .com/.xyz/.fchk/.mol</em> file</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--basis-set</span></code></p></td>
+<td><p>“With which basis set?”</p></td>
+<td><p><em>valid basis set</em> | <code class="docutils literal notranslate"><span class="pre">gen</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--gen-basis</span></code></p></td>
+<td><p>“Where is the gen basis set?”</p></td>
+<td><p><em>path to a gbs file</em></p></td>
+<td><p>Only if <code class="docutils literal notranslate"><span class="pre">gaussian</span></code> and <code class="docutils literal notranslate"><span class="pre">gen</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--differentiation</span></code></p></td>
+<td><p>“What to differentiate?”</p></td>
+<td><p><a class="reference internal" href="#nachos-make-note-2"><span class="std std-ref">see below</span></a></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--frequencies</span></code></p></td>
+<td><p>“Dynamic frequencies?”</p></td>
+<td><p><a class="reference internal" href="#nachos-make-note-3"><span class="std std-ref">see below</span></a></p></td>
+<td><p>Only if dynamic quantities requested</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--name</span></code></p></td>
+<td><p>“Name of the files?”</p></td>
+<td><p><em>any string</em></p></td>
+<td><p>Avoid spaces and special characters!</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--min-field</span></code></p></td>
+<td><p>“Minimum field (F0)?”</p></td>
+<td><p><em>floating number</em></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--ratio</span></code></p></td>
+<td><p>“Ratio (a)?”</p></td>
+<td><p><em>floating number</em></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--k-max</span></code></p></td>
+<td><p>“Maximum k?”</p></td>
+<td><p><em>floating number</em></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--flavor-extra</span></code></p></td>
+<td><p>“Update flavor extra ?”</p></td>
+<td><p><a class="reference internal" href="#nachos-make-note-4"><span class="std std-ref">see below</span></a></p></td>
+<td><p>Blank input use default values</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>When everything is done, you end up with a <code class="docutils literal notranslate"><span class="pre">.yml</span></code> file that contains all the information you input.
+For example, this is an input to compute vibrational contribution to the polariability:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># flavor</span>
+</span><span data-line="2"><span class="nt">flavor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gaussian</span>
+</span><span data-line="3"><span class="nt">method</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HF</span>
+</span><span data-line="4"><span class="nt">basis_set</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gen</span>
+</span><span data-line="5"><span class="nt">geometry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water.xyz</span>
+</span><span data-line="6"><span class="nt">flavor_extra</span><span class="p">:</span>
+</span><span data-line="7"><span class="w">  </span><span class="nt">convergence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">11</span>
+</span><span data-line="8"><span class="w">  </span><span class="nt">cphf_convergence</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">10</span>
+</span><span data-line="9"><span class="w">  </span><span class="nt">gen_basis</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sto-3g.gbs</span>
+</span><span data-line="10"><span class="w">  </span><span class="nt">memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3Gb</span>
+</span><span data-line="11"><span class="w">  </span><span class="nt">procs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span>
+</span><span data-line="12"><span class="c1"># differentiation (the label is the number of time</span>
+</span><span data-line="13"><span class="c1"># you want to differentiate each item of the list)</span>
+</span><span data-line="14"><span class="nt">differentiation</span><span class="p">:</span>
+</span><span data-line="15"><span class="w">  </span><span class="nt">2</span><span class="p">:</span>
+</span><span data-line="16"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F</span>
+</span><span data-line="17"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FF</span>
+</span><span data-line="18"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dD</span>
+</span><span data-line="19"><span class="w">  </span><span class="nt">1</span><span class="p">:</span>
+</span><span data-line="20"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GG</span>
+</span><span data-line="21"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">G</span>
+</span><span data-line="22"><span class="nt">min_field</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span>
+</span><span data-line="23"><span class="nt">ratio</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+</span><span data-line="24"><span class="nt">k_max</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span>
+</span><span data-line="25"><span class="nt">frequencies</span><span class="p">:</span>
+</span><span data-line="26"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1064nm</span>
+</span><span data-line="27"><span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">694.3nm</span>
+</span><span data-line="28"><span class="c1"># others:</span>
+</span><span data-line="29"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">water_test</span>
+</span></pre></div>
+</div>
+<p>Obviously, nothing prevents you from writing your own <em>recipe file</em> from scratch. Actually, you just need to define</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">flavor</span></code> ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">type</span></code> ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">method</span></code> ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">basis_set</span></code> ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">geometry</span></code> ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">differentiation</span></code> ;</p></li>
+</ul>
+</div></blockquote>
+<p>Since there is default values for the rest.</p>
+<hr class="docutils" />
+<p id="nachos-make-note-1">For <code class="docutils literal notranslate"><span class="pre">--method</span></code>: the value of this argument depends on the <em>flavor</em> you chose.
+This also determine the maximum properties available at this level i.e. what you can request in <code class="docutils literal notranslate"><span class="pre">--differentiation</span></code> (<a class="reference internal" href="#nachos-make-note-2"><span class="std std-ref">see below</span></a>).</p>
+<ul>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">gaussian</span></code> (chosen according to the <a class="reference external" href="http://gaussian.com/force/">force page</a>, the <a class="reference external" href="http://gaussian.com/freq/">freq page</a> and the <a class="reference external" href="http://gaussian.com/polar/">polar page</a>):</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Maximum level of electrical properties</p></th>
+<th class="head"><p>Maximum level of geometrical properties</p></th>
+<th class="head"><p>Available</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HF</span></code></p></td>
+<td><p>3</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">GG</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">FF</span></code>, <code class="docutils literal notranslate"><span class="pre">dD</span></code>, <code class="docutils literal notranslate"><span class="pre">dDF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDD</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DFT</span></code></p></td>
+<td><p>3</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">GG</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">FF</span></code>, <code class="docutils literal notranslate"><span class="pre">dD</span></code>, <code class="docutils literal notranslate"><span class="pre">dDF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDD</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">MP2</span></code></p></td>
+<td><p>2</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">GG</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">FF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MP3</span></code>, <code class="docutils literal notranslate"><span class="pre">MP4</span></code>, <code class="docutils literal notranslate"><span class="pre">MP4D</span></code>, <code class="docutils literal notranslate"><span class="pre">MP4DQ</span></code>, <code class="docutils literal notranslate"><span class="pre">MP4SDQ</span></code></p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CCSD</span></code></p></td>
+<td><p>1</p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CCSD(T)</span></code>, <code class="docutils literal notranslate"><span class="pre">SCS-MP2</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Some method are not available, but may be added in the future if needed (CI methods, for example).</p>
+<p><code class="docutils literal notranslate"><span class="pre">SCS-MP2</span></code> is computed according to <a class="reference external" href="https://dx.doi.org/10.1063/1.1569242">S. Grimme. J. Chem. Phys. 118, 9095 (2003).</a> with the default parameters of 1/3 and 6/5.</p>
+</li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">dalton</span></code>:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Maximum level of electrical properties</p></th>
+<th class="head"><p>Maximum level of geometrical properties</p></th>
+<th class="head"><p>Available</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">HF</span></code></p></td>
+<td><p>4</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">GG</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">FF</span></code>, <code class="docutils literal notranslate"><span class="pre">dD</span></code>, <code class="docutils literal notranslate"><span class="pre">dDF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDD</span></code>, <code class="docutils literal notranslate"><span class="pre">FFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">dDFF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDDF</span></code>, <code class="docutils literal notranslate"><span class="pre">dDDd</span></code>, <code class="docutils literal notranslate"><span class="pre">XDDD</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">DFT</span></code></p></td>
+<td><p>4</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">GG</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">FF</span></code>, <code class="docutils literal notranslate"><span class="pre">dD</span></code>, <code class="docutils literal notranslate"><span class="pre">dDF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDD</span></code>, <code class="docutils literal notranslate"><span class="pre">FFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">dDFF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDDF</span></code>, <code class="docutils literal notranslate"><span class="pre">dDDd</span></code>, <code class="docutils literal notranslate"><span class="pre">XDDD</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CC</span></code></p></td>
+<td><p>4</p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code>, <code class="docutils literal notranslate"><span class="pre">G</span></code>, <code class="docutils literal notranslate"><span class="pre">F</span></code>, <code class="docutils literal notranslate"><span class="pre">FF</span></code>, <code class="docutils literal notranslate"><span class="pre">dD</span></code>, <code class="docutils literal notranslate"><span class="pre">dDF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDD</span></code>, <code class="docutils literal notranslate"><span class="pre">FFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">dFFD</span></code>, <code class="docutils literal notranslate"><span class="pre">XDDF</span></code>, <code class="docutils literal notranslate"><span class="pre">dDDd</span></code>, <code class="docutils literal notranslate"><span class="pre">XDDD</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note that for the <code class="docutils literal notranslate"><span class="pre">DFT</span></code> method, only a few XC functional allow to compute more than the polarizability (this list may not be accurate, and it is not checked by the program):</p>
+<ul class="simple">
+<li><p>B1LYP</p></li>
+<li><p>B2PLYP</p></li>
+<li><p>B3LYP</p></li>
+<li><p>B86x</p></li>
+<li><p>Becke</p></li>
+<li><p>BHandH</p></li>
+<li><p>BHandHLYP</p></li>
+<li><p>BLYP</p></li>
+<li><p>BVWN</p></li>
+<li><p>Camb3lyp</p></li>
+<li><p>KMLYP</p></li>
+<li><p>LDA</p></li>
+<li><p>LYP</p></li>
+<li><p>pbex</p></li>
+<li><p>Slater</p></li>
+<li><p>SVWN5</p></li>
+<li><p>WL90c</p></li>
+<li><p>XAlpha</p></li>
+</ul>
+</li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">qchem</span></code>, only the methods supported by <a class="reference external" href="http://www.q-chem.com/qchem-website/manual/qchem51_manual/sect-ccmeth.html">CCMAN2</a> are available (that’s the only methods for which the number of digits available for the energy can be increased to fit the required precision, otherwise you get at most 9-10 digits). Thus,</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Method</p></th>
+<th class="head"><p>Maximum level of electrical properties</p></th>
+<th class="head"><p>Maximum level of geometrical properties</p></th>
+<th class="head"><p>Available</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CCMP2</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">MP3</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">QCISD</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">QCISD(T)</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CCD</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">CCSD</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">CCSD(T)</span></code></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note that the dipole moment is also available in the output, so it may be added latter on.</p>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<ul class="simple">
+<li><p>Due to some differences in the implementation, dc-Kerr effect is <code class="docutils literal notranslate"><span class="pre">dDFF</span></code> with HF and DFT (<em>RESPONSE</em> module), while it is <code class="docutils literal notranslate"><span class="pre">dFFD</span></code> with CC.
+Use the correct one.</p></li>
+<li><p>By default, first and (some components of the) second hyperpolarizability with HF or DFT are printed with an lower accuracy than the other responses.
+If you want a better accuracy, consider <a class="reference external" href="./install.html">patching Dalton</a>.</p></li>
+</ul>
+</div>
+<hr class="docutils" />
+<p id="nachos-make-note-2">For <code class="docutils literal notranslate"><span class="pre">--differentiation</span></code>: this is where you request what you want to differentiate, and up to which level, with a semicolon separated list.
+Each member of the list should be of the form <code class="docutils literal notranslate"><span class="pre">what:how</span> <span class="pre">many</span></code>, where <code class="docutils literal notranslate"><span class="pre">what</span></code> is a properties (<a class="reference external" href="#list-of-derivatives">see the appendix</a>) and <code class="docutils literal notranslate"><span class="pre">how</span> <span class="pre">much</span></code> is how many times you want to differentiate this property.</p>
+<p>For example,</p>
+<ul class="simple">
+<li><p>If you want to do an electric field differentiation (<code class="docutils literal notranslate"><span class="pre">F</span></code>) to obtain the static first hyperpolarizability (<code class="docutils literal notranslate"><span class="pre">FFF</span></code>) from the energy, input should be <code class="docutils literal notranslate"><span class="pre">energy:3</span></code>, because you want to differentiate energy 3 times.
+To get the same property from the dipole moment and the static polarizability, the input is <code class="docutils literal notranslate"><span class="pre">F:2;FF:1</span></code>.</p></li>
+<li><p>If you want to get the vibrational contribution to a given property (say, the polarizability), you need to select <code class="docutils literal notranslate"><span class="pre">G</span></code> for the type of differentiation, then you need at least second order derivative of the dipole moment polariability with respect to that (the first one is automatically computed if the second is), and the cubic force field, so an input could look like <code class="docutils literal notranslate"><span class="pre">FF:2;F:2;GG:1</span></code> (and eventually <code class="docutils literal notranslate"><span class="pre">dD:2</span></code>).</p></li>
+</ul>
+<p><a class="reference internal" href="#nachos-make-note-1"><span class="std std-ref">See above</span></a> for the list of properties that you can differentiate depending on the <em>flavor</em> and the method.</p>
+<hr class="docutils" />
+<p id="nachos-make-note-3">For <code class="docutils literal notranslate"><span class="pre">--frequencies</span></code>: This is only relevant if you requested the differentation of a quantity that is dynamic.
+The input is a list of semicolon separated frequencies, and is quite liberal, since a valid example could be <code class="docutils literal notranslate"><span class="pre">1064nm;0.04:1000cm-1;0.1eV</span></code> (it accepts <code class="docutils literal notranslate"><span class="pre">eV</span></code>, <code class="docutils literal notranslate"><span class="pre">cm-1</span></code>,  <code class="docutils literal notranslate"><span class="pre">nm</span></code> and nothing, which means atomic units).
+The values are converted in atomic unit in <code class="docutils literal notranslate"><span class="pre">nachos_prepare</span></code> (see below).</p>
+<hr class="docutils" />
+<p id="nachos-make-note-4">For <code class="docutils literal notranslate"><span class="pre">--flavor-extra</span></code>: this option actually controls the generation of input files and that is it (for example, that is where you request the amount of memory and processors for gaussian).
+The options depends on the <em>flavor</em>, and are given in a semicolon separated list (for example <code class="docutils literal notranslate"><span class="pre">procs=4;memory=3Gb;extra_keywords=srcf=(iefpcm,solvent=water)</span></code> for <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>).
+Note that you don’t have to redefine every variable, since they have a default value which is correct for most cases.</p>
+<ul>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">gaussian</span></code>, the options are</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Note</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">memory</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1Gb</span></code></p></td>
+<td><p>Value of <code class="docutils literal notranslate"><span class="pre">%mem</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">procs</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Value of <code class="docutils literal notranslate"><span class="pre">%nprocshared</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">convergence</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">11</span></code></p></td>
+<td><p>SCF convergence criterion</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cphf_convergence</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+<td><p>CPHF convergence criterion</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cc_convergence</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">11</span></code></p></td>
+<td><p>CC convergence criterion</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">max_cycles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">600</span></code></p></td>
+<td><p>Maximum number of SCF and CC cycles</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">extra_keywords</span></code></p></td>
+<td></td>
+<td><p>Any extra input (for example, the solvent, …)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">extra_sections</span></code></p></td>
+<td></td>
+<td><p>Path to a file where extra section of the input files are given (for example, solvent definition, …)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">vshift</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1000</span></code></p></td>
+<td><p>Apply a <em>vshift</em> (helps for the electric field differentiation)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">use_full</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>For post-HF methods (not HF and DFT), use <code class="docutils literal notranslate"><span class="pre">=Full</span></code> to include core orbitals.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note that the value of <code class="docutils literal notranslate"><span class="pre">extra_section</span></code> is not tested here.
+Also, <code class="docutils literal notranslate"><span class="pre">XC</span></code> and <code class="docutils literal notranslate"><span class="pre">gen_basis</span></code> are available, but that would modify their previous values.</p>
+</li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">dalton</span></code>, the options are</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Note</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1e-11</span></code></p></td>
+<td><p>Convergence criterion for the SCF gradient</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cc_threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1e-11</span></code></p></td>
+<td><p>Convergence criterion for the CC energy gradient</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dal_name</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ND</span></code></p></td>
+<td><p>Prefix for the different <code class="docutils literal notranslate"><span class="pre">.dal</span></code> files</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">response_threshold</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1e-10</span></code></p></td>
+<td><p>Convergence criterion for response functions</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">response_max_it</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2500</span></code></p></td>
+<td><p>Maximum number of iteration to solve linear equations for response functions</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">response_max_ito</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">10</span></code></p></td>
+<td><p>Maximum number of trial vector microiterations (not relevant for CC)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">response_dim_reduced_space</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2500</span></code></p></td>
+<td><p>Maximum dimension of the reduced space (should be increased if large number of frequency or sharp convergence criterion).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">split_level_3</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Split first hyperpolarizability calculations over separate dal files</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">split_level_4</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p>Split second hyperpolarizability calculations over separate dal files</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">merge_level_3</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Merge first hyperpolarizability calculations with lower order calculations (only for <code class="docutils literal notranslate"><span class="pre">CC</span></code>). Priority over splitting.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">merge_level_4</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>Merge second hyperpolarizability calculations with lower order calculations (only for <code class="docutils literal notranslate"><span class="pre">CC</span></code>). Priority over splitting.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Note that the value of <code class="docutils literal notranslate"><span class="pre">extra_section</span></code> is not tested here.
+Also, <code class="docutils literal notranslate"><span class="pre">XC</span></code> and <code class="docutils literal notranslate"><span class="pre">CC</span></code> are available, but that would modify their previous values.</p>
+<p>Splitting and merging modify the number of calculation, but also the times it takes (because Dalton tries to solve all response functions at the same time, therefore you may need to increase <code class="docutils literal notranslate"><span class="pre">response_max_it</span></code>).</p>
+</li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">qchem</span></code>, the options are</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20.0%" />
+<col style="width: 20.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Option</p></th>
+<th class="head"><p>Default value</p></th>
+<th class="head"><p>Note</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">convergence</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">11</span></code></p></td>
+<td><p>SCF convergence criterion</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cc_convergence</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p>CC convergence criterion</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_cycles</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">600</span></code></p></td>
+<td><p>Maximum number of SCF and CC cycles</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">memory_static</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2000</span></code></p></td>
+<td><p>Memory (in MiB) for the SCF part</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">memory_cc</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2000</span></code></p></td>
+<td><p>Memory (in MiB) for CCMAN2 (you <strong>should increase it</strong> if you use a large basis set)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</li>
+</ul>
+<section id="id2">
+<h3>nachos_prepare<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
+<p>Create the input files for the quantum chemistry programs out of a given recipe</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="go">usage: nachos_prepare [-h] [-v] [-V VERBOSE] [-d DIRECTORY] [-r RECIPE] [-c]</span>
+</span><span data-line="2"><span class="go">                      [-D]</span>
+</span></pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_prepare-h">
+<span id="cmdoption-nachos_prepare-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-h" title="Link to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_prepare-v">
+<span id="cmdoption-nachos_prepare-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-v" title="Link to this definition">¶</a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_prepare-V">
+<span id="cmdoption-nachos_prepare-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-V" title="Link to this definition">¶</a></dt>
+<dd><p>Level of details (0 or 1)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_prepare-d">
+<span id="cmdoption-nachos_prepare-directory"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;directory&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--directory</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;directory&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-d" title="Link to this definition">¶</a></dt>
+<dd><p>output directory</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_prepare-r">
+<span id="cmdoption-nachos_prepare-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_prepare-r" title="Link to this definition">¶</a></dt>
+<dd><p>Recipe file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_prepare-c">
+<span id="cmdoption-nachos_prepare-copy-files"></span><span class="sig-name descname"><span class="pre">-c</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--copy-files</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-c" title="Link to this definition">¶</a></dt>
+<dd><p>copy geometry, extra files, and recipe into destination directory</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_prepare-D">
+<span id="cmdoption-nachos_prepare-dry-run"></span><span class="sig-name descname"><span class="pre">-D</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--dry-run</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_prepare-D" title="Link to this definition">¶</a></dt>
+<dd><p>dry run (do not create the files)</p>
+</dd></dl>
+
+</section>
+<p>The program will prepare as many input files as needed.
+By using <code class="docutils literal notranslate"><span class="pre">-d</span></code>, you can decide where the input files should be generated, but keep in mind that they should be in the same directory as the recipe for the next step (use <code class="docutils literal notranslate"><span class="pre">-c</span></code> if needed).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> option allows you to know how much files where generated.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>When using electric fields, Gaussian compute the fields in an opposite direction to what is expected by Nachos.
+So, e.g., if the title card say that the field is computed in the +x direction it is the <strong>normal behavior</strong> that the x component of the electric field has a negative sign.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To helps the dalton program, a file called <code class="docutils literal notranslate"><span class="pre">inputs_matching.txt</span></code> is created for this <em>flavor</em>, where each lines contains the combination of dal and mol file to launch (because there may be different dal files).</p>
+<p>If you use job arrays, you may therefor use a job file that contains the following lines (here with  <a class="reference external" href="https://slurm.schedmd.com/">slurm</a>, but it is the same with other schedulers):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># get the files from the line:</span>
+</span><span data-line="2"><span class="nv">INPUT_FILES</span><span class="o">=</span><span class="k">$(</span>sed<span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">SLURM_ARRAY_TASK_ID</span><span class="si">}</span><span class="s2">p&quot;</span><span class="w"> </span>inputs_matching.txt<span class="k">)</span>
+</span><span data-line="3"><span class="c1"># launch dalton:</span>
+</span><span data-line="4">dalton<span class="w"> </span><span class="nv">$INPUT_FILES</span>
+</span></pre></div>
+</div>
+<p>You need to launch as many calculations as there is lines in this file.</p>
+<p>For the gaussian program, just run as many calculation as there is input files, all are useful.</p>
+<p>Note that the program tries to optimize things as much as possible and request the computation of things that are needed at a given level (no need to do a gradient calculation for second order if not requested, for example, which explains the multiple dal files, and why some calculations may be faster than other).</p>
+</div>
+<section id="id3">
+<h3>nachos_cook<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
+<p>Out of the results of calculation, create a h5 file to store them</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="go">usage: nachos_cook [-h] [-v] [-V VERBOSE] [-r RECIPE] [-o OUTPUT]</span>
+</span><span data-line="2"><span class="go">                   [--gaussian-logs]</span>
+</span><span data-line="3"><span class="go">                   [directories ...]</span>
+</span></pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-arg-directories">
+<span class="sig-name descname"><span class="pre">directories</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-arg-directories" title="Link to this definition">¶</a></dt>
+<dd><p>directory where to look for QM results</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-h">
+<span id="cmdoption-nachos_cook-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-h" title="Link to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-v">
+<span id="cmdoption-nachos_cook-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-v" title="Link to this definition">¶</a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-V">
+<span id="cmdoption-nachos_cook-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-V" title="Link to this definition">¶</a></dt>
+<dd><p>Level of details (0 to 1)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-r">
+<span id="cmdoption-nachos_cook-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-r" title="Link to this definition">¶</a></dt>
+<dd><p>Recipe file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-o">
+<span id="cmdoption-nachos_cook-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_cook-o" title="Link to this definition">¶</a></dt>
+<dd><p>Output h5 file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_cook-gaussian-logs">
+<span class="sig-name descname"><span class="pre">--gaussian-logs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_cook-gaussian-logs" title="Link to this definition">¶</a></dt>
+<dd><p>Use Gaussian LOGs instead of FCHKs (… but why in the world?!?)</p>
+</dd></dl>
+
+</section>
+<p>The program fetch the different computational results from each files that it can fin (it looks for FCHK files with gaussian, TAR archive and OUT files for dalton, LOG for Q-Chem), and mix them together in a single <em>data file</em>.</p>
+<p>By default, the program looks for output files <strong>in the same directory as the recipe</strong>. You can supply directories as argument, but in this case, the program does not look in the recipe directory (so don’t forget to add it to the list).</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> option allows you to know which files the program actually discovered and used.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">--gaussian-logs</span></code> is experimental, and is only tested for HF, MP2 and SCS-MP2 (that is the <strong>only</strong> way to get this one).</p>
+<section id="id4">
+<h3>nachos_bake<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
+<p>From h5 file, perform numerical differentiation.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="go">usage: nachos_bake [-h] [-v] [-r RECIPE] [-d DATA] [-o OUTPUT] [-V VERBOSE]</span>
+</span><span data-line="2"><span class="go">                   [-S] [-O ONLY] [-p] [-H HESSIAN] [-R ROMBERG] [-a]</span>
+</span></pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-h">
+<span id="cmdoption-nachos_bake-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-h" title="Link to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-v">
+<span id="cmdoption-nachos_bake-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-v" title="Link to this definition">¶</a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-r">
+<span id="cmdoption-nachos_bake-recipe"></span><span class="sig-name descname"><span class="pre">-r</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--recipe</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;recipe&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-r" title="Link to this definition">¶</a></dt>
+<dd><p>Recipe file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-d">
+<span id="cmdoption-nachos_bake-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-d" title="Link to this definition">¶</a></dt>
+<dd><p>H5 data file (output of nachos_cook)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-o">
+<span id="cmdoption-nachos_bake-output"></span><span class="sig-name descname"><span class="pre">-o</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--output</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;output&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-o" title="Link to this definition">¶</a></dt>
+<dd><p>Output h5 file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-V">
+<span id="cmdoption-nachos_bake-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-V" title="Link to this definition">¶</a></dt>
+<dd><p>Level of details (0 to 3)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-S">
+<span id="cmdoption-nachos_bake-do-not-steal"></span><span class="sig-name descname"><span class="pre">-S</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--do-not-steal</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-S" title="Link to this definition">¶</a></dt>
+<dd><p>do not add base derivatives to output file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-O">
+<span id="cmdoption-nachos_bake-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-O" title="Link to this definition">¶</a></dt>
+<dd><p>only differentiate a subset of the original recipe</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-p">
+<span id="cmdoption-nachos_bake-project"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--project</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-p" title="Link to this definition">¶</a></dt>
+<dd><p>project geometrical derivatives over normal mode (if hessian)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-H">
+<span id="cmdoption-nachos_bake-hessian"></span><span class="sig-name descname"><span class="pre">-H</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--hessian</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-H" title="Link to this definition">¶</a></dt>
+<dd><p>consume hessian from an other file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-R">
+<span id="cmdoption-nachos_bake-romberg"></span><span class="sig-name descname"><span class="pre">-R</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--romberg</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;romberg&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_bake-R" title="Link to this definition">¶</a></dt>
+<dd><p>Bypass detection and force a value in the triangle. Must be of the form <cite>k;m</cite>.</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_bake-a">
+<span id="cmdoption-nachos_bake-append"></span><span class="sig-name descname"><span class="pre">-a</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--append</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_bake-a" title="Link to this definition">¶</a></dt>
+<dd><p>Append to existing H5 file</p>
+</dd></dl>
+
+</section>
+<p>The <code class="docutils literal notranslate"><span class="pre">-O</span></code> option to control what is actually differentiated.
+It expects a semicolon list like the <code class="docutils literal notranslate"><span class="pre">--differentiation</span></code> option of <code class="docutils literal notranslate"><span class="pre">nachos_make</span></code> (<a class="reference internal" href="#nachos-make-note-2"><span class="std std-ref">see above</span></a>), but you don’t have to provide the number of time if you want the number in the recipe to be used.</p>
+<p>So, for example, if you have a recipe that contains:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">G</span>
+</span><span data-line="2"><span class="c1"># ... other stuffs ...</span>
+</span><span data-line="3"><span class="nt">differentiation</span><span class="p">:</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">2</span><span class="p">:</span>
+</span><span data-line="5"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">F</span>
+</span><span data-line="6"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FF</span>
+</span><span data-line="7"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">FD</span>
+</span><span data-line="8"><span class="w">  </span><span class="nt">1</span><span class="p">:</span>
+</span><span data-line="9"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GG</span>
+</span></pre></div>
+</div>
+<p>Using <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F:1;FF:1&quot;</span></code> will request to perform the first order geometrical derivatives <strong>only</strong> for the dipole moment and static polarizability, while <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;F;FF:1&quot;</span></code> will request the same for static hyperpolarizability, but adds the second order for the dipole moment (as written in the recipe).
+In both cases, dynamic polarizability is not differentiated.</p>
+<p>The output depends on the value of <code class="docutils literal notranslate"><span class="pre">-V</span></code>, which can be:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">0</span></code> nothing is outputted (this is default) ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> outputs the final tensors that are obtained ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">2</span></code> also outputs Romberg triangle and best values (for each nonredudant components) ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">3</span></code> also output the decision process to find best value in Romberg triangle.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>If you request second order (or third, or …) derivative, the lower order derivatives are also computed.
+There is no way to change this behavior.</p></li>
+<li><p>By default, the program also include the base tensors calculated in the process.
+The <code class="docutils literal notranslate"><span class="pre">-S</span></code> option prevents this (that may be useful in the case of electric field differentiation)</p></li>
+<li><p>If you want to add results to existing <code class="docutils literal notranslate"><span class="pre">molecule_nd.h5</span></code> file, you can use the <code class="docutils literal notranslate"><span class="pre">`--append</span></code> option.</p></li>
+<li><p>Projection over normal mode of all the geometrical derivatives is requested via the <code class="docutils literal notranslate"><span class="pre">-p</span></code> option, but you can also request that the cartesian hessian used to do so is different, with the <code class="docutils literal notranslate"><span class="pre">-H</span></code> option (which accepts FCHK and dalton archives with cartesian hessian in it as argument).</p></li>
+</ul>
+</div>
+<section id="id5">
+<h3>nachos_shake<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
+<p>Shake it! (compute the vibrational contributions)</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="go">usage: nachos_shake [-h] [-v] [-d DATA] [-V VERBOSE] [-O ONLY]</span>
+</span><span data-line="2"><span class="go">                    [-f FREQUENCIES] [-A] [-m MODIFY_MODES]</span>
+</span></pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-h">
+<span id="cmdoption-nachos_shake-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-h" title="Link to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-v">
+<span id="cmdoption-nachos_shake-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-v" title="Link to this definition">¶</a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-d">
+<span id="cmdoption-nachos_shake-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-d" title="Link to this definition">¶</a></dt>
+<dd><p>Input/ouput h5 file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-V">
+<span id="cmdoption-nachos_shake-verbose"></span><span class="sig-name descname"><span class="pre">-V</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--verbose</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;verbose&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-V" title="Link to this definition">¶</a></dt>
+<dd><p>Level of details (0 to 3)</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-O">
+<span id="cmdoption-nachos_shake-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-O" title="Link to this definition">¶</a></dt>
+<dd><p>only compute the contribution of given derivatives</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-f">
+<span id="cmdoption-nachos_shake-frequencies"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-f" title="Link to this definition">¶</a></dt>
+<dd><p>compute vibrational contribution for set of frequencies</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-A">
+<span id="cmdoption-nachos_shake-do-not-append"></span><span class="sig-name descname"><span class="pre">-A</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--do-not-append</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_shake-A" title="Link to this definition">¶</a></dt>
+<dd><p>do not include vibrational contribution in data file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_shake-m">
+<span id="cmdoption-nachos_shake-modify-modes"></span><span class="sig-name descname"><span class="pre">-m</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;modify_modes&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--modify-modes</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;modify_modes&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_shake-m" title="Link to this definition">¶</a></dt>
+<dd><p>Exclude or include vibrational modes</p>
+</dd></dl>
+
+</section>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Obviously, you can only compute vibrational contribution to electrical derivatives (dipole, polarizability, hyperpolarizabilities).</p>
+</div>
+<p>From the information available in the <em>final file</em>, the program decide which vibrational contributions are computable, and compute them.
+Stores them back into the same file, except if the <code class="docutils literal notranslate"><span class="pre">-A</span></code> option was used.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Vibrational contribution are written <span class="math">\([xyz]^{m,n}\)</span>, where <span class="math">\(m\)</span> is the level of electrical anharmonicity and <span class="math">\(n\)</span> is the level of mecanical anharmonicity.
+The <code class="docutils literal notranslate"><span class="pre">-O</span></code> options allows to restrict the <strong>total</strong> (<span class="math">\(m+n\)</span>) level, so that, for example, if <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;FF:1&quot;</span></code> (see below), <span class="math">\([]^{0,0}\)</span>, <span class="math">\([]^{1,0}\)</span> and <span class="math">\([]^{0,1}\)</span>-like contributions will be computed, but not the <span class="math">\([]^{1,1}\)</span>-like contributions.</p>
+<p>Also, the more the level, the more the time.</p>
+</div>
+<p>You can restrict the number of vibrational contribution with the <code class="docutils literal notranslate"><span class="pre">-O</span></code> option, which takes a semicolon separated list of stuff of the form <code class="docutils literal notranslate"><span class="pre">quantity:level</span></code>, which are the quantities for which vibrational contribution should be added, and what is the maximum level of vibrational contribution to compute for it.
+If this second part is not provided, default maximum (2) is assumed, so you can simply provide quantity.
+For example, <code class="docutils literal notranslate"><span class="pre">-O</span> <span class="pre">&quot;FF;FFF:1&quot;</span></code> will compute all vibrational contribution to polarizability, but only first-order contribution to hyperpolarizability.</p>
+<p>The first order ZPVA contributions (<span class="math">\([]^{1,0}\)</span> and <span class="math">\([]^{0,1}\)</span>) are available for any quantities (if first and second order geometrical derivatives of these quantities and <code class="docutils literal notranslate"><span class="pre">NNN</span></code> are available).</p>
+<p>The pure vibrational (pv) contributions depends on the quantity:</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 30.0%" />
+<col style="width: 20.0%" />
+<col style="width: 10.0%" />
+<col style="width: 40.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Quantity</p></th>
+<th class="head"><p>Vibrational contribution</p></th>
+<th class="head"><p>Level</p></th>
+<th class="head"><p>Derivatives needed</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Polarizability (<code class="docutils literal notranslate"><span class="pre">FF</span></code>, <code class="docutils literal notranslate"><span class="pre">dD</span></code>)</p></td>
+<td><p><span class="math">\([\mu^2]^{0,0}\)</span></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu^2]^{1,1}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\mu^2]^{2,0}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NNF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu^2]^{0,2}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>First hyperpolarizability (<code class="docutils literal notranslate"><span class="pre">FFF</span></code>, <code class="docutils literal notranslate"><span class="pre">dDF</span></code>, <code class="docutils literal notranslate"><span class="pre">XDD</span></code>)</p></td>
+<td><p><span class="math">\([\mu\alpha]^{0,0}\)</span></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu^3]^{1,0}\)</span></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNF</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\mu^3]^{0,1}\)</span></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu\alpha]^{1,1}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\mu\alpha]^{2,0}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NNF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNFF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu\alpha]^{0,2}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Second hyperpolarizability (<code class="docutils literal notranslate"><span class="pre">FFFF</span></code>, …)</p></td>
+<td><p><span class="math">\([\alpha^2]^{0,0}\)</span></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NFF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu\beta]^{0,0}\)</span></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFFF</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\mu^2\alpha]^{1,0}\)</span></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNFF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu^2\alpha]^{0,1}\)</span></p></td>
+<td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\alpha^2]^{1,1}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\alpha^2]^{2,0}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NNFF</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\alpha^2]^{0,2}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu\beta]^{1,1}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\mu\beta]^{2,0}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NNF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNFFF</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu\beta]^{0,2}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NFFF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\mu^4]^{1,1}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td><p><span class="math">\([\mu^4]^{2,0}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNF</span></code></p></td>
+</tr>
+<tr class="row-even"><td></td>
+<td><p><span class="math">\([\mu^4]^{0,2}\)</span></p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">NF</span></code>, <code class="docutils literal notranslate"><span class="pre">NNN</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The formulas for each contribution are detailed <a class="reference download internal" download="" href="_downloads/371964ca0ca6c6073a6940a9de36704e/contribs.pdf"><code class="xref download docutils literal notranslate"><span class="pre">in</span> <span class="pre">this</span> <span class="pre">document</span></code></a>.
+Note that the formulas are truncated so that the quartic force constant (<code class="docutils literal notranslate"><span class="pre">NNNN</span></code>) and third order (<code class="docutils literal notranslate"><span class="pre">NNNF</span></code>, …) derivatives are not used.</p>
+<p>The output depends on the value of <code class="docutils literal notranslate"><span class="pre">-V</span></code>, which can be:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">0</span></code> nothing is outputted (this is default) ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">1</span></code> outputs only the final vibrational tensors that are obtained ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">2</span></code> also outputs the total pv and ZPVA tensors ;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-V</span> <span class="pre">3</span></code> also outputs the tensors for <strong>each</strong> contribution.</p></li>
+</ul>
+<p>You can change the vibrational mode included in the computation of vibrational contributions with the <code class="docutils literal notranslate"><span class="pre">-m</span></code> option (default is all non-trans+rot modes).
+This options takes a list of comma separated modes, positive numbers to add a mode, negative number to remove one (modes starts at 1, so modes 1-6 are trans+rot modes if molecule is nonlinear, 1-5 otherwise).
+Therefore, you could do something <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">&quot;+1;-7&quot;</span></code> to add first mode and remove mode 7 (if, for example, ordering is incorrect).
+Note that if you only want to remove modes, for example using <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">&quot;-7;-8&quot;</span></code> would not work (because of the way some terminals works), so you can add a <code class="docutils literal notranslate"><span class="pre">:</span></code> at the beginning to avoid the <code class="docutils literal notranslate"><span class="pre">-</span></code> to be interpreted as another command, so <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">&quot;:-7;-8&quot;</span></code> in this case.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The <code class="docutils literal notranslate"><span class="pre">-f</span></code> option (semicolon separated list of frequencies, <a class="reference internal" href="#nachos-make-note-3"><span class="std std-ref">same as above</span></a>), allows to change the set of frequency for which the contributions are computed, if dynamic.
+Even though ZPVA requires derivatives of the dynamic quantities to be available, this is not the case for the pure vibrational part, for which any frequency could be used.
+Therefore, the ZPVA part is only computed for available frequencies, and the pv part is computed for all (!) frequencies.</p></li>
+<li><p><strong>If the corresponding static properties are available</strong>, you can even request <em>pure vibrational</em> contributions for processes that are not initially present, with the <code class="docutils literal notranslate"><span class="pre">-O</span></code> option.</p></li>
+</ul>
+</div>
+<section id="id6">
+<h3>nachos_analyze<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h3>
+<p>Analyze the results stored in data file</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="go">usage: nachos_analyze [-h] [-v] [-d DATA] [-O ONLY] [-f FREQUENCIES]</span>
+</span><span data-line="2"><span class="go">                      -p PROPERTIES [-I] [-g]</span>
+</span></pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-h">
+<span id="cmdoption-nachos_analyze-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-h" title="Link to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-v">
+<span id="cmdoption-nachos_analyze-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-v" title="Link to this definition">¶</a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-d">
+<span id="cmdoption-nachos_analyze-data"></span><span class="sig-name descname"><span class="pre">-d</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--data</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;data&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-d" title="Link to this definition">¶</a></dt>
+<dd><p>Input h5 file</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-O">
+<span id="cmdoption-nachos_analyze-only"></span><span class="sig-name descname"><span class="pre">-O</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--only</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;only&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-O" title="Link to this definition">¶</a></dt>
+<dd><p>only fetch the properties of given derivatives</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-f">
+<span id="cmdoption-nachos_analyze-frequencies"></span><span class="sig-name descname"><span class="pre">-f</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--frequencies</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;frequencies&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-f" title="Link to this definition">¶</a></dt>
+<dd><p>only show for a given set of frequencies</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-p">
+<span id="cmdoption-nachos_analyze-properties"></span><span class="sig-name descname"><span class="pre">-p</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;properties&gt;</span></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--properties</span></span><span class="sig-prename descclassname"> <span class="pre">&lt;properties&gt;</span></span><a class="headerlink" href="#cmdoption-nachos_analyze-p" title="Link to this definition">¶</a></dt>
+<dd><p>which properties to carry out</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-I">
+<span id="cmdoption-nachos_analyze-inverse"></span><span class="sig-name descname"><span class="pre">-I</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--inverse</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-I" title="Link to this definition">¶</a></dt>
+<dd><p>for vibrational contribution, show <cite>property(total - current)</cite> rather than <cite>property(current)</cite></p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_analyze-g">
+<span id="cmdoption-nachos_analyze-group-vibs"></span><span class="sig-name descname"><span class="pre">-g</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--group-vibs</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_analyze-g" title="Link to this definition">¶</a></dt>
+<dd><p>Group vibrational contribution per perturbation order</p>
+</dd></dl>
+
+</section>
+<p>This program allows you to quickly access to a (electrical derivative) property.</p>
+<p>The properties have the form <code class="docutils literal notranslate"><span class="pre">tensor:property</span></code> or <code class="docutils literal notranslate"><span class="pre">tensor::component</span></code>, where <code class="docutils literal notranslate"><span class="pre">tensor</span></code> is either <code class="docutils literal notranslate"><span class="pre">m</span></code> (dipole, <code class="docutils literal notranslate"><span class="pre">F</span></code>), <code class="docutils literal notranslate"><span class="pre">a</span></code> (polarizability, <code class="docutils literal notranslate"><span class="pre">FF</span></code> or <code class="docutils literal notranslate"><span class="pre">FD</span></code>), <code class="docutils literal notranslate"><span class="pre">b</span></code> (first hyperpolarizability, <code class="docutils literal notranslate"><span class="pre">FFF</span></code>, <code class="docutils literal notranslate"><span class="pre">FDF</span></code> or <code class="docutils literal notranslate"><span class="pre">FDD</span></code>) or <code class="docutils literal notranslate"><span class="pre">g</span></code> (second hyperpolarizability).</p>
+<ul class="simple">
+<li><p>If you use the form <code class="docutils literal notranslate"><span class="pre">tensor::component</span></code>, you can directly access to a given component, like <code class="docutils literal notranslate"><span class="pre">a::xx</span></code> or <code class="docutils literal notranslate"><span class="pre">b::xyz</span></code> (obviously, the number of components should match the size of the tensor).</p></li>
+<li><p>On the other hand, with the form <code class="docutils literal notranslate"><span class="pre">tensor:property</span></code>, <code class="docutils literal notranslate"><span class="pre">property</span></code> differs from one tensor to another. Values may be the following:</p>
+<ul>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">m</span></code>: <code class="docutils literal notranslate"><span class="pre">norm</span></code></p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">a</span></code>: <code class="docutils literal notranslate"><span class="pre">isotropic_value</span></code>, <code class="docutils literal notranslate"><span class="pre">anisotropic_value</span></code></p></li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">b</span></code>:</p>
+<ul>
+<li><p>For any process: <code class="docutils literal notranslate"><span class="pre">beta_parallel</span></code>, <code class="docutils literal notranslate"><span class="pre">beta_perpendicular</span></code>, <code class="docutils literal notranslate"><span class="pre">beta_kerr</span></code></p></li>
+<li><p>For SHG: <code class="docutils literal notranslate"><span class="pre">beta_squared_zxx</span></code>, <code class="docutils literal notranslate"><span class="pre">beta_squared_zzz</span></code>, <code class="docutils literal notranslate"><span class="pre">beta_hrs</span></code>, <code class="docutils literal notranslate"><span class="pre">depolarization_ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">dipolar_contribution</span></code>, <code class="docutils literal notranslate"><span class="pre">octupolar_contribution</span></code>, <code class="docutils literal notranslate"><span class="pre">nonlinear_anisotropy</span></code></p></li>
+</ul>
+</li>
+<li><p>For <code class="docutils literal notranslate"><span class="pre">g</span></code>:</p>
+<ul>
+<li><p>For any process: <code class="docutils literal notranslate"><span class="pre">gamma_parallel</span></code>, <code class="docutils literal notranslate"><span class="pre">gamma_perpendicular</span></code>, <code class="docutils literal notranslate"><span class="pre">gamma_kerr</span></code></p></li>
+<li><p>For THS: <code class="docutils literal notranslate"><span class="pre">gamma_squared_zzzz</span></code>, <code class="docutils literal notranslate"><span class="pre">gamma_squared_zxxx</span></code>, <code class="docutils literal notranslate"><span class="pre">gamma_ths</span></code>, <code class="docutils literal notranslate"><span class="pre">depolarization_ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">isotropic_contribution</span></code>, <code class="docutils literal notranslate"><span class="pre">quadrupolar_contribution</span></code>, <code class="docutils literal notranslate"><span class="pre">hexadecapolar_contribution</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>You can restrict the number of vibrational contribution with the <code class="docutils literal notranslate"><span class="pre">-O</span></code> option, which takes a semicolon separated list of quantities.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><p>The different properties are actually function of the corresponding tensors in <a class="reference external" href="https://pierre-24.github.io/qcip_tools/code-documentation/derivatives_e.html">qcip_tools electrical properties</a>, so this list may not be exhaustive (but at your own risks).</p></li>
+<li><p>Please use the <code class="docutils literal notranslate"><span class="pre">-O</span></code> option to restrict the effect when fetching SHG or THS properties, and use <code class="docutils literal notranslate"><span class="pre">-f</span></code> to restrict the amount of frequencies printed.</p></li>
+<li><p>If vibrational contribution have been added via <code class="docutils literal notranslate"><span class="pre">nachos_shake</span></code> to the program, the different values for each contribution will be printed.
+The <code class="docutils literal notranslate"><span class="pre">-I</span></code> option may be used to get <code class="docutils literal notranslate"><span class="pre">property(total-current)</span></code> rather than <code class="docutils literal notranslate"><span class="pre">property(current)</span></code>, which is usefull to assess the impact of a given vibrationnal contribution on the total value (since some properties, like HRS and THS properties are not additive).
+The <code class="docutils literal notranslate"><span class="pre">-g</span></code> option can be used to group vibrational contribution by perturbation order (for example, <span class="math">\([\mu\alpha]^{1,1} + [\mu\alpha]^{2,0} + [\mu\alpha]^{0,2}\)</span> as <span class="math">\([\mu\alpha]^\text{II}\)</span>)</p></li>
+</ul>
+</div>
+<section id="id7">
+<h3>nachos_peek<a class="headerlink" href="#id7" title="Link to this heading">¶</a></h3>
+<p>Peek into an output file (LOG, FCHK, H5, …).</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="go">usage: nachos_peek [-h] [-v] [infile]</span>
+</span></pre></div>
+</div>
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_peek-arg-infile">
+<span class="sig-name descname"><span class="pre">infile</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-arg-infile" title="Link to this definition">¶</a></dt>
+<dd><p>source of the derivatives</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_peek-h">
+<span id="cmdoption-nachos_peek-help"></span><span class="sig-name descname"><span class="pre">-h</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--help</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-h" title="Link to this definition">¶</a></dt>
+<dd><p>show this help message and exit</p>
+</dd></dl>
+
+<dl class="std option">
+<dt class="sig sig-object std" id="cmdoption-nachos_peek-v">
+<span id="cmdoption-nachos_peek-version"></span><span class="sig-name descname"><span class="pre">-v</span></span><span class="sig-prename descclassname"></span><span class="sig-prename descclassname"><span class="pre">,</span> </span><span class="sig-name descname"><span class="pre">--version</span></span><span class="sig-prename descclassname"></span><a class="headerlink" href="#cmdoption-nachos_peek-v" title="Link to this definition">¶</a></dt>
+<dd><p>show program’s version number and exit</p>
+</dd></dl>
+
+</section>
+<p>This program reads the (pure) geometrical and electrical derivatives found in a file.
+This program is less advance than <code class="docutils literal notranslate"><span class="pre">nachos_analyze</span></code>, since it <strong>does not</strong> include vibrational corrections.</p>
+</section>
+<section id="appendix">
+<h2>Appendix<a class="headerlink" href="#appendix" title="Link to this heading">¶</a></h2>
+<section id="list-of-the-derivatives">
+<h3>List of the derivatives<a class="headerlink" href="#list-of-the-derivatives" title="Link to this heading">¶</a></h3>
+<p>Note that it would be better to respect the order for the different derivatives (<code class="docutils literal notranslate"><span class="pre">dDF</span></code>, not <code class="docutils literal notranslate"><span class="pre">FdD</span></code>, for example).</p>
+<div class="table-wrapper colwidths-given docutils container">
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 10.0%" />
+<col style="width: 50.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Derivative</p></th>
+<th class="head"></th>
+<th class="head"><p>Comment</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>The energy</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">energy</span></code></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math">\(\mu\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">F</span></code></p></td>
+<td><p>Dipole moment</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math">\(\alpha(0;0)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FF</span></code></p></td>
+<td><p>Static polarizability</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math">\(\alpha(-\omega;\omega)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dD</span></code></p></td>
+<td><p>Dynamic polarizability</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math">\(\beta(0;0,0)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FFF</span></code></p></td>
+<td><p>Static first hyperpolarizability</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math">\(\beta(-\omega;\omega,0)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dDF</span></code></p></td>
+<td><p>EOP first hyperpolarizability</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math">\(\beta(-2\omega;\omega,\omega)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">XDD</span></code></p></td>
+<td><p>SHG/SHS first hyperpolarizability</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math">\(\gamma(0;0,0,0)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">FFFF</span></code></p></td>
+<td><p>Static second hyperpolarizability</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math">\(\gamma(-\omega;0,0,\omega)\)</span> or <span class="math">\(\gamma(-\omega;\omega,0,0)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dFFD</span></code> or <code class="docutils literal notranslate"><span class="pre">dDFF</span></code></p></td>
+<td><p>Kerr second hyperpolarizability</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math">\(\gamma(-2\omega;\omega,\omega,0)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">XDDF</span></code></p></td>
+<td><p>ESHG second hyperpolarizability</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math">\(\gamma(-\omega;\omega,\omega,-\omega)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">dDDd</span></code></p></td>
+<td><p>DFWM second hyperpolarizability</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math">\(\gamma(-3\omega;\omega,\omega,\omega)\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">XDDD</span></code></p></td>
+<td><p>THG/THS second hyperpolarizability</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math">\(\frac{\partial V(x)}{\partial x}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">G</span></code></p></td>
+<td><p>(cartesian) gradient</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math">\(\frac{\partial^2 V(x,y)}{\partial x\partial y}\)</span></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">GG</span></code></p></td>
+<td><p>(cartesian) hessian</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="install.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Installing nachos</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="contributing.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Contributing</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2026, Pierre Beaujean (University of Namur)</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+<a href="https://github.com/pierre-24/nachos" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=6c02275b"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/katex.min.js?v=5cc8ed51"></script>
+      <script src="_static/auto-render.min.js?v=af98beb9"></script>
+      <script src="_static/katex_autorenderer.js?v=bebc588a"></script>
+      <script src="_static/shibuya.js?v=50760d75"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("False" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll("");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("False" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script></body>
+</html>
